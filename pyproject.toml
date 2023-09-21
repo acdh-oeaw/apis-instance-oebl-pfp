@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "apis-instance-oebl-pnp"
+version = "0.1.0"
+description = "APIS instance OEBL"
+authors = ["Birger Schacht <birger.schacht@oeaw.ac.at>"]
+license = "MIT"
+packages = [{include = "apis_ontology"}]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = ">=4.1,<4.2"
+django-allow-cidr = "^0.6.0"
+psycopg2 = "^2.9"
+apis-core = { git = "https://github.com/acdh-oeaw/apis-core-rdf.git", tag = "v0.3.1" }
+apis-acdhch-default-settings = { git = "https://github.com/acdh-oeaw/apis-acdhch-default-settings.git", tag = "v0.1.7" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
