@@ -65,3 +65,5 @@ REDMINE_ID = ""
 ALLOWED_CIDR_NETS = ["10.0.0.0/8", "127.0.0.0/8"]
 
 PROJECT_DEFAULT_MD = {}
+
+ALLOWED_HOSTS = ["oebl-pnp.acdh-dev.oeaw.ac.at"]
