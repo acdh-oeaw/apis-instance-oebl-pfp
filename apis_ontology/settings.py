@@ -87,3 +87,11 @@ PROJECT_DEFAULT_MD = {}
 ALLOWED_HOSTS = ["oebl-pnp.acdh-dev.oeaw.ac.at", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
+
+APIS_ENTITIES = {
+        "Event": {},
+        "Institution": {},
+        "Person": {},
+        "Place": {},
+        "Work": {},
+}
