@@ -53,6 +53,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # we need this for listing entities in the base template
+                "apis_core.context_processors.custom_context_processors.list_entities",
             ],
         },
     },
