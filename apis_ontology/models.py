@@ -5,7 +5,7 @@ from apis_core.core.models import LegacyDateMixin
 
 class LegacyStuffMixin(models.Model):
     review = review = models.BooleanField(default=False, help_text="Should be set to True, if the data record holds up quality standards.")
-    status = models.CharField(max_length=100)
+    status = models.CharField(max_length=100, blank=True)
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
