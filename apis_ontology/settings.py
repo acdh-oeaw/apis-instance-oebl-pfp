@@ -59,6 +59,7 @@ TEMPLATES = [
 DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/tmp/staticfiles'
 
 REDMINE_ID = ""
 
