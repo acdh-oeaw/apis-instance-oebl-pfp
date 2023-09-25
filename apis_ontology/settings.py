@@ -23,10 +23,20 @@ INSTALLED_APPS = [
     'apis_core.apis_relations',
     'apis_core.apis_entities',
     'apis_core.apis_labels',
-    'dal_select2',
     'apis_ontology',
     "reversion",
+    # ui stuff
     "crispy_forms",
+    "django_filters",
+    "django_tables2",
+    "dal",
+    "dal_select2",
+    "charts",
+    # api
+    "rest_framework",
+    "rest_framework.authtoken",
+    # for swagger ui generation
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
