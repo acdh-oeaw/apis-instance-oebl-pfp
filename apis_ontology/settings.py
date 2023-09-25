@@ -98,3 +98,20 @@ APIS_ENTITIES = {
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 50,
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.DjangoObjectPermissions",
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
