@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'dal_select2',
     'apis_ontology',
     "reversion",
+    "crispy_forms",
 ]
 
 MIDDLEWARE = [
