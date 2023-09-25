@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'apis_core.apis_labels',
     'dal_select2',
     'apis_ontology',
+    "reversion",
 ]
 
 MIDDLEWARE = [
@@ -36,6 +37,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allow_cidr.middleware.AllowCIDRMiddleware',
+    "reversion.middleware.RevisionMiddleware",
 ]
 
 ROOT_URLCONF = 'apis_ontology.urls'
