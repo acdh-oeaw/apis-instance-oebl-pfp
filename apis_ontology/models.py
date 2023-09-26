@@ -1,3 +1,4 @@
+import reversion
 from django.db import models
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
@@ -60,14 +61,17 @@ class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
 
+@reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True)
 
 
+@reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True)
 
 
+@reversion.register(follow=["rootobject_ptr"])
 class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     GENDER_CHOICES = (
         ("female", "female"),
@@ -80,11 +84,13 @@ class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEnti
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
 
 
+@reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
 
+@reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True)
