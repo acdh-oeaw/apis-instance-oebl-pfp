@@ -12,7 +12,7 @@ python = "^3.11"
 django = ">=4.1,<4.2"
 django-allow-cidr = "^0.6.0"
 psycopg2 = "^2.9"
-apis-core = { git = "https://github.com/acdh-oeaw/apis-core-rdf.git", tag = "v0.3.1" }
+apis-core = { git = "https://github.com/acdh-oeaw/apis-core-rdf.git" } #, tag = "v0.3.1" }
 apis-acdhch-default-settings = { git = "https://github.com/acdh-oeaw/apis-acdhch-default-settings.git", tag = "v0.1.7" }
 
 [build-system]
