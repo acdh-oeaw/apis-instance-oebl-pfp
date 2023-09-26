@@ -18,3 +18,12 @@ urlpatterns = [
 ]
 
 urlpatterns += staticfiles_urlpatterns()
+
+from rest_framework import routers
+from .api_views import UriViewSet
+router = routers.DefaultRouter()
+router.register('writeuri', UriViewSet, basename='writeuri')
+customurlpatterns = [
+    path('custom-api/', include(router.urls)),
+]
+urlpatterns += customurlpatterns
