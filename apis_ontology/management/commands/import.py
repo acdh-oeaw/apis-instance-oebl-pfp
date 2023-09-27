@@ -74,6 +74,7 @@ class Command(BaseCommand):
             data = page.json()
             nextpage = data['next']
             for result in data["results"]:
+                print(result["url"])
                 newuri, created = Uri.objects.get_or_create(uri=result["uri"])
                 try:
                     result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
