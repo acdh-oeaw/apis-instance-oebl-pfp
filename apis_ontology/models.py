@@ -63,12 +63,12 @@ class Title(models.Model):
 
 @reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
-    kind = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=255, blank=True, null=True)
 
 
 @reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
-    kind = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=255, blank=True, null=True)
 
 
 @reversion.register(follow=["rootobject_ptr"])
@@ -86,11 +86,11 @@ class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEnti
 
 @reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
-    kind = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=255, blank=True, null=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
 
 @reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
-    kind = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=255, blank=True, null=True)
