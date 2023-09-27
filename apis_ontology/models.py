@@ -16,47 +16,6 @@ class LegacyStuffMixin(models.Model):
         abstract = True
 
 
-# we are overriding the LegacyDateMixin save method for now
-# because the DateParser returns datetime instead of date
-# and the API does not like that
-class FixLegacyDateMixin:
-    def save(self, *args, **kwargs):
-        start = None
-        start_start = None
-        start_end = None
-        end = None
-        end_start = None
-        end_end = None
-
-        if self.start_date_written:
-            start, start_start, start_end = DateParser.parse_date(
-                self.start_date_written
-            )
-            if start:
-                start = start.date()
-            if start_start:
-                start_start = start_start.date()
-            if start_end:
-                start_end = start_end.date()
-
-        if self.end_date_written:
-            end, end_start, end_end = DateParser.parse_date(self.end_date_written)
-            if end:
-                end = end.date()
-            if end_start:
-                end_start = end_start.date()
-            if end_end:
-                end_end = end_end.date()
-
-        self.start_date = start
-        self.start_start_date = start_start
-        self.start_end_date = start_end
-        self.end_date = end
-        self.end_start_date = end_start
-        self.end_end_date = end_end
-
-        super().save(*args, **kwargs)
-
 class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
@@ -67,17 +26,17 @@ class Profession(models.Model):
 
 
 @reversion.register(follow=["rootobject_ptr"])
-class Event(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
+class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
 @reversion.register(follow=["rootobject_ptr"])
-class Institution(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
+class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
 @reversion.register(follow=["rootobject_ptr"])
-class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
+class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
@@ -90,12 +49,12 @@ class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEnti
 
 
 @reversion.register(follow=["rootobject_ptr"])
-class Place(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
+class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
 
 @reversion.register(follow=["rootobject_ptr"])
-class Work(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
+class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
