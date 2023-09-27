@@ -19,10 +19,16 @@ class LegacyStuffMixin(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Profession(models.Model):
     name = models.CharField(max_length=255, blank=True)
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 @reversion.register(follow=["rootobject_ptr"])
