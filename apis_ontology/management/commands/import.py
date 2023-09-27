@@ -76,10 +76,12 @@ class Command(BaseCommand):
             for result in data["results"]:
                 print(result["url"])
                 newuri, created = Uri.objects.get_or_create(uri=result["uri"])
-                try:
-                    result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
-                    for attribute in result:
-                        if hasattr(newuri, attribute):
-                            setattr(newuri, attribute, result[attribute])
-                except RootObject.DoesNotExist:
-                    pass
+                if hasattr(result["entity"], "id"):
+                    try:
+                        result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
+                        for attribute in result:
+                            if hasattr(newuri, attribute):
+                                setattr(newuri, attribute, result[attribute])
+                        newuri.save()
+                    except RootObject.DoesNotExist:
+                        pass
