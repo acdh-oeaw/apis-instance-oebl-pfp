@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from django.contrib.contenttypes.models import ContentType
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title
+from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession
 from apis_core.apis_metainfo.models import Uri, RootObject
 
 SRC="https://apis.acdh.oeaw.ac.at/apis/api"
@@ -40,11 +40,16 @@ class Command(BaseCommand):
                 data = page.json()
                 nextpage = data['next']
                 for result in data["results"]:
+                    print(result["url"])
                     result_id = result["id"]
                     if "kind" in result and result["kind"] is not None:
                         result["kind"] = result["kind"]["label"]
-                    if "profession" in result and result["profession"] is not None:
-                        result["profession"] = ",".join([x["label"] for x in result["profession"]])
+                    professionlist = []
+                    if "profession" in result:
+                        for profession in result["profession"]:
+                            newprofession, created = Profession.objects.get_or_create(name=profession["label"])
+                            professionlist.append(newprofession)
+                        del result["profession"]
                     titlelist = []
                     if "title" in result:
                         for title in result["title"]:
@@ -57,6 +62,8 @@ class Command(BaseCommand):
                             setattr(newentity, attribute, result[attribute])
                     for title in titlelist:
                         newentity.title.add(title)
+                    for profession in professionlist:
+                        newentity.profession.add(profession)
                     newentity.save()
 
         # Migrate URIs
