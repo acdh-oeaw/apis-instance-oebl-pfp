@@ -61,6 +61,11 @@ class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
 
+class Profession(models.Model):
+    name = models.CharField(max_length=255, blank=True)
+    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
+
+
 @reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
@@ -79,7 +84,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, FixLegacyDateMixin, AbstractEnti
         ("third gender", "third gender"),
     )
     first_name = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
-    profession = models.CharField(max_length=255, blank=True)
+    profession = models.ManyToManyField(Profession, blank=True)
     title = models.ManyToManyField(Title, blank=True)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
 
