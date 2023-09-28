@@ -16,6 +16,19 @@ class LegacyStuffMixin(models.Model):
         abstract = True
 
 
+class Source(models.Model):
+    orig_filename = models.CharField(max_length=255, blank=True)
+    indexed = models.BooleanField(default=False)
+    pubinfo = models.CharField(max_length=400, blank=True)
+    author = models.CharField(max_length=255, blank=True)
+    orig_id = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        if self.author and self.orig_filename:
+            return f"{self.orig_filename}, stored by {self.author}"
+        return f"(ID: {self.id})".format(self.id)
+
+
 class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 

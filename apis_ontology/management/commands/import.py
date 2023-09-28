@@ -2,11 +2,27 @@ import requests
 
 from django.core.management.base import BaseCommand
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession
+from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.apis_relations.models import Property, TempTriple
 
 SRC="https://apis.acdh.oeaw.ac.at/apis/api"
+
+
+def import_sources():
+    nextpage = f"{SRC}/metainfo/source/?format=json&limit=1000"
+    while nextpage:
+        print(nextpage)
+        page = requests.get(nextpage)
+        data = page.json()
+        nextpage = data['next']
+        for result in data["results"]:
+            print(result["url"])
+            newsource, created = Source.objects.get_or_create(id=result["id"])
+            for attribute in result:
+                if hasattr(newsource, attribute):
+                    setattr(newsource, attribute, result[attribute])
+                newsource.save()
 
 
 class Command(BaseCommand):
@@ -16,6 +32,7 @@ class Command(BaseCommand):
         parser.add_argument("--entities", action="store_true")
         parser.add_argument("--urls", action="store_true")
         parser.add_argument("--relations", action="store_true")
+        parser.add_argument("--sources", action="store_true")
         parser.add_argument("--all")
 
 
@@ -24,6 +41,10 @@ class Command(BaseCommand):
             options["entities"] = True
             options["urls"] = True
             options["relations"] = True
+            options["sources"] = True
+
+        if options["sources"]:
+            import_sources()
 
         entities = {
                 "event": {
