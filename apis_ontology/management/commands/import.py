@@ -152,7 +152,10 @@ class Command(BaseCommand):
                                     obj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["obj"]]["id"])
                                     prop.obj_class.add(obj.self_contenttype)
                                 prop.save()
-                                tt, created = TempTriple.objects.get_or_create(id=result["id"], prop=prop, subj=subj, obj=obj)
+                                if subj and obj and prop:
+                                    tt, created = TempTriple.objects.get_or_create(id=result["id"], prop=prop, subj=subj, obj=obj)
+                                else:
+                                    print(result)
                             except RootObject.DoesNotExist as e:
                                 print(result)
                                 print(e)
