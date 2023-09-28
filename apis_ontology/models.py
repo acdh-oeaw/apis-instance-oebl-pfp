@@ -16,6 +16,7 @@ class LegacyStuffMixin(models.Model):
         abstract = True
 
 
+@reversion.register
 class Source(models.Model):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
@@ -29,6 +30,7 @@ class Source(models.Model):
         return f"(ID: {self.id})".format(self.id)
 
 
+@reversion.register
 class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
@@ -36,6 +38,7 @@ class Title(models.Model):
         return self.name
 
 
+@reversion.register
 class Profession(models.Model):
     name = models.CharField(max_length=255, blank=True)
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
