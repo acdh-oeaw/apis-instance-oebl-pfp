@@ -25,12 +25,35 @@ def import_sources():
                 newsource.save()
 
 
+def import_uris():
+    nextpage = f"{SRC}/metainfo/uri/?format=json"
+    while nextpage:
+        print(nextpage)
+        page = requests.get(nextpage)
+        data = page.json()
+        nextpage = data['next']
+        for result in data["results"]:
+            print(result["url"])
+            newuri, created = Uri.objects.get_or_create(uri=result["uri"])
+            if "id" in result["entity"]:
+                try:
+                    result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
+                    for attribute in result:
+                        if hasattr(newuri, attribute):
+                            setattr(newuri, attribute, result[attribute])
+                    newuri.save()
+                except RootObject.DoesNotExist as e:
+                    print(e)
+            else:
+                print(f"No entity.id set for URI: {result}")
+
+
 class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
     def add_arguments(self, parser):
         parser.add_argument("--entities", action="store_true")
-        parser.add_argument("--urls", action="store_true")
+        parser.add_argument("--uris", action="store_true")
         parser.add_argument("--relations", action="store_true")
         parser.add_argument("--sources", action="store_true")
         parser.add_argument("--all")
@@ -100,28 +123,8 @@ class Command(BaseCommand):
                             newentity.profession.add(profession)
                         newentity.save()
 
-        if options["urls"]:
-            # Migrate URIs
-            nextpage = f"{SRC}/metainfo/uri/?format=json"
-            while nextpage:
-                print(nextpage)
-                page = requests.get(nextpage)
-                data = page.json()
-                nextpage = data['next']
-                for result in data["results"]:
-                    print(result["url"])
-                    newuri, created = Uri.objects.get_or_create(uri=result["uri"])
-                    if hasattr(result["entity"], "id"):
-                        try:
-                            result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
-                            for attribute in result:
-                                if hasattr(newuri, attribute):
-                                    setattr(newuri, attribute, result[attribute])
-                            newuri.save()
-                        except RootObject.DoesNotExist as e:
-                            print(e)
-                    else:
-                        print(f"No entity.id set for URI: {result}")
+        if options["uris"]:
+            import_uris()
 
         relations = {
                 'personevent': {
