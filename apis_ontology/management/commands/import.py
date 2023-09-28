@@ -26,7 +26,7 @@ def import_sources():
 
 
 def import_uris():
-    nextpage = f"{SRC}/metainfo/uri/?format=json"
+    nextpage = f"{SRC}/metainfo/uri/?format=json&limit=1000"
     while nextpage:
         print(nextpage)
         page = requests.get(nextpage)
@@ -34,7 +34,9 @@ def import_uris():
         nextpage = data['next']
         for result in data["results"]:
             print(result["url"])
-            newuri, created = Uri.objects.get_or_create(uri=result["uri"])
+            newuri, created = Uri.objects.get_or_create(id=result["id"], uri=result["uri"])
+            del result["uri"]
+            del result["id"]
             if "id" in result["entity"]:
                 try:
                     result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
