@@ -50,6 +50,66 @@ def import_uris():
                 print(f"No entity.id set for URI: {result}")
 
 
+def import_entities():
+    entities = {
+            "event": {
+                "dst": Event
+            },
+            "institution": {
+                "dst": Institution,
+            },
+            "person": {
+                "dst": Person,
+            },
+            "place": {
+                "dst": Place,
+            },
+            "work": {
+                "dst": Work,
+            }
+    }
+
+    for entity, entitysettings in entities.items():
+        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=500"
+        while nextpage:
+            print(nextpage)
+            page = requests.get(nextpage)
+            data = page.json()
+            nextpage = data['next']
+            for result in data["results"]:
+                print(result["url"])
+                result_id = result["id"]
+                if "kind" in result and result["kind"] is not None:
+                    result["kind"] = result["kind"]["label"]
+                professionlist = []
+                if "profession" in result:
+                    for profession in result["profession"]:
+                        newprofession, created = Profession.objects.get_or_create(name=profession["label"])
+                        professionlist.append(newprofession)
+                    del result["profession"]
+                titlelist = []
+                if "title" in result:
+                    for title in result["title"]:
+                        newtitle, created = Title.objects.get_or_create(name=title)
+                        titlelist.append(newtitle)
+                    del result["title"]
+                newentity, created = entitysettings["dst"].objects.get_or_create(pk=result_id)
+                for attribute in result:
+                    if hasattr(newentity, attribute):
+                        setattr(newentity, attribute, result[attribute])
+                for title in titlelist:
+                    newentity.title.add(title)
+                for profession in professionlist:
+                    newentity.profession.add(profession)
+                newentity.save()
+                if "source" in result:
+                    try:
+                        source = Source.objects.get(pk=result["source"]["id"])
+                        # set source target to entity
+                    except Source.DoesNotExist:
+                        pass
+
+
 class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
@@ -71,62 +131,11 @@ class Command(BaseCommand):
         if options["sources"]:
             import_sources()
 
-        entities = {
-                "event": {
-                    "dst": Event
-                },
-                "institution": {
-                    "dst": Institution,
-                },
-                "person": {
-                    "dst": Person,
-                },
-                "place": {
-                    "dst": Place,
-                },
-                "work": {
-                    "dst": Work,
-                }
-        }
-
-        if options["entities"]:
-            # Migrate entities
-            for entity, entitysettings in entities.items():
-                nextpage = f"{SRC}/entities/{entity}/?format=json&limit=500"
-                while nextpage:
-                    print(nextpage)
-                    page = requests.get(nextpage)
-                    data = page.json()
-                    nextpage = data['next']
-                    for result in data["results"]:
-                        print(result["url"])
-                        result_id = result["id"]
-                        if "kind" in result and result["kind"] is not None:
-                            result["kind"] = result["kind"]["label"]
-                        professionlist = []
-                        if "profession" in result:
-                            for profession in result["profession"]:
-                                newprofession, created = Profession.objects.get_or_create(name=profession["label"])
-                                professionlist.append(newprofession)
-                            del result["profession"]
-                        titlelist = []
-                        if "title" in result:
-                            for title in result["title"]:
-                                newtitle, created = Title.objects.get_or_create(name=title)
-                                titlelist.append(newtitle)
-                            del result["title"]
-                        newentity, created = entitysettings["dst"].objects.get_or_create(pk=result_id)
-                        for attribute in result:
-                            if hasattr(newentity, attribute):
-                                setattr(newentity, attribute, result[attribute])
-                        for title in titlelist:
-                            newentity.title.add(title)
-                        for profession in professionlist:
-                            newentity.profession.add(profession)
-                        newentity.save()
-
         if options["uris"]:
             import_uris()
+
+        if options["entities"]:
+            import_entities()
 
         relations = {
                 'personevent': {
