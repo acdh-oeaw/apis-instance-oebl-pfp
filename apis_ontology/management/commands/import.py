@@ -50,6 +50,24 @@ def import_uris():
                 print(f"No entity.id set for URI: {result}")
 
 
+def import_professions():
+    nextpage = f"{SRC}/vocabularies/professiontype/?format=json&limit=1000"
+    while nextpage:
+        print(nextpage)
+        page = requests.get(nextpage)
+        data = page.json()
+        nextpage = data['next']
+        for result in data["results"]:
+            print(result["url"])
+            newprofession, created = Profession.objects.get_or_create(id=result["id"])
+            if result["parent_class"]:
+                newprofession.parent = Profession.objects.get(pk=result["parent_class"]["id"])
+            for attribute in result:
+                if hasattr(newprofession, attribute):
+                    setattr(newprofession, attribute, result[attribute])
+            newprofession.save()
+
+
 def import_entities():
     entities = {
             "event": {
@@ -84,8 +102,10 @@ def import_entities():
                 professionlist = []
                 if "profession" in result:
                     for profession in result["profession"]:
-                        newprofession, created = Profession.objects.get_or_create(name=profession["label"])
-                        professionlist.append(newprofession)
+                        try:
+                            professionlist.append(Profession.objects.get(pk=profession["id"]))
+                        except Profession.DoesNotExist:
+                            pass
                     del result["profession"]
                 titlelist = []
                 if "title" in result:
@@ -114,6 +134,7 @@ class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
     def add_arguments(self, parser):
+        parser.add_argument("--professions", action="store_true")
         parser.add_argument("--entities", action="store_true")
         parser.add_argument("--uris", action="store_true")
         parser.add_argument("--relations", action="store_true")
@@ -127,6 +148,10 @@ class Command(BaseCommand):
             options["urls"] = True
             options["relations"] = True
             options["sources"] = True
+            options["professions"] = True
+
+        if options["professions"]:
+            import_professions()
 
         if options["sources"]:
             import_sources()
