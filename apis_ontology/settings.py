@@ -117,3 +117,5 @@ REST_FRAMEWORK = {
 }
 
 APIS_API_ID_WRITABLE = True
+
+USE_TZ = True
