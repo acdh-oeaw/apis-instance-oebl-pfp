@@ -192,12 +192,13 @@ def import_entities():
                 for profession in professionlist:
                     newentity.profession.add(profession)
                 newentity.save()
-                if "source" in result:
+                if "source" in result and "id" in result["source"]:
                     try:
                         source = Source.objects.get(pk=result["source"]["id"])
                         # set source target to entity
                     except Source.DoesNotExist:
                         pass
+
 
 def import_relations():
     relations = {
