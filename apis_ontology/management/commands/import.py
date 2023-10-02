@@ -6,6 +6,8 @@ from apis_ontology.models import Event, Institution, Person, Place, Work, Title,
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.apis_relations.models import Property, TempTriple
 
+from django.db import utils
+
 SRC="https://apis.acdh.oeaw.ac.at/apis/api"
 
 
@@ -33,21 +35,89 @@ def import_uris():
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
+            # this is an error in the source data, it has
+            # 60485 == 60379
+            # 64341 == 64338
+            # 64344 == 64342
+            # 65675 == 65470
+            # 67843 == 67841
+            # 67866 == 67862
+            # 67870 == 67868
+            # 67872 == 67874, 67876, 67878
+            # 74055 == 74051
+            # 74057 == 74053
+            # 82548 == 82544
+            # 82550 == 82546
+            # 86445 == 86441
+            # 86447 == 86443
+            # 86703 == 86699
+            # 86705 == 86701
+            # 89010 == 89008
+            # 89026 == 89024
+            # 89050 == 89046
+            # 91406 == 91405
+            # 91477 == 91476
+            # 92307 == 92305
+            # 92311 == 92309
+            # 92317 == 92313
+            # 92319 == 92315
+            # 92916 == 63941
+            # 92933 == 19323
+            # 92941 == 19406
+            # 92950 == 48
+            # 92969 == 7566
+            # 92988 == 18870
+            # 92992 == 19242
+            # 93001 == 64175
+            # 93007 == 178
+            # 93040 == 13
+            # 93044 == 4
+            # 93050 == 898
+            # 93054 == 3860
+            # 93059 == 40
+            # 93064 == 67324
+            # 93088 == 19370
+            # 93109 == 80929
+            # 93113 == 19156
+            # 93119 == 64139
+            # 93142 == 64812
+            # 93149 == 11388
+            # 93155 == 89054
+            # 93213 == 64068
+            # 93237 == 19232
+            # 93250 == 65268
+            # 93260 == 18961
+            # 93262 == 512
+            # 93266 == 78171
+            # 93295 == 105
+            # 93318 == 63882
+            # 93320 == 63882
+            # ...
+            if result["id"] in [60485, 64341, 64344, 65675, 67843, 67866, 67870, 67874, 67876, 67878, 74055, 74057, 82548, 82550, 86445, 86447, 86703, 86705, 89010, 89026, 89050, 91406, 91477, 92307, 92311, 92317, 92319, 92916, 92933, 92941, 92950, 92969, 92988, 92992, 93001, 93007, 93040, 93044, 93050, 93054, 93059, 93064, 93088, 93109, 93113, 93119, 93142, 93149, 93155, 93213, 93237, 93250, 93260, 93262, 93266, 93295, 93318, 93320, 93324, 93341, 93358, 93376, 93388, 93392, 93409, 93442, 93459, 93478, 93482, 93499, 93517, 93531, 93548, 93555, 93589, 93609, 93616, 93697, 93720, 93727, 93740, 93747, 93756, 93785, 93851, 93863, 93926, 93934, 93948, 93958, 93968, 93980, 94004, 94044, 94072, 94111, 94198, 94202, 94206, 94237, 94268, 94317, 94354, 94375, 94398, 94450, 94456, 94463, 94477, 94490, 94498, 94511, 94622, 94638, 94683, 94779, 94873, 94919, 94958, 95111, 95124, 95146, 95190, 95194, 95274, 95284, 95305, 95309, 95339, 95449, 95534, 95610, 95616, 95620, 95626, 95655, 95668, 95672, 95696]:
+                continue
+            if result["uri"] == "https://apis-edits.acdh-dev.oeaw.ac.at/entity/None/":
+                continue
+            if result["uri"] == "":
+                continue
             print(result["url"])
-            newuri, created = Uri.objects.get_or_create(id=result["id"], uri=result["uri"])
+            try:
+                newuri, created = Uri.objects.get_or_create(id=result["id"], uri=result["uri"])
+            except utils.IntegrityError:
+                print(f"IntegrityErro: {result['id']}")
             del result["uri"]
             del result["id"]
-            if "id" in result["entity"]:
+            if result["entity"] and "id" in result["entity"]:
                 try:
                     result["root_object"] = RootObject.objects.get(pk=result["entity"]["id"])
-                    for attribute in result:
-                        if hasattr(newuri, attribute):
-                            setattr(newuri, attribute, result[attribute])
-                    newuri.save()
-                except RootObject.DoesNotExist as e:
-                    print(e)
+                except RootObject.DoesNotExist:
+                    result["root_object"] = None
+                    print(f"RootObject with ID {result['entity']['id']} not found")
             else:
                 print(f"No entity.id set for URI: {result}")
+            for attribute in result:
+                if hasattr(newuri, attribute):
+                    setattr(newuri, attribute, result[attribute])
+            newuri.save()
 
 
 def import_professions():
