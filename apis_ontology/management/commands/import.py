@@ -199,18 +199,78 @@ def import_entities():
                     except Source.DoesNotExist:
                         pass
 
+def import_relations():
+    relations = {
+            'personevent': {
+                "subj": "related_person",
+                "obj": "related_event",
+            },
+            'personinstitution': {
+                "subj": "related_person",
+                "obj": "related_institution"
+            },
+            "personperson": {
+                "subj": "related_personA",
+                "obj": "related_personB",
+            },
+            "personplace": {
+                "subj": "related_person",
+                "obj": "related_place",
+            },
+            "personwork": {
+                "subj": "related_person",
+                "obj": "related_work",
+            },
+    }
+    for relation, relationsettings in relations.items():
+        nextpage = f"{SRC}/relations/{relation}/?format=json&limit=500"
+        while nextpage:
+            print(nextpage)
+            page = requests.get(nextpage)
+            data = page.json()
+            nextpage = data["next"]
+            for result in data["results"]:
+                print(result["url"])
+                if result["relation_type"]:
+                    prop, created = Property.objects.get_or_create(id=result["relation_type"]["id"])
+                    if created:
+                        proppage = requests.get(result["relation_type"]["url"])
+                        propdata = proppage.json()
+                        prop.name = propdata["name"]
+                        prop.name_reverse = propdata["name_reverse"]
+                        prop.save()
+                    try:
+                        subj = None
+                        if result[relationsettings["subj"]]:
+                            subj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["subj"]]["id"])
+                            prop.subj_class.add(subj.self_contenttype)
+                        obj = None
+                        if result[relationsettings["obj"]]:
+                            obj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["obj"]]["id"])
+                            prop.obj_class.add(obj.self_contenttype)
+                        prop.save()
+                        if subj and obj and prop:
+                            tt, created = TempTriple.objects.get_or_create(id=result["id"], prop=prop, subj=subj, obj=obj)
+                        else:
+                            print(result)
+                    except RootObject.DoesNotExist as e:
+                        print(result)
+                        print(e)
+                else:
+                    print(f"No relation type for relation {result}")
+
 
 class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
     def add_arguments(self, parser):
+        parser.add_argument("--all", action="store_true")
+
         parser.add_argument("--professions", action="store_true")
         parser.add_argument("--entities", action="store_true")
         parser.add_argument("--uris", action="store_true")
         parser.add_argument("--relations", action="store_true")
         parser.add_argument("--sources", action="store_true")
-        parser.add_argument("--all")
-
 
     def handle(self, *args, **options):
         if options["all"]:
@@ -232,62 +292,5 @@ class Command(BaseCommand):
         if options["entities"]:
             import_entities()
 
-        relations = {
-                'personevent': {
-                    "subj": "related_person",
-                    "obj": "related_event",
-                },
-                'personinstitution': {
-                    "subj": "related_person",
-                    "obj": "related_institution"
-                },
-                "personperson": {
-                    "subj": "related_personA",
-                    "obj": "related_personB",
-                },
-                "personplace": {
-                    "subj": "related_person",
-                    "obj": "related_place",
-                },
-                "personwork": {
-                    "subj": "related_person",
-                    "obj": "related_work",
-                },
-        }
         if options["relations"]:
-            for relation, relationsettings in relations.items():
-                nextpage = f"{SRC}/relations/{relation}/?format=json&limit=500"
-                while nextpage:
-                    print(nextpage)
-                    page = requests.get(nextpage)
-                    data = page.json()
-                    nextpage = data["next"]
-                    for result in data["results"]:
-                        print(result["url"])
-                        if result["relation_type"]:
-                            prop, created = Property.objects.get_or_create(id=result["relation_type"]["id"])
-                            if created:
-                                proppage = requests.get(result["relation_type"]["url"])
-                                propdata = proppage.json()
-                                prop.name = propdata["name"]
-                                prop.name_reverse = propdata["name_reverse"]
-                                prop.save()
-                            try:
-                                subj = None
-                                if result[relationsettings["subj"]]:
-                                    subj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["subj"]]["id"])
-                                    prop.subj_class.add(subj.self_contenttype)
-                                obj = None
-                                if result[relationsettings["obj"]]:
-                                    obj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["obj"]]["id"])
-                                    prop.obj_class.add(obj.self_contenttype)
-                                prop.save()
-                                if subj and obj and prop:
-                                    tt, created = TempTriple.objects.get_or_create(id=result["id"], prop=prop, subj=subj, obj=obj)
-                                else:
-                                    print(result)
-                            except RootObject.DoesNotExist as e:
-                                print(result)
-                                print(e)
-                        else:
-                            print(f"No relation type for relation {result}")
+            import_relations()
