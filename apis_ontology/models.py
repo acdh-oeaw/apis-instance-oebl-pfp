@@ -27,8 +27,8 @@ class Source(models.Model):
     author = models.CharField(max_length=255, blank=True)
     orig_id = models.PositiveIntegerField(blank=True, null=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True)
+    object_id = models.PositiveIntegerField(blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
