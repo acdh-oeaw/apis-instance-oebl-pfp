@@ -87,3 +87,13 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 @reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+
+
+@reversion.register
+class Text(models.Model):
+    text = models.TextField(blank=True)
+    kind = models.CharField(max_length=255, blank=True, null=True)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
