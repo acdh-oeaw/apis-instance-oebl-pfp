@@ -2,13 +2,29 @@ import requests
 
 from django.core.management.base import BaseCommand
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source
+from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, Text
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.apis_relations.models import Property, TempTriple
 
 from django.db import utils
 
 SRC="https://apis.acdh.oeaw.ac.at/apis/api"
+
+
+def import_texts():
+    nextpage = f"{SRC}/metainfo/text/?format=json&limit=1000"
+    while nextpage:
+        print(nextpage)
+        page = requests.get(nextpage)
+        data = page.json()
+        nextpage = data['next']
+        for result in data['results']:
+            print(result['url'])
+            newtext, created = Text.objects.get_or_create(id=result["id"])
+            newtext.text = result["text"]
+            if "kind" in result and result["kind"] is not None:
+                newtext.kind = result["kind"]["label"]
+            newtext.save()
 
 
 def import_sources():
@@ -200,6 +216,14 @@ def import_entities():
                             source.save()
                         except Source.DoesNotExist:
                             print(f"Source does not exist: {result['source']['id']}")
+                for rtext in result["texts"]:
+                    if "id" in rtext:
+                        try:
+                            text = Text.objects.get(pk=rtext["id"])
+                            text.content_object = newentity
+                            text.save()
+                        except Text.DoesNotExist:
+                            print(f"Text does not exist: {rtext['id']}")
 
 
 def import_relations():
@@ -274,6 +298,7 @@ class Command(BaseCommand):
         parser.add_argument("--uris", action="store_true")
         parser.add_argument("--relations", action="store_true")
         parser.add_argument("--sources", action="store_true")
+        parser.add_argument("--texts", action="store_true")
 
     def handle(self, *args, **options):
         if options["all"]:
@@ -282,6 +307,10 @@ class Command(BaseCommand):
             options["relations"] = True
             options["sources"] = True
             options["professions"] = True
+            options["texts"] = True
+
+        if options["texts"]:
+            import_texts()
 
         if options["professions"]:
             import_professions()
