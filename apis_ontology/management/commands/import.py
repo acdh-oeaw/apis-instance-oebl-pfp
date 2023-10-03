@@ -216,7 +216,7 @@ def import_entities():
                             source.save()
                         except Source.DoesNotExist:
                             print(f"Source does not exist: {result['source']['id']}")
-                for rtext in result["texts"]:
+                for rtext in result["text"]:
                     if "id" in rtext:
                         try:
                             text = Text.objects.get(pk=rtext["id"])
