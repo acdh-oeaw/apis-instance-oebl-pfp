@@ -1,0 +1,18 @@
+{% extends "apis_entities/detail_views/detail_generic.html" %}
+
+{% block content %}
+{{ block.super }}
+
+<div class="container-fluid mt-4">
+  <h2>Texts</h2>
+{% for text in object.texts.all %}
+<div class="mt-2">
+  <h4>{{ text.kind }}</h4>
+  <div class="bg-light border p-2 text-{{text.id}}">
+  {{ text.text }}
+  </div>
+</div>
+{% endfor %}
+</div>
+
+{% endblock content %}
