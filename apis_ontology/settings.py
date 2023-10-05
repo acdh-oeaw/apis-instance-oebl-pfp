@@ -89,12 +89,48 @@ ALLOWED_HOSTS = ["oebl-pnp.acdh-dev.oeaw.ac.at", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 
+
+def institution_form(*args, **kwargs):
+    from apis_ontology.forms import InstitutionForm
+    return InstitutionForm(*args, **kwargs)
+
+
+def event_form(*args, **kwargs):
+    from apis_ontology.forms import EventForm
+    return EventForm(*args, **kwargs)
+
+
+def person_form(*args, **kwargs):
+    from apis_ontology.forms import PersonForm
+    return PersonForm(*args, **kwargs)
+
+
+def place_form(*args, **kwargs):
+    from apis_ontology.forms import PlaceForm
+    return PlaceForm(*args, **kwargs)
+
+
+def work_form(*args, **kwargs):
+    from apis_ontology.forms import WorkForm
+    return WorkForm(*args, **kwargs)
+
+
 APIS_ENTITIES = {
-        "Event": {},
-        "Institution": {},
-        "Person": {},
-        "Place": {},
-        "Work": {},
+        "Event": {
+            "form": event_form
+        },
+        "Institution": {
+            "form": institution_form
+        },
+        "Person": {
+            "form": person_form
+        },
+        "Place": {
+            "form": place_form
+        },
+        "Work": {
+            "form": work_form
+        },
 }
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
