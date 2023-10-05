@@ -1,6 +1,6 @@
 import reversion
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
 from apis_core.apis_entities.models import AbstractEntity
@@ -14,6 +14,8 @@ class LegacyStuffMixin(models.Model):
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
+
+    texts = GenericRelation("Text")
 
     class Meta:
         abstract = True
@@ -91,8 +93,38 @@ class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
 @reversion.register
 class Text(models.Model):
+    TEXTTYPE_CHOICES = [
+            (1, "Place description ÖBL"),
+            (2, "ÖBL Haupttext"),
+            (3, "ÖBL Kurzinfo"),
+            (4, "Place review comments"),
+            (5, "Commentary Staribacher"),
+            (6, "Online Edition Haupttext"),
+            (7, "Nachrecherche"),
+            (8, "Soziale Herkunft"),
+            (9, "Verwandtschaft"),
+            (10, "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"),
+            (11, "Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte"),
+            (12, "Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben"),
+            (13, "Literatur"),
+            (14, "Beruf(e)"),
+            (15, "Sterbedatum"),
+            (16, "Adelsprädikat"),
+            (17, "Übersiedlung, Emigration, Remigration"),
+            (18, "Weitere Namensformen"),
+            (19, "Geburtsdatum"),
+            (20, "Sterbeort"),
+            (21, "Geburtsort"),
+            (22, "Religion(en)"),
+            (23, "Name"),
+            (24, "Übersiedlungen, Emigration, Remigration"),
+            (25, "Pseudonyme"),
+            (26, "Soziale Herkunft"),
+            (27, "ÖBL Werkverzeichnis"),
+    ]
+
     text = models.TextField(blank=True)
-    kind = models.CharField(max_length=255, blank=True, null=True)
+    kind = models.CharField(max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
