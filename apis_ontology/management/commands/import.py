@@ -1,4 +1,5 @@
 import requests
+import os
 
 from django.core.management.base import BaseCommand
 
@@ -8,14 +9,17 @@ from apis_core.apis_relations.models import Property, TempTriple
 
 from django.db import utils
 
-SRC="https://apis.acdh.oeaw.ac.at/apis/api"
+SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
+
+TOKEN = os.environ.get("TOKEN")
+HEADERS = {"Authorization": f"Token {TOKEN}"}
 
 def import_texts():
     nextpage = f"{SRC}/metainfo/text/?format=json&limit=1000"
     while nextpage:
         print(nextpage)
-        page = requests.get(nextpage)
+        page = requests.get(nextpage, headers=HEADERS)
         data = page.json()
         nextpage = data['next']
         for result in data['results']:
@@ -31,7 +35,7 @@ def import_sources():
     nextpage = f"{SRC}/metainfo/source/?format=json&limit=1000"
     while nextpage:
         print(nextpage)
-        page = requests.get(nextpage)
+        page = requests.get(nextpage, headers=HEADERS)
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
@@ -47,7 +51,7 @@ def import_uris():
     nextpage = f"{SRC}/metainfo/uri/?format=json&limit=1000"
     while nextpage:
         print(nextpage)
-        page = requests.get(nextpage)
+        page = requests.get(nextpage, headers=HEADERS)
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
@@ -140,7 +144,7 @@ def import_professions():
     nextpage = f"{SRC}/vocabularies/professiontype/?format=json&limit=1000"
     while nextpage:
         print(nextpage)
-        page = requests.get(nextpage)
+        page = requests.get(nextpage, headers=HEADERS)
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
@@ -177,7 +181,7 @@ def import_entities():
         nextpage = f"{SRC}/entities/{entity}/?format=json&limit=500"
         while nextpage:
             print(nextpage)
-            page = requests.get(nextpage)
+            page = requests.get(nextpage, headers=HEADERS)
             data = page.json()
             nextpage = data['next']
             for result in data["results"]:
@@ -253,7 +257,7 @@ def import_relations():
         nextpage = f"{SRC}/relations/{relation}/?format=json&limit=500"
         while nextpage:
             print(nextpage)
-            page = requests.get(nextpage)
+            page = requests.get(nextpage, headers=HEADERS)
             data = page.json()
             nextpage = data["next"]
             for result in data["results"]:
