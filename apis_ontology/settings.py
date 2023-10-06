@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     # for swagger ui generation
     "drf_spectacular",
+    # highlighter
+    "apis_highlighter",
 ]
 
 MIDDLEWARE = [
