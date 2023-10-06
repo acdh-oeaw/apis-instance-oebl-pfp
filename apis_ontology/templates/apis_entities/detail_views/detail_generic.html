@@ -1,4 +1,5 @@
 {% extends "apis_entities/detail_views/detail_generic.html" %}
+{% load apis_highlighter %}
 
 {% block content %}
 {{ block.super }}
@@ -9,7 +10,7 @@
 <div class="mt-2">
   <h4>{{ text.kind }}</h4>
   <div class="bg-light border p-2 text-{{text.id}}">
-  {{ text.text }}
+  {{ text | highlight_text }}
   </div>
 </div>
 {% endfor %}
