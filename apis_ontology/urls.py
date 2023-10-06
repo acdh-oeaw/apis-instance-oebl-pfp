@@ -15,6 +15,7 @@ urlpatterns = [
         "entity/<int:pk>/", GetEntityGeneric.as_view(), name="GetEntityGenericRoot"
     ),
     path("", TemplateView.as_view(template_name="base.html")),
+    path("highlighter/", include("apis_highlighter.urls", namespace="highlighter")),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
