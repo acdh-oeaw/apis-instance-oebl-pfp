@@ -253,6 +253,7 @@ def import_relations():
                 "obj": "related_work",
             },
     }
+    relationlist = {}
     for relation, relationsettings in relations.items():
         nextpage = f"{SRC}/relations/{relation}/?format=json&limit=500"
         while nextpage:
@@ -264,12 +265,14 @@ def import_relations():
                 print(result["url"])
                 if result["relation_type"]:
                     prop, created = Property.objects.get_or_create(id=result["relation_type"]["id"])
-                    if created:
+                    propdata = relationlist.get(result["relation_type"]["id"])
+                    if not propdata:
                         proppage = requests.get(result["relation_type"]["url"])
                         propdata = proppage.json()
-                        prop.name = propdata["name"]
-                        prop.name_reverse = propdata["name_reverse"]
-                        prop.save()
+                        relationlist[result["relation_type"]["id"]] = propdata
+                    prop.name = propdata["name"]
+                    prop.name_reverse = propdata["name_reverse"]
+                    prop.save()
                     try:
                         subj = None
                         if result[relationsettings["subj"]]:
