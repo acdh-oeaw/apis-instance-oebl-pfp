@@ -3,14 +3,7 @@
 
 {% block scriptHeader %}
 {{ block.super }}
-<style>
-.select2-container--open {
-    z-index: 9999999
-}
-.popover{
-    max-width: 100%; /* Max Width of the popover (depending on the container!) */
-}
-</style>
+<link rel="stylesheet" href="/static/css/highlighter.css">
 {% endblock %}
 
 {% block relations %}
@@ -22,9 +15,7 @@
 {% if text.text %}
 <div class="mt-2">
   <h4>{{ text.kind }}</h4>
-  <div class="bg-light border p-2 highlight-text" data-text_object_id="{{text.id}}" data-text_content_type_id="{{text|content_type_id}}">
   {{ text | highlight_text }}
-  </div>
 </div>
 {% endif %}
 {% endfor %}
