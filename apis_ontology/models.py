@@ -4,12 +4,16 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 
 from apis_core.apis_entities.models import AbstractEntity
+from apis_core.apis_relations.models import Triple
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils import DateParser
 
 
 class LegacyStuffMixin(models.Model):
-    review = review = models.BooleanField(default=False, help_text="Should be set to True, if the data record holds up quality standards.")
+    review = review = models.BooleanField(
+        default=False,
+        help_text="Should be set to True, if the data record holds up quality standards.",
+    )
     status = models.CharField(max_length=100, blank=True)
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
@@ -21,7 +25,6 @@ class LegacyStuffMixin(models.Model):
         abstract = True
 
 
-@reversion.register
 class Source(models.Model):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
@@ -29,9 +32,11 @@ class Source(models.Model):
     author = models.CharField(max_length=255, blank=True)
     orig_id = models.PositiveIntegerField(blank=True, null=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
         if self.author and self.orig_filename:
@@ -39,7 +44,6 @@ class Source(models.Model):
         return f"(ID: {self.id})".format(self.id)
 
 
-@reversion.register
 class Title(models.Model):
     name = models.CharField(max_length=255, blank=True)
 
@@ -47,85 +51,89 @@ class Title(models.Model):
         return self.name
 
 
-@reversion.register
 class Profession(models.Model):
     name = models.CharField(max_length=255, blank=True)
-    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 
-@reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-@reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-@reversion.register(follow=["rootobject_ptr"])
-class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
-    GENDER_CHOICES = (
-        ("female", "female"),
-        ("male", "male"),
-        ("third gender", "third gender"),
-    )
-    first_name = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
-    profession = models.ManyToManyField(Profession, blank=True)
-    title = models.ManyToManyField(Title, blank=True)
-    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
-
-
-@reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
 
-@reversion.register(follow=["rootobject_ptr"])
+class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+    GENDER_CHOICES = (
+        ("female", "female"),
+        ("male", "male"),
+        ("third gender", "third gender"),
+    )
+    first_name = models.CharField(
+        max_length=255,
+        help_text="The persons´s forename. In case of more then one name...",
+        blank=True,
+        null=True,
+    )
+    profession = models.ManyToManyField(Profession, blank=True)
+    title = models.ManyToManyField(Title, blank=True)
+    gender = models.CharField(
+        max_length=15, choices=GENDER_CHOICES, blank=True, null=True
+    )
+
+
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-@reversion.register
 class Text(models.Model):
     TEXTTYPE_CHOICES = [
-            (1, "Place description ÖBL"),
-            (2, "ÖBL Haupttext"),
-            (3, "ÖBL Kurzinfo"),
-            (4, "Place review comments"),
-            (5, "Commentary Staribacher"),
-            (6, "Online Edition Haupttext"),
-            (7, "Nachrecherche"),
-            (8, "Soziale Herkunft"),
-            (9, "Verwandtschaft"),
-            (10, "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"),
-            (11, "Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte"),
-            (12, "Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben"),
-            (13, "Literatur"),
-            (14, "Beruf(e)"),
-            (15, "Sterbedatum"),
-            (16, "Adelsprädikat"),
-            (17, "Übersiedlung, Emigration, Remigration"),
-            (18, "Weitere Namensformen"),
-            (19, "Geburtsdatum"),
-            (20, "Sterbeort"),
-            (21, "Geburtsort"),
-            (22, "Religion(en)"),
-            (23, "Name"),
-            (24, "Übersiedlungen, Emigration, Remigration"),
-            (25, "Pseudonyme"),
-            (26, "Soziale Herkunft"),
-            (27, "ÖBL Werkverzeichnis"),
+        (1, "Place description ÖBL"),
+        (2, "ÖBL Haupttext"),
+        (3, "ÖBL Kurzinfo"),
+        (4, "Place review comments"),
+        (5, "Commentary Staribacher"),
+        (6, "Online Edition Haupttext"),
+        (7, "Nachrecherche"),
+        (8, "Soziale Herkunft"),
+        (9, "Verwandtschaft"),
+        (10, "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"),
+        (11, "Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte"),
+        (12, "Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben"),
+        (13, "Literatur"),
+        (14, "Beruf(e)"),
+        (15, "Sterbedatum"),
+        (16, "Adelsprädikat"),
+        (17, "Übersiedlung, Emigration, Remigration"),
+        (18, "Weitere Namensformen"),
+        (19, "Geburtsdatum"),
+        (20, "Sterbeort"),
+        (21, "Geburtsort"),
+        (22, "Religion(en)"),
+        (23, "Name"),
+        (24, "Übersiedlungen, Emigration, Remigration"),
+        (25, "Pseudonyme"),
+        (26, "Soziale Herkunft"),
+        (27, "ÖBL Werkverzeichnis"),
     ]
 
     text = models.TextField(blank=True)
-    kind = models.CharField(max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES)
+    kind = models.CharField(
+        max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES
+    )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
