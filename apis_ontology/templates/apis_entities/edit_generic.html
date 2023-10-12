@@ -10,12 +10,13 @@
 {{ block.super }}
 
 <div class="container-fluid mt-4">
+{% select_highlighter_project request %}
   <h2>Texts</h2>
 {% for text in instance.texts.all %}
 {% if text.text %}
 <div class="mt-2">
   <h4>{{ text.kind }}</h4>
-  {{ text | highlight_text }}
+  {{ text | highlight_text:request }}
 </div>
 {% endif %}
 {% endfor %}
