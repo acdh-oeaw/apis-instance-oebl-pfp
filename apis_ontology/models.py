@@ -1,5 +1,9 @@
+from datetime import datetime, timezone
+from apis_core.apis_relations.models import TempTriple
+from django.dispatch import receiver
 import reversion
 from django.db import models
+from django.db.models import Q
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
@@ -7,6 +11,11 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.apis_relations.models import Triple
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils import DateParser
+from simple_history.models import HistoricalRecords
+from simple_history.signals import (
+    pre_create_historical_record,
+    pre_create_historical_m2m_records,
+)
 
 
 class LegacyStuffMixin(models.Model):
@@ -25,7 +34,34 @@ class LegacyStuffMixin(models.Model):
         abstract = True
 
 
-class Source(models.Model):
+class APISHistoryTableBase(models.Model):
+    class Meta:
+        abstract = True
+
+    def get_triples_for_version(self):
+        triples = TempTriple.history.as_of(self.history_date).filter(
+            Q(subj=self.instance) | Q(obj=self.instance)
+        )
+        return triples
+
+
+class VersionMixin(models.Model):
+    history = HistoricalRecords(inherit=True, bases=[APISHistoryTableBase])
+    __history_date = datetime.now()
+
+    @property
+    def _history_date(self):
+        return self.__history_date
+
+    @_history_date.setter
+    def _history_date(self, value):
+        self.__history_date = value
+
+    class Meta:
+        abstract = True
+
+
+class Source(VersionMixin):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
     pubinfo = models.CharField(max_length=400, blank=True)
@@ -44,14 +80,14 @@ class Source(models.Model):
         return f"(ID: {self.id})".format(self.id)
 
 
-class Title(models.Model):
+class Title(VersionMixin):
     name = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.name
 
 
-class Profession(models.Model):
+class Profession(VersionMixin):
     name = models.CharField(max_length=255, blank=True)
     parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.CASCADE)
 
@@ -59,21 +95,21 @@ class Profession(models.Model):
         return self.name
 
 
-class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
 
-class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
@@ -92,11 +128,11 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     )
 
 
-class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
 
-class Text(models.Model):
+class Text(VersionMixin):
     TEXTTYPE_CHOICES = [
         (1, "Place description ÖBL"),
         (2, "ÖBL Haupttext"),
