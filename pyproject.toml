@@ -12,7 +12,7 @@ python = "^3.11"
 django = ">=4.1,<4.2"
 django-allow-cidr = "^0.6.0"
 psycopg2 = "^2.9"
-apis-core = { git = "https://github.com/acdh-oeaw/apis-core-rdf.git" , tag = "v0.6.1" }
+apis-core = { git = "https://github.com/acdh-oeaw/apis-core-rdf.git" , tag = "v0.6.2" }
 apis-highlighter-ng = { git = "https://github.com/acdh-oeaw/apis-highlighter-ng.git"}
 apis-acdhch-default-settings = { git = "https://github.com/acdh-oeaw/apis-acdhch-default-settings.git", tag = "v0.1.7" }
 apis-override-select2js = { git="https://github.com/acdh-oeaw/apis-override-select2js", tag="v0.1.0" }
