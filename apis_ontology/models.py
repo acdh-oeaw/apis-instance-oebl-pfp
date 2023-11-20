@@ -79,6 +79,10 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     title = models.ManyToManyField(Title, blank=True)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
 
+    @property
+    def oebl_kurzinfo(self):
+        return self.texts.get(kind="ÖBL Kurzinfo").text
+
 
 @reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
