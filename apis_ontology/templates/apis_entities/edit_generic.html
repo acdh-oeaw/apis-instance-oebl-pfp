@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="/static/css/highlighter.css">
 {% endblock %}
 
+{% block card-header-content %}
+{{ block.super }}
+{{ instance.oebl_kurzinfo }}
+{% endblock card-header-content %}
+
 {% block relations %}
 {{ block.super }}
 
