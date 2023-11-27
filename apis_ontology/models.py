@@ -16,7 +16,7 @@ class LegacyStuffMixin(models.Model):
     published = models.BooleanField(default=False)
 
     texts = GenericRelation("Text")
-    source = GenericRelation("Source")
+    sources = GenericRelation("Source")
 
     class Meta:
         abstract = True

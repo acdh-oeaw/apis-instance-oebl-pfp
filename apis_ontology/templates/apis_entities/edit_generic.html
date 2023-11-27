@@ -9,6 +9,7 @@
 {% block card-header-content %}
 {{ block.super }}
 {{ instance.oebl_kurzinfo }}
+<i>({% for source in instance.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
 {% endblock card-header-content %}
 
 {% block relations %}
