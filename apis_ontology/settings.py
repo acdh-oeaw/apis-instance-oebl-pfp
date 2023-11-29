@@ -1,5 +1,5 @@
 from apis_acdhch_default_settings.settings import *
-from apis_ontology.filters import name_first_name_filter
+from apis_ontology.filters import trigram_search_filter
 
 DEBUG = True
 
@@ -17,7 +17,7 @@ CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 APIS_ENTITIES = {
         "Person": {
             "list_filters": {
-                "name": {"method": name_first_name_filter, "label": "Name or first name"},
+                "name": {"method": trigram_search_filter, "label": "Name or first name"},
             },
         },
 }
