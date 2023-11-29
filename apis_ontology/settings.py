@@ -1,13 +1,9 @@
 import os
-# from apis_acdhch_default_settings.settings import *
-import dj_database_url
+from apis_acdhch_default_settings.settings import *
 
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -76,18 +72,13 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
-
 STATIC_URL = '/static/'
 STATIC_ROOT = '/tmp/staticfiles'
 
 REDMINE_ID = ""
 
-ALLOWED_CIDR_NETS = ["10.0.0.0/8", "127.0.0.0/8"]
 
 PROJECT_DEFAULT_MD = {}
-
-ALLOWED_HOSTS = ["oebl-pnp.acdh-dev.oeaw.ac.at", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 
