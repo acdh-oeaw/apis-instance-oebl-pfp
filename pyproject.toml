@@ -9,7 +9,6 @@ packages = [{include = "apis_ontology"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-django-allow-cidr = "^0.6.0"
 psycopg2 = "^2.9"
 apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.7.1"}
 apis-highlighter-ng = { git = "https://github.com/acdh-oeaw/apis-highlighter-ng.git"}
