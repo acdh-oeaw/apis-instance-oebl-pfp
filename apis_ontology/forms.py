@@ -1,13 +1,14 @@
 from django.forms import ModelForm, CharField, Textarea
 from apis_ontology.models import Institution, Text, Event, Person, Place, Work
 from crispy_forms.helper import FormHelper
-
+from crispy_forms.layout import Layout, HTML
 
 
 class EntityForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        text_details = Layout(HTML("<details><summary>Texts</summary>"))
         for ttypenr, ttype in Text.TEXTTYPE_CHOICES:
             self.fields[ttype] = CharField(required=False, widget=Textarea)
             if instance := kwargs.get("instance"):
@@ -16,9 +17,13 @@ class EntityForm(ModelForm):
                     self.fields[ttype].initial = text.text
                 except Text.DoesNotExist:
                     pass
+            text_details.append(ttype)
+        text_details.append(HTML("</details>"))
 
         self.helper = FormHelper()
         self.helper.form_tag = False
+        all_other_fields = [f.name for f in self._meta.model._meta.get_fields()]
+        self.helper.layout = Layout(*all_other_fields, text_details)
 
     def save(self, *args, **kwargs):
         obj = super().save(*args, **kwargs)
