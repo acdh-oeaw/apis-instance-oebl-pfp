@@ -43,6 +43,8 @@ class EventForm(EntityForm):
 
 
 class PersonForm(EntityForm):
+    field_order = ["first_name", "name", "start_date_written", "end_date_written", "gender", "profession", "title",]
+
     class Meta:
         model = Person
         fields = "__all__"
