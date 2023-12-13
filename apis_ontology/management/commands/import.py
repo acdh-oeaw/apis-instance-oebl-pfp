@@ -1,9 +1,10 @@
+import re
 import requests
 import os
 
 from django.core.management.base import BaseCommand
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, Text
+from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, Text, ProfessionCategory
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.apis_relations.models import Property, TempTriple
 
@@ -148,36 +149,38 @@ def import_professions():
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
-            print(result["url"])
-            newprofession, created = Profession.objects.get_or_create(id=result["id"])
+            tokens = re.split(r" und |,", result["name"])
+            for pos, token in enumerate(tokens):
+                if token.startswith("-"):
+                    token = tokens[pos-1] + token
+                profession, created = Profession.objects.get_or_create(name=token.strip())
+                if profession.oldids:
+                    existing = set(profession.oldids.splitlines())
+                    existing.add(str(result["id"]))
+                    profession.oldids = '\n'.join(list(existing))
+                else:
+                    profession.oldids = result["id"]
+                if profession.oldnames:
+                    existing = set(profession.oldnames.splitlines())
+                    existing.add(str(result["name"]))
+                    profession.oldnames = '\n'.join(list(existing))
+                else:
+                    profession.oldnames = result["name"]
+                for attribute in result:
+                    if hasattr(profession, attribute) and attribute not in ["name", "id"]:
+                        setattr(profession, attribute, result[attribute])
+                profession.save()
             if result["parent_class"]:
-                newprofession.parent = Profession.objects.get(pk=result["parent_class"]["id"])
-            for attribute in result:
-                if hasattr(newprofession, attribute):
-                    setattr(newprofession, attribute, result[attribute])
-            newprofession.save()
+                professioncat, created = ProfessionCategory.objects.get_or_create(id=result["parent_class"]["id"])
+                professioncat.name = result["parent_class"]["label"]
+                professioncat.save()
 
 
-def import_entities():
-    entities = {
-            "event": {
-                "dst": Event
-            },
-            "institution": {
-                "dst": Institution,
-            },
-            "person": {
-                "dst": Person,
-            },
-            "place": {
-                "dst": Place,
-            },
-            "work": {
-                "dst": Work,
-            }
-    }
+def import_entities(entities=[]):
+    entities = entities or [Event, Institution, Person, Place, Work]
 
-    for entity, entitysettings in entities.items():
+    for entitymodel in entities:
+        entity = entitymodel.__name__.lower()
         nextpage = f"{SRC}/entities/{entity}/?format=json&limit=500"
         while nextpage:
             print(nextpage)
@@ -190,12 +193,15 @@ def import_entities():
                 if "kind" in result and result["kind"] is not None:
                     result["kind"] = result["kind"]["label"]
                 professionlist = []
+                professioncategory = None
                 if "profession" in result:
                     for profession in result["profession"]:
-                        try:
-                            professionlist.append(Profession.objects.get(pk=profession["id"]))
-                        except Profession.DoesNotExist:
-                            pass
+                        if int(profession["id"]) in list(ProfessionCategory.objects.all().values_list('id', flat=True)):
+                            professioncategory = ProfessionCategory.objects.get(id=profession["id"])
+                        else:
+                            for dbprofession in Profession.objects.all():
+                                if profession["id"] in list(map(int, dbprofession.oldids.splitlines())):
+                                    professionlist.append(dbprofession)
                     del result["profession"]
                 titlelist = []
                 if "title" in result:
@@ -203,7 +209,7 @@ def import_entities():
                         newtitle, created = Title.objects.get_or_create(name=title)
                         titlelist.append(newtitle)
                     del result["title"]
-                newentity, created = entitysettings["dst"].objects.get_or_create(pk=result_id)
+                newentity, created = entitymodel.objects.get_or_create(pk=result_id)
                 for attribute in result:
                     if hasattr(newentity, attribute):
                         setattr(newentity, attribute, result[attribute])
@@ -211,6 +217,8 @@ def import_entities():
                     newentity.title.add(title)
                 for profession in professionlist:
                     newentity.profession.add(profession)
+                if professioncategory:
+                    newentity.professioncategory = professioncategory
                 newentity.save()
                 if result["source"] is not None:
                     if "id" in result["source"]:
@@ -306,6 +314,11 @@ class Command(BaseCommand):
         parser.add_argument("--relations", action="store_true")
         parser.add_argument("--sources", action="store_true")
         parser.add_argument("--texts", action="store_true")
+        parser.add_argument("--event", action="store_true")
+        parser.add_argument("--institution", action="store_true")
+        parser.add_argument("--person", action="store_true")
+        parser.add_argument("--place", action="store_true")
+        parser.add_argument("--work", action="store_true")
 
     def handle(self, *args, **options):
         if options["all"]:
@@ -328,8 +341,21 @@ class Command(BaseCommand):
         if options["uris"]:
             import_uris()
 
+        entities = []
+
+        if options["event"]:
+            entities.append(Event)
+        if options["institution"]:
+            entities.append(Institution)
+        if options["person"]:
+            entities.append(Person)
+        if options["place"]:
+            entities.append(Place)
+        if options["work"]:
+            entities.append(Work)
+
         if options["entities"]:
-            import_entities()
+            import_entities(entities)
 
         if options["relations"]:
             import_relations()

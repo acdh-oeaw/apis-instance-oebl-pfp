@@ -49,12 +49,24 @@ class Title(models.Model):
 
 
 @reversion.register
-class Profession(models.Model):
-    name = models.CharField(max_length=255, blank=True)
-    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
+class ProfessionCategory(models.Model):
+    name = models.CharField(max_length=255, blank=False)
 
     def __str__(self):
         return self.name
+
+
+@reversion.register
+class Profession(models.Model):
+    class Meta:
+        ordering = ("name",)
+
+    name = models.CharField(max_length=255, blank=True)
+    oldids = models.TextField(null=True)
+    oldnames = models.TextField(null=True)
+
+    def __str__(self):
+        return self.name or f"No name ({self.id})"
 
 
 @reversion.register(follow=["rootobject_ptr"])
@@ -76,6 +88,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     )
     first_name = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
     profession = models.ManyToManyField(Profession, blank=True)
+    professioncategory = models.ForeignKey(ProfessionCategory, on_delete=models.CASCADE, null=True)
     title = models.ManyToManyField(Title, blank=True)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
 
