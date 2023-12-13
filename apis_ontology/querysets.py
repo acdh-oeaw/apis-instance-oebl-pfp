@@ -5,4 +5,4 @@ from .models import Person
 
 DB_COLLATION = 'binary' if 'sqlite' in settings.DATABASES['default']['ENGINE'] else 'en-x-icu'
 
-PersonListViewQueryset = Person.objects.all().order_by(Collate("name", DB_COLLATION))
+PersonListViewQueryset = Person.objects.all().order_by(Collate("name", DB_COLLATION), Collate("first_name", DB_COLLATION))
