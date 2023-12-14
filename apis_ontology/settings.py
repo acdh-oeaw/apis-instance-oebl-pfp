@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'apis_ontology',
     'apis_core.core',
     'apis_core.apis_metainfo',
@@ -91,6 +92,8 @@ def work_form(*args, **kwargs):
     from apis_ontology.forms import WorkForm
     return WorkForm(*args, **kwargs)
 
+from .filters import name_first_name_filter
+
 
 APIS_ENTITIES = {
         "Event": {
@@ -100,7 +103,10 @@ APIS_ENTITIES = {
             "form": institution_form
         },
         "Person": {
-            "form": person_form
+            "form": person_form,
+            "list_filters": {
+                "name": {"method": name_first_name_filter, "label": "Name or first name"},
+            },
         },
         "Place": {
             "form": place_form
