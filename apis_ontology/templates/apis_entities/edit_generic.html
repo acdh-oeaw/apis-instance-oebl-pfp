@@ -8,18 +8,29 @@
 
 {% block card-header-content %}
 {{ block.super }}
-{{ instance.oebl_kurzinfo }}
+{{ instance.oebl_kurzinfo.text }}
+{% if instance.sources.all %}
 <i>({% for source in instance.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
+{% endif %}
 {% endblock card-header-content %}
 
 {% block relations %}
+
+{% if instance.oebl_haupttext.text %}
+<details class="mb-2">
+  {% select_highlighter_project request %}
+  <summary style="cursor: pointer; display: inline;"><h5>ÖBL Haupttext</h5></summary>
+{{ instance.oebl_haupttext | highlight_text:request }}
+</details>
+{% endif %}
+
 {{ block.super }}
 
 <div class="container-fluid mt-4">
 {% select_highlighter_project request %}
   <h2>Texts</h2>
 {% for text in instance.texts.all %}
-{% if text.text %}
+{% if text.text and text != instance.oebl_haupttext and text != instance.oebl_kurzinfo %}
 <div class="mt-2">
   <h4>{{ text.kind }}</h4>
   {{ text | highlight_text:request }}
