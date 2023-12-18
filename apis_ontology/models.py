@@ -94,7 +94,11 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
     @property
     def oebl_kurzinfo(self):
-        return self.texts.get(kind="ÖBL Kurzinfo").text
+        return self.texts.get(kind="ÖBL Kurzinfo")
+
+    @property
+    def oebl_haupttext(self):
+        return self.texts.get(kind="ÖBL Haupttext")
 
 
 @reversion.register(follow=["rootobject_ptr"])
