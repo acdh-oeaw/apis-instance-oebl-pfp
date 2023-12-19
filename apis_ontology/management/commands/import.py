@@ -1,6 +1,8 @@
+import json
 import re
 import requests
 import os
+import pathlib
 
 from django.core.management.base import BaseCommand
 
@@ -239,67 +241,35 @@ def import_entities(entities=[]):
 
 
 def import_relations():
-    relations = {
-            'personevent': {
-                "subj": "related_person",
-                "obj": "related_event",
-            },
-            'personinstitution': {
-                "subj": "related_person",
-                "obj": "related_institution"
-            },
-            "personperson": {
-                "subj": "related_personA",
-                "obj": "related_personB",
-            },
-            "personplace": {
-                "subj": "related_person",
-                "obj": "related_place",
-            },
-            "personwork": {
-                "subj": "related_person",
-                "obj": "related_work",
-            },
-    }
-    relationlist = {}
-    for relation, relationsettings in relations.items():
-        nextpage = f"{SRC}/relations/{relation}/?format=json&limit=500"
-        while nextpage:
-            print(nextpage)
-            page = requests.get(nextpage, headers=HEADERS)
-            data = page.json()
-            nextpage = data["next"]
-            for result in data["results"]:
-                print(result["url"])
-                if result["relation_type"]:
-                    prop, created = Property.objects.get_or_create(id=result["relation_type"]["id"])
-                    propdata = relationlist.get(result["relation_type"]["id"])
-                    if not propdata:
-                        proppage = requests.get(result["relation_type"]["url"])
-                        propdata = proppage.json()
-                        relationlist[result["relation_type"]["id"]] = propdata
-                    prop.name = propdata["name"]
-                    prop.name_reverse = propdata["name_reverse"]
-                    prop.save()
-                    try:
-                        subj = None
-                        if result[relationsettings["subj"]]:
-                            subj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["subj"]]["id"])
-                            prop.subj_class.add(subj.self_contenttype)
-                        obj = None
-                        if result[relationsettings["obj"]]:
-                            obj = RootObject.objects_inheritance.get_subclass(pk=result[relationsettings["obj"]]["id"])
-                            prop.obj_class.add(obj.self_contenttype)
-                        prop.save()
-                        if subj and obj and prop:
-                            tt, created = TempTriple.objects.get_or_create(id=result["id"], prop=prop, subj=subj, obj=obj)
-                        else:
-                            print(result)
-                    except RootObject.DoesNotExist as e:
-                        print(result)
-                        print(e)
-                else:
-                    print(f"No relation type for relation {result}")
+    relations = json.loads(pathlib.Path("relations.json").read_text())
+
+    l = len(relations)
+    p = 0
+
+    for id, relation in relations.items():
+        p += 1
+        print(f"{p}/{l}")
+        prop, created = Property.objects.get_or_create(name=relation["name"], name_reverse=relation["name_reverse"])
+        try:
+            subj = None
+            if subj := relation["subj"]:
+                subj = RootObject.objects_inheritance.get_subclass(pk=subj)
+                prop.subj_class.add(subj.self_contenttype)
+            obj = None
+            if obj := relation["obj"]:
+                obj = RootObject.objects_inheritance.get_subclass(pk=obj)
+                prop.obj_class.add(obj.self_contenttype)
+            if subj and obj and prop:
+                try:
+                    tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
+                except Exception as e:
+                    print(e)
+                    print(relation)
+            else:
+                print(relation)
+        except RootObject.DoesNotExist as e:
+            print(relation)
+            print(e)
 
 
 class Command(BaseCommand):
