@@ -6,6 +6,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = True
 
 INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres"]
+INSTALLED_APPS.remove("apis_ontology")
+INSTALLED_APPS.insert(0, "apis_ontology")
 
 ROOT_URLCONF = 'apis_ontology.urls'
 
