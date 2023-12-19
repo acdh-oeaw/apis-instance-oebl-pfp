@@ -10,6 +10,8 @@ TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
 RELATIONS = {}
 
+COPYFIELDS = ['review', 'start_date', 'start_start_date', 'start_end_date', 'end_date', 'end_start_date', 'end_end_date', 'start_date_written', 'end_date_written', 'status', 'references', 'notes', 'published', 'source']
+
 def import_relations():
     relations = {
             'personevent': {
@@ -59,6 +61,8 @@ def import_relations():
                             "subj": result[relationsettings["subj"]]["id"],
                             "obj": result[relationsettings["obj"]]["id"],
                         }
+                        for field in COPYFIELDS:
+                            RELATIONS[result["id"]][field] = result[field]
                     else:
                         print(result)
                 else:

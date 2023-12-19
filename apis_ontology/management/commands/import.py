@@ -248,7 +248,7 @@ def import_relations():
 
     for id, relation in relations.items():
         p += 1
-        print(f"{p}/{l}")
+        print(f"{p}/{l}:\t {id}: {relation['name']}")
         prop, created = Property.objects.get_or_create(name=relation["name"], name_reverse=relation["name_reverse"])
         try:
             subj = None
@@ -262,6 +262,10 @@ def import_relations():
             if subj and obj and prop:
                 try:
                     tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
+                    for attribute in relation:
+                        if hasattr(tt, attribute) and attribute not in ["id", "subj", "obj"]:
+                            setattr(tt, attribute, relation[attribute])
+                    print(tt.save())
                 except Exception as e:
                     print(e)
                     print(relation)
