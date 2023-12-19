@@ -22,7 +22,7 @@ class EntityForm(ModelForm):
 
         self.helper = FormHelper()
         self.helper.form_tag = False
-        all_other_fields = [f.name for f in self._meta.model._meta.get_fields()]
+        all_other_fields = [f for f in self.fields if f not in text_details]
         self.helper.layout = Layout(*all_other_fields, text_details)
 
     def save(self, *args, **kwargs):
