@@ -5,7 +5,7 @@ from apis_acdhch_default_settings.settings import *
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = True
 
-INSTALLED_APPS += ["apis_highlighter"]
+INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres"]
 
 ROOT_URLCONF = 'apis_ontology.urls'
 
