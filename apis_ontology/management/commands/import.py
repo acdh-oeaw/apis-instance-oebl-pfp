@@ -265,7 +265,7 @@ def import_relations():
                     for attribute in relation:
                         if hasattr(tt, attribute) and attribute not in ["id", "subj", "obj"]:
                             setattr(tt, attribute, relation[attribute])
-                    print(tt.save())
+                    tt.save()
                 except Exception as e:
                     print(e)
                     print(relation)
