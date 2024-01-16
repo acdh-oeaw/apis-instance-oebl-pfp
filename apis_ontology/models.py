@@ -94,11 +94,15 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
     @property
     def oebl_kurzinfo(self):
-        return self.texts.get(kind="ÖBL Kurzinfo")
+        if self.texts.filter(kind="ÖBL Kurzinfo").exists():
+            return self.texts.get(kind="ÖBL Kurzinfo")
+        return None
 
     @property
     def oebl_haupttext(self):
-        return self.texts.get(kind="ÖBL Haupttext")
+        if self.texts.filter(kind="ÖBL Haupttext").exists():
+            return self.texts.get(kind="ÖBL Haupttext")
+        return None
 
 
 @reversion.register(follow=["rootobject_ptr"])
