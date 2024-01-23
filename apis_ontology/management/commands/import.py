@@ -5,10 +5,12 @@ import os
 import pathlib
 
 from django.core.management.base import BaseCommand
+from django.contrib.contenttypes.models import ContentType
 
 from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, Text, ProfessionCategory
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.apis_relations.models import Property, TempTriple
+from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 
 from django.db import utils
 
@@ -222,6 +224,14 @@ def import_entities(entities=[]):
                 if professioncategory:
                     newentity.professioncategory = professioncategory
                 newentity.save()
+                if "collection" in result:
+                    for collection in result["collection"]:
+                        importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
+                        newcol, created = SkosCollection.objects.get_or_create(name=collection["label"])
+                        newcol.parent = importcol
+                        newcol.save()
+                        ct = ContentType.objects.get_for_model(newentity)
+                        SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         try:
