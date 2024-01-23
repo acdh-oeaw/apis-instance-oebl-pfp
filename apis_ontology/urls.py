@@ -9,6 +9,7 @@ from apis_core.apis_entities.api_views import GetEntityGeneric
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("apis/", include("apis_core.urls", namespace="apis")),
+    path("apis/collections/", include("apis_core.collections.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path(
         "entity/<int:pk>/", GetEntityGeneric.as_view(), name="GetEntityGenericRoot"
