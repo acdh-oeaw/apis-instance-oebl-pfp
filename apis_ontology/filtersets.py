@@ -36,7 +36,7 @@ def related_property(queryset, name, value):
 def collection_method(queryset, name, value):
     if value:
         content_type = ContentType.objects.get_for_model(queryset.model)
-        scco = SkosCollectionContentObject.objects.filter(content_type=content_type, collection__in=value)
+        scco = SkosCollectionContentObject.objects.filter(content_type=content_type, collection__in=value).values("object_id")
         return queryset.filter(id__in=scco)
     return queryset
 
