@@ -1,5 +1,6 @@
 {% extends "apis_entities/edit_generic.html" %}
 {% load apis_highlighter %}
+{% load apis_collections %}
 
 {% block scriptHeader %}
 {{ block.super }}
@@ -12,6 +13,10 @@
 {% if instance.sources.all %}
 <i>({% for source in instance.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
 {% endif %}
+{% collection_content_objects instance "64,65" as collection_content_objects %}
+{% for cco in collection_content_objects %}
+{% collection_object_parent instance cco %}
+{% endfor %}
 {% endblock card-header-content %}
 
 {% block relations %}
