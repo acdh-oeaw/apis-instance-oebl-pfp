@@ -12,7 +12,7 @@ python = "^3.11"
 psycopg2 = "^2.9"
 apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.11.2"}
 apis-highlighter-ng = { git = "https://github.com/acdh-oeaw/apis-highlighter-ng.git"}
-apis-acdhch-default-settings = "^0.1.23"
+apis-acdhch-default-settings = "0.1.24"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
