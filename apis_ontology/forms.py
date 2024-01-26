@@ -1,10 +1,10 @@
-from django.forms import ModelForm, CharField, Textarea
+from django.forms import CharField, Textarea
 from apis_ontology.models import Institution, Text, Event, Person, Place, Work
-from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML
+from apis_core.generic.forms import GenericModelForm
 
 
-class EntityForm(ModelForm):
+class EntityForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -20,8 +20,6 @@ class EntityForm(ModelForm):
             text_details.append(ttype)
         text_details.append(HTML("</details>"))
 
-        self.helper = FormHelper()
-        self.helper.form_tag = False
         all_other_fields = [f for f in self.fields if f not in text_details]
         self.helper.layout = Layout(*all_other_fields, text_details)
 
