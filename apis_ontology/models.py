@@ -104,6 +104,9 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
             return self.texts.get(kind="ÖBL Haupttext")
         return None
 
+    def __str__(self):
+        return f"{self.first_name} {self.name}"
+
 
 @reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
