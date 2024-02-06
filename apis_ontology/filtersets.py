@@ -1,36 +1,55 @@
+import re
 import django_filters
-from apis_core.generic.filtersets import GenericFilterSet, GenericFilterSetForm
+from django.contrib.postgres.search import TrigramWordSimilarity
+from django.db.models.functions import Greatest
 
-from apis_core.utils.filtermethods import (
-    related_entity_name,
-)
-from apis_core.apis_relations.models import Property
+from apis_core.apis_entities.filtersets import AbstractEntityFilterSet
+from apis_core.utils.filtermethods import related_entity_name
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 from django.contrib.contenttypes.models import ContentType
-from .filters import trigram_search_filter
 
-ABSTRACT_ENTITY_FILTERS_EXCLUDE = [
-    "self_contenttype",
-    "review",
-    "start_date",
-    "start_start_date",
-    "start_end_date",
-    "end_date",
-    "end_start_date",
-    "end_end_date",
-    "notes",
-    "text",
-    "published",
-    "status",
-    "references",
-]
-HELP_TEXT = "Search for similar words in <em>first_name</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
+PERSON_HELP_TEXT = "Search for similar words in <em>first_name</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
+HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 
 
-def related_property(queryset, name, value):
-    p = Property.objects.get(name=value)
-    queryset = queryset.filter(triple_set_from_subj__prop=p).distinct()
-    return queryset
+PATTERN = re.compile(r'''((?:[^ "']|"[^"]*"|'[^']*')+)''')
+
+#########
+# helpers
+#########
+
+
+def remove_quotes(token):
+    return token.strip('"')
+
+
+################
+# filter methods
+################
+
+
+def trigram_search_filter_person(queryset, name, value):
+    return trigram_search_filter(queryset, ["name", "first_name"], value)
+
+
+def trigram_search_filter_institution(queryset, name, value):
+    return trigram_search_filter(queryset, ["name"], value)
+
+
+def trigram_search_filter_place(queryset, name, value):
+    return trigram_search_filter(queryset, ["name"], value)
+
+
+def trigram_search_filter(queryset, fields, value):
+    tokens = PATTERN.split(value)
+    tokens = list(filter(str.strip, tokens))
+    tokens = set(list(map(remove_quotes, tokens)) + [value])
+    trig_vector_list = []
+    for token in tokens:
+        for field in fields:
+            trig_vector_list.append(TrigramWordSimilarity(token, field))
+    trig_vector = Greatest(*trig_vector_list, None)
+    return queryset.annotate(similarity=trig_vector).filter(similarity__gt=0.4).order_by("-similarity")
 
 
 def collection_method(queryset, name, value):
@@ -41,18 +60,13 @@ def collection_method(queryset, name, value):
     return queryset
 
 
-class PersonFilterSetForm(GenericFilterSetForm):
-    columns_exclude = ABSTRACT_ENTITY_FILTERS_EXCLUDE
+###################
+# custom filtersets
+###################
 
-
-class PersonFilterSet(GenericFilterSet):
+class PersonFilterSet(AbstractEntityFilterSet):
     related_entity_name = django_filters.CharFilter(
         method=related_entity_name, label="Related entity"
-    )
-    related_property = django_filters.ModelChoiceFilter(
-        queryset=Property.objects.all().order_by('name'),
-        label="Related Property",
-        method=related_property,
     )
     collection = django_filters.ModelMultipleChoiceFilter(
         queryset=SkosCollection.objects.all().order_by("name"),
@@ -60,16 +74,34 @@ class PersonFilterSet(GenericFilterSet):
         method=collection_method,
     )
     search = django_filters.CharFilter(
-            method=trigram_search_filter,
+            method=trigram_search_filter_person,
             label="Search",
-            help_text=HELP_TEXT)
-
-    class Meta:
-        form = PersonFilterSetForm
-        exclude = ABSTRACT_ENTITY_FILTERS_EXCLUDE
+            help_text=PERSON_HELP_TEXT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("first_name", False)
         self.filters.move_to_end("collection", False)
+        self.filters.move_to_end("search", False)
+
+
+class InstitutionFilterSet(AbstractEntityFilterSet):
+    search = django_filters.CharFilter(
+            method=trigram_search_filter_institution,
+            label="Search",
+            help_text=HELP_TEXT)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filters.move_to_end("search", False)
+
+
+class PlaceFilterSet(AbstractEntityFilterSet):
+    search = django_filters.CharFilter(
+            method=trigram_search_filter_institution,
+            label="Search",
+            help_text=HELP_TEXT)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.filters.move_to_end("search", False)
