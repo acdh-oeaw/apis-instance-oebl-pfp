@@ -1,0 +1,23 @@
+{% extends "apis_core/apis_entities/abstractentity.html" %}
+{% load apis_collections %}
+
+{% block scriptHeader %}
+{{ block.super }}
+<link rel="stylesheet" href="/static/css/oebl.css">
+{% endblock %}
+
+{% block card-header-content %}
+{{ block.super }}
+<div class="row justify-content-center align-items-center">
+  <span class="kurzinfo mr-2">
+    {{ object.oebl_kurzinfo.text }}
+    {% if object.sources.all %}
+    <i>({% for source in object.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
+    {% endif %}
+  </span>
+{% collection_content_objects object "64,65" as collection_content_objects %}
+{% for cco in collection_content_objects %}
+{% collection_object_parent object cco %}
+{% endfor %}
+</div>
+{% endblock card-header-content %}
