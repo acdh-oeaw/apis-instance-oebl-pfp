@@ -11,3 +11,5 @@ jobs:
   deploy:
     uses: acdh-oeaw/prosnet-workflows/.github/workflows/deploy-apis-instance.yml@v0.3.5
     secrets: inherit
+    with:
+      apis-base-container-ref: "birger/psql"
