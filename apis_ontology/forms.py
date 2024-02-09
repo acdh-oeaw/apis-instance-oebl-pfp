@@ -1,11 +1,10 @@
 from django.forms import CharField, Textarea
-from apis_ontology.models import Institution, Text, Event, Person, Place, Work
+from apis_ontology.models import Person, Text
 from crispy_forms.layout import Layout, HTML
-from crispy_forms.helper import FormHelper
 from apis_core.generic.forms import GenericModelForm
 
 
-class EntityForm(GenericModelForm):
+class LegacyStuffMixinForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -21,8 +20,6 @@ class EntityForm(GenericModelForm):
             text_details.append(ttype)
         text_details.append(HTML("</details>"))
 
-        self.helper = FormHelper()
-        self.helper.form_tag = False
         all_other_fields = [f for f in self.fields if f not in text_details]
         self.helper.layout = Layout(*all_other_fields, text_details)
 
@@ -36,33 +33,9 @@ class EntityForm(GenericModelForm):
         return obj
 
 
-class InstitutionForm(EntityForm):
-    class Meta:
-        model = Institution
-        fields = "__all__"
-
-
-class EventForm(EntityForm):
-    class Meta:
-        model = Event
-        fields = "__all__"
-
-
-class PersonForm(EntityForm):
+class PersonForm(LegacyStuffMixinForm):
     field_order = ["first_name", "name", "start_date_written", "end_date_written", "gender", "profession", "title",]
 
     class Meta:
         model = Person
-        fields = "__all__"
-
-
-class PlaceForm(EntityForm):
-    class Meta:
-        model = Place
-        fields = "__all__"
-
-
-class WorkForm(EntityForm):
-    class Meta:
-        model = Work
         fields = "__all__"

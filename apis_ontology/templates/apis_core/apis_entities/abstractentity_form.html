@@ -1,0 +1,42 @@
+{% extends "apis_core/apis_entities/abstractentity_form.html" %}
+{% load apis_highlighter %}
+
+{% block scriptHeader %}
+{{ block.super }}
+<link rel="stylesheet" href="/static/css/highlighter.css">
+{% endblock %}
+
+{% block col-one %}
+
+{% if object.oebl_haupttext.text %}
+<div class="card mb-2">
+  <div class="card-header">
+  ÖBL Haupttext {% select_highlighter_project request %}
+  </div>
+  <div class="card-body">
+    {{ object.oebl_haupttext | highlight_text:request }}
+  </div>
+</div>
+{% endif %}
+
+{{ block.super }}
+
+<div class="card mt-2">
+  <div class="card-header">
+  Texts {% select_highlighter_project request %}
+  </div>
+  {% for text in object.texts.all %}
+  {% if text.text and text != object.oebl_haupttext and text != object.oebl_kurzinfo %}
+  <div class="mt-2">
+    <h4>{{ text.kind }}</h4>
+    {{ text | highlight_text:request }}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock col-one %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="/static/js/highlighter.js"></script>
+{% endblock scripts %}

@@ -1,12 +1,14 @@
 import django_tables2 as tables
+from apis_core.generic.tables import GenericTable
 from django_tables2.utils import A
 from .models import Person
 
 
-class PersonTable(tables.Table):
+class PersonTable(GenericTable):
     class Meta:
         model = Person
         fields = ["name", "first_name", "start_date", "end_date"]
+        exclude = ["desc"]
         row_attrs = {"title": lambda record: record.oebl_kurzinfo.text if record.oebl_kurzinfo else None }
 
 
