@@ -2,9 +2,9 @@ import re
 import django_filters
 from django.contrib.postgres.search import TrigramWordSimilarity
 from django.db.models.functions import Greatest
+from django.db import models
 
 from apis_core.apis_entities.filtersets import AbstractEntityFilterSet
-from apis_core.utils.filtermethods import related_entity_name
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 from django.contrib.contenttypes.models import ContentType
 
@@ -63,11 +63,19 @@ def collection_method(queryset, name, value):
 ###################
 # custom filtersets
 ###################
+class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
+    class Meta(AbstractEntityFilterSet.Meta):
+        filter_overrides = {
+             models.CharField: {
+                 'filter_class': django_filters.CharFilter,
+                 'extra': lambda f: {
+                     'lookup_expr': 'icontains',
+                 },
+             },
+        }
 
-class PersonFilterSet(AbstractEntityFilterSet):
-    related_entity_name = django_filters.CharFilter(
-        method=related_entity_name, label="Related entity"
-    )
+
+class PersonFilterSet(LegacyStuffMixinFilterSet):
     collection = django_filters.ModelMultipleChoiceFilter(
         queryset=SkosCollection.objects.all().order_by("name"),
         label="Collections",
@@ -85,7 +93,7 @@ class PersonFilterSet(AbstractEntityFilterSet):
         self.filters.move_to_end("search", False)
 
 
-class InstitutionFilterSet(AbstractEntityFilterSet):
+class InstitutionFilterSet(LegacyStuffMixinFilterSet):
     search = django_filters.CharFilter(
             method=trigram_search_filter_institution,
             label="Search",
@@ -96,7 +104,7 @@ class InstitutionFilterSet(AbstractEntityFilterSet):
         self.filters.move_to_end("search", False)
 
 
-class PlaceFilterSet(AbstractEntityFilterSet):
+class PlaceFilterSet(LegacyStuffMixinFilterSet):
     search = django_filters.CharFilter(
             method=trigram_search_filter_institution,
             label="Search",
