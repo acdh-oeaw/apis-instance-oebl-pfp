@@ -1,7 +1,8 @@
 from django.forms import CharField, Textarea
 from apis_ontology.models import Person, Text
-from crispy_forms.layout import Layout, HTML
+from crispy_forms.layout import Layout, HTML, Column, Row
 from apis_core.generic.forms import GenericModelForm
+from crispy_forms.bootstrap import PrependedText
 
 TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
 
@@ -10,6 +11,9 @@ class LegacyStuffMixinForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Create a 'More details ...' details html element, so we can
+        # put some of the less important form element inside and keep
+        # the form clean
         more_details = Layout(HTML("<details><summary>More details</summary>"))
         for ttypenr, ttype in Text.TEXTTYPE_CHOICES:
             self.fields[ttype] = CharField(required=False, widget=Textarea)
@@ -25,6 +29,34 @@ class LegacyStuffMixinForm(GenericModelForm):
         more_details.append(HTML("</details>"))
 
         all_other_fields = [f for f in self.fields if f not in more_details]
+
+        # lets combine some of the form elements that belong together
+        # into rows in columns and use bootstraps PrependedText to replace
+        # the label of the form fields
+        if {"first_name", "name"} <= set(all_other_fields):
+            all_other_fields.remove("name")
+            all_other_fields.remove("first_name")
+            row = Row(
+                    Column(PrependedText("first_name", self.fields["first_name"].label)),
+                    Column(PrependedText("name", self.fields["name"].label)))
+            self.fields["first_name"].label = self.fields["name"].label = False
+            all_other_fields.insert(0, row)
+        if {"start_date_written", "end_date_written"} <= set(all_other_fields):
+            all_other_fields.remove("start_date_written")
+            all_other_fields.remove("end_date_written")
+            # if we are dealing with a person, we are changing the label
+            startlabel = "Geboren am" if self.Meta.model == Person else self.fields["start_date_written"].label
+            endlabel = "Gestorben am" if self.Meta.model == Person else self.fields["end_date_written"].label
+            row = Row(
+                    Column(PrependedText("start_date_written", startlabel)),
+                    Column(PrependedText("end_date_written", endlabel)))
+            self.fields["start_date_written"].label = self.fields["end_date_written"].label = False
+            all_other_fields.insert(1, row)
+        if {"gender", "title"} <= set(all_other_fields):
+            all_other_fields.remove("gender")
+            all_other_fields.remove("title")
+            all_other_fields.insert(2, Row(Column("gender"), Column("title")))
+
         self.helper.layout = Layout(*all_other_fields, more_details)
 
     def save(self, *args, **kwargs):
@@ -35,11 +67,3 @@ class LegacyStuffMixinForm(GenericModelForm):
                 text.text = self.cleaned_data[ttype]
                 text.save()
         return obj
-
-
-class PersonForm(LegacyStuffMixinForm):
-    field_order = ["first_name", "name", "start_date_written", "end_date_written", "gender", "profession", "title",]
-
-    class Meta:
-        model = Person
-        fields = "__all__"
