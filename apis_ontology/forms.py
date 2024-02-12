@@ -3,12 +3,14 @@ from apis_ontology.models import Person, Text
 from crispy_forms.layout import Layout, HTML
 from apis_core.generic.forms import GenericModelForm
 
+TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
+
 
 class LegacyStuffMixinForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        text_details = Layout(HTML("<details><summary>Texts</summary>"))
+        more_details = Layout(HTML("<details><summary>More details</summary>"))
         for ttypenr, ttype in Text.TEXTTYPE_CHOICES:
             self.fields[ttype] = CharField(required=False, widget=Textarea)
             if instance := kwargs.get("instance"):
@@ -17,11 +19,13 @@ class LegacyStuffMixinForm(GenericModelForm):
                     self.fields[ttype].initial = text.text
                 except Text.DoesNotExist:
                     pass
-            text_details.append(ttype)
-        text_details.append(HTML("</details>"))
+            if ttype not in TEXTTYPE_CHOICES_MAIN:
+                more_details.append(ttype)
+        more_details.extend(["notes", "status", "review", "published"])
+        more_details.append(HTML("</details>"))
 
-        all_other_fields = [f for f in self.fields if f not in text_details]
-        self.helper.layout = Layout(*all_other_fields, text_details)
+        all_other_fields = [f for f in self.fields if f not in more_details]
+        self.helper.layout = Layout(*all_other_fields, more_details)
 
     def save(self, *args, **kwargs):
         obj = super().save(*args, **kwargs)
