@@ -1,10 +1,10 @@
 import django_tables2 as tables
-from apis_core.generic.tables import GenericTable
+from apis_core.apis_entities.tables import AbstractEntityTable
 from django_tables2.utils import A
 from .models import Person
 
 
-class PersonTable(GenericTable):
+class PersonTable(AbstractEntityTable):
     class Meta:
         model = Person
         fields = ["name", "first_name", "start_date", "end_date"]
