@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
+from apis_core.utils.helpers import create_object_from_uri
 from apis_core.utils import DateParser
 
 
@@ -20,6 +21,11 @@ class LegacyStuffMixin(models.Model):
 
     class Meta:
         abstract = True
+
+    @classmethod
+    def get_or_create_uri(cls, uri):
+        print(f"using custom get_or_create_uri with {uri}")
+        return create_object_from_uri(uri, cls) or cls.objects.get(pk=uri)
 
 
 @reversion.register
