@@ -1,0 +1,45 @@
+##############################################
+# Create an entity `apis_ontology.Person`
+# from a wikidata RDF endpoint
+##############################################
+model = "apis_ontology.Place"
+filter_sparql = """
+PREFIX ps: <http://www.wikidata.org/prop/statement/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+ASK {
+  ?subject wdt:P279* wd:Q123964505.
+}
+"""
+[[attributes]]
+# name
+sparql = """
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX schema: <http://schema.org/>
+SELECT ?name
+WHERE {
+  ?something schema:about ?subject .
+  ?subject rdfs:label ?label .
+  OPTIONAL { ?subject wdt:P1448/rdfs:label ?official_label }
+  BIND(COALESCE(?official_label, ?label) AS ?name)
+}
+"""
+[[attributes]]
+# lng
+sparql = '''
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?lng
+WHERE {
+  ?subject wdt:P625 ?geo1 .
+  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+).*$", "$1") as ?lng)
+  }
+'''
+[[attributes]]
+# lat
+sparql = '''
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?lat
+WHERE {
+  ?subject wdt:P625 ?geo1 .
+  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+) (\\d+\\.\\d+).*$", "$2") as ?lat)
+  }
+'''
