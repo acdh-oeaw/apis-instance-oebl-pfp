@@ -2,3 +2,4 @@
 *.lock
 *.sqlite3
 local
+.env
