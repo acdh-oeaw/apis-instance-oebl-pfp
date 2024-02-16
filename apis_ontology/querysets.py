@@ -4,6 +4,7 @@ import os
 import urllib
 from django.db.models.functions import Collate
 from django.conf import settings
+from django.template.loader import render_to_string
 
 from .models import Person
 
@@ -15,34 +16,54 @@ PersonListViewQueryset = Person.objects.all().order_by(Collate("name", DB_COLLAT
 
 
 class TypeSense_ExternalAutocomplete:
+    collections = None
+    template = None
+
+    def get_result_label(self, hit={}):
+        if self.template:
+            return render_to_string(self.template, {"hit": hit})
+        return f'{hit["document"]["label"]} <a href="{hit["document"]["id"]}">{hit["document"]["id"]}</a>'
+
     def extract(self, res):
-        match res:
-            case {"document": {"id": id, "label": text}, **rest}:
-                label = rest.get("highlight", {}).get("label", {})
-                text = label.get("snippet", text) if isinstance(label, dict) else text
-                text += f' <a href="{id}">{id}</a>'
-                return {"id": id, "text": text, "selected_text": text}
-            case unknown:
-                logger.error("Could not parse result from typesense collection %s: %s", self.collectionname, unknown,)
+        if res.get("document"):
+            return {"id": res["document"]["id"], "text": self.get_result_label(res), "selected_text": self.get_result_label(res)}
+        logger.error("Could not parse result from typesense collection %s: %s", self.collections, res)
         return False
 
     def get_results(self, q):
         typesensetoken = os.getenv("TYPESENSE_TOKEN", None)
         typesenseserver = os.getenv("TYPESENSE_SERVER", None)
-        if typesensetoken and typesenseserver and getattr(self, "collectionname"):
-            url = f"{typesenseserver}/collections/{self.collectionname}/documents/search?q={q}&query_by=description&query_by=label"
-            req = urllib.request.Request(url)
+        if typesensetoken and typesenseserver:
+            match self.collections:
+                # if there is only on collection configured, we hit that collection directly
+                case str() as collection:
+                    data = None
+                    url = f"{typesenseserver}/collections/{collection}/documents/search?q={q}&query_by=description&query_by=label"
+                    req = urllib.request.Request(url)
+                # if there are multiple collections configured, we use the `multi_search` endpoint
+                case list() as collectionlist:
+                    url = f"{typesenseserver}/multi_search?q={q}&query_by=description&query_by=label"
+                    data = {"searches": []}
+                    for collection in collectionlist:
+                        data["searches"].append({"collection": collection})
+                    req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"))
+                case unknown:
+                    logger.error("Don't know what to do with collection %s", unknown)
+
             req.add_header("X-TYPESENSE-API-KEY", typesensetoken)
             with urllib.request.urlopen(req) as f:
                 data = json.loads(f.read())
-                results = list(filter(bool, map(self.extract, data.get("hits", []))))
-                return results
+                hits = data.get("hits", [])
+                for result in data.get("results", []):
+                    hits.extend(result.get("hits", []))
+                return list(filter(bool, map(self.extract, hits)))
         return {}
 
 
 class PlaceExternalAutocomplete(TypeSense_ExternalAutocomplete):
-    collectionname = "prosnet-wikidata-place-index"
+    collections = ["prosnet-wikidata-place-index", "prosnet-geonames-place-index"]
+    template = "apis_ontology/place_external_autocomplete_result.html"
 
 
 class PersonExternalAutocomplete(TypeSense_ExternalAutocomplete):
-    collectionname = "prosnet-wikidata-person-index"
+    collections = "prosnet-wikidata-person-index"
