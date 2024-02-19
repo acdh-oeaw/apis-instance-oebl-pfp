@@ -1,13 +1,14 @@
 ##############################################
-# Create an entity `apis_ontology.Person`
+# Create an entity `apis_ontology.Place`
 # from a wikidata RDF endpoint
 ##############################################
 model = "apis_ontology.Place"
+# We filter for rdf documents that contain a wdt:P1566,
+# which is the GeoNames ID
 filter_sparql = """
-PREFIX ps: <http://www.wikidata.org/prop/statement/>
-PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 ASK {
-  ?subject wdt:P279* wd:Q123964505.
+  ?item wdt:P1566 ?obj .
 }
 """
 [[attributes]]
