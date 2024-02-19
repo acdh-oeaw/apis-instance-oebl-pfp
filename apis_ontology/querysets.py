@@ -67,3 +67,7 @@ class PlaceExternalAutocomplete(TypeSense_ExternalAutocomplete):
 
 class PersonExternalAutocomplete(TypeSense_ExternalAutocomplete):
     collections = "prosnet-wikidata-person-index"
+
+
+class InstitutionExternalAutocomplete(TypeSense_ExternalAutocomplete):
+    collections = "prosnet-wikidata-organization-index"

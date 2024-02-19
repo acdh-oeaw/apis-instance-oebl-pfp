@@ -15,3 +15,9 @@ class PersonImporter(GenericImporter):
         if "profession" in data:
             del data["profession"]
         return data
+
+
+class InstitutionImporter(GenericImporter):
+    def request(self, uri):
+        model, data = get_definition_and_attributes_from_uri(uri)
+        return data
