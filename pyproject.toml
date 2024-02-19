@@ -13,6 +13,7 @@ psycopg2 = "^2.9"
 apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.13.0"}
 apis-highlighter-ng = "^0.1.4"
 apis-acdhch-default-settings = "0.1.24"
+django-action-logger = "^0.1.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
