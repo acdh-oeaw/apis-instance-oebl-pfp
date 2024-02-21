@@ -38,6 +38,10 @@ def import_relations():
                 "subj": "related_placeA",
                 "obj": "related_placeB",
             },
+            "institutioninstitution": {
+                "subj": "related_institutionA",
+                "obj": "related_institutionB",
+            }
     }
     relationlist = {}
     for relation, relationsettings in relations.items():
