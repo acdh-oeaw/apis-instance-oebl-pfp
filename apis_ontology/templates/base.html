@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block userlogin-menu %}
+<ul class="navbar-nav">
+  {% if user.is_authenticated %}
+    <li class="nav-item dropdown ml-auto">
+      <a href=""
+         class="nav-link dropdown-toggle"
+         data-toggle="dropdown"
+         role="button"
+         aria-haspopup="true"
+         aria-expanded="false">User: {{ user.get_username }}</a>
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="dropdown-item">
+          <a class="nav-link p-0" href="{% url 'apis:logout' %}?next=/">
+            <span class="material-symbols-outlined">logout</span>
+            log out
+          </a>
+        </div>
+        <div class="dropdown-item">
+          <a class="nav-link p-0" href="{% url "django_action_logger:log" %}">
+            <span class="material-symbols-outlined">web_stories</span>
+            Log
+          </a>
+        </div>
+      </div>
+    </li>
+  {% else %}
+    <li class="nav-item dropdown ml-auto">
+      <a class="nav-link p-0"
+         href="{% url 'apis:login' %}?next={{ request.path|urlencode }}">
+        <span class="material-symbols-outlined">login</span>
+      </a>
+    </li>
+  {% endif %}
+</ul>
+{% endblock userlogin-menu %}
+
