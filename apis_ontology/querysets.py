@@ -3,7 +3,7 @@ import os
 from django.db.models.functions import Collate
 from django.conf import settings
 
-from apis_ontology.autocomplete import ExternalAutocomplete, TypeSenseAutocompleteAdapter, LobidAutocompleteAdapter
+from apis_core.utils.autocomplete import ExternalAutocomplete, TypeSenseAutocompleteAdapter, LobidAutocompleteAdapter
 
 from .models import Person
 
