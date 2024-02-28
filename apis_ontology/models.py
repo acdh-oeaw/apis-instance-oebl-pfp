@@ -7,6 +7,7 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.utils import DateParser
+from apis_core.generic.abc import GenericModel
 
 
 class LegacyStuffMixin(models.Model):
@@ -29,7 +30,7 @@ class LegacyStuffMixin(models.Model):
 
 
 @reversion.register
-class Source(models.Model):
+class Source(GenericModel, models.Model):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
     pubinfo = models.CharField(max_length=400, blank=True)
@@ -47,7 +48,7 @@ class Source(models.Model):
 
 
 @reversion.register
-class Title(models.Model):
+class Title(GenericModel, models.Model):
     name = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
@@ -55,7 +56,7 @@ class Title(models.Model):
 
 
 @reversion.register
-class ProfessionCategory(models.Model):
+class ProfessionCategory(GenericModel, models.Model):
     name = models.CharField(max_length=255, blank=False)
 
     def __str__(self):
@@ -63,7 +64,7 @@ class ProfessionCategory(models.Model):
 
 
 @reversion.register
-class Profession(models.Model):
+class Profession(GenericModel, models.Model):
     class Meta:
         ordering = ("name",)
 
@@ -127,7 +128,7 @@ class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
 
 @reversion.register
-class Text(models.Model):
+class Text(GenericModel, models.Model):
     TEXTTYPE_CHOICES = [
             (1, "Place description ÖBL"),
             (2, "ÖBL Haupttext"),
