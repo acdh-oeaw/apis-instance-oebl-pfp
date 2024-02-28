@@ -56,6 +56,10 @@ class LegacyStuffMixinForm(GenericModelForm):
             all_other_fields.remove("gender")
             all_other_fields.remove("title")
             all_other_fields.insert(2, Row(Column("gender"), Column("title")))
+        if {"profession", "professioncategory"} <= set(all_other_fields):
+            all_other_fields.remove("profession")
+            all_other_fields.remove("professioncategory")
+            all_other_fields.insert(3, Row(Column("profession"), Column("professioncategory")))
 
         self.helper.layout = Layout(*all_other_fields, more_details)
 
