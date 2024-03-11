@@ -2,14 +2,8 @@
 # Create an entity `apis_ontology.Person`
 # from a wikidata RDF endpoint
 ##############################################
-model = "apis_ontology.Person"
-filter_sparql = """
-PREFIX ps: <http://www.wikidata.org/prop/statement/>
-PREFIX wd: <http://www.wikidata.org/entity/>
-ASK {
-  ?subject ps:P31 wd:Q5.
-}
-"""
+superclass = "apis_ontology.models.Person"
+regex = "https://www.wikidata.org.*"
 [[attributes]]
 # name
 sparql = """

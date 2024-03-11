@@ -2,15 +2,8 @@
 # Create an entity `apis_ontology.Place`
 # from a wikidata RDF endpoint
 ##############################################
-model = "apis_ontology.Place"
-# We filter for rdf documents that contain a wdt:P1566,
-# which is the GeoNames ID
-filter_sparql = """
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-ASK {
-  ?item wdt:P1566 ?obj .
-}
-"""
+superclass = "apis_ontology.models.Place"
+regex = "https://www.wikidata.org.*"
 [[attributes]]
 # name
 sparql = """

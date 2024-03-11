@@ -16,6 +16,7 @@ class LegacyStuffMixin(models.Model):
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     texts = GenericRelation("Text")
     sources = GenericRelation("Source")
@@ -80,11 +81,15 @@ class Profession(GenericModel, models.Model):
 class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return self.name
 
 @reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return self.name
 
 @reversion.register(follow=["rootobject_ptr"])
 class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
@@ -121,11 +126,15 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
+    def __str__(self):
+        return self.name
 
 @reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return self.name
 
 @reversion.register
 class Text(GenericModel, models.Model):
