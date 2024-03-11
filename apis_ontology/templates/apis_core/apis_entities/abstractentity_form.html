@@ -3,7 +3,6 @@
 
 {% block scriptHeader %}
 {{ block.super }}
-<link rel="stylesheet" href="/static/css/highlighter.css">
 <script type="text/javascript">
 function showmap(element) {
   $('.popover').remove();
@@ -67,5 +66,5 @@ function delmap(element) {
 
 {% block scripts %}
 {{ block.super }}
-<script src="/static/js/highlighter.js"></script>
+{% include "apis_highlighter/apis_highlighter.html" %}
 {% endblock scripts %}
