@@ -2,11 +2,11 @@ import reversion
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
-from apis_core.utils import DateParser
 from apis_core.generic.abc import GenericModel
 
 
@@ -28,6 +28,12 @@ class LegacyStuffMixin(models.Model):
     def get_or_create_uri(cls, uri):
         print(f"using custom get_or_create_uri with {uri}")
         return create_object_from_uri(uri, cls) or cls.objects.get(pk=uri)
+
+    @property
+    def uri(self):
+        contenttype = ContentType.objects.get_for_model(self)
+        uri = reverse("apis_core:generic:detail", args=[contenttype, self.pk])
+        return uri
 
 
 @reversion.register
