@@ -13,24 +13,6 @@ WHERE {
 }
 """
 [[attributes]]
-# altName
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?altName
-WHERE {
-  ?subject gndo:variantNameForTheCorporateBody ?altName
-}
-"""
-[[attributes]]
-# place
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?place
-WHERE {
-  ?subject gndo:placeOfBusiness ?place
-}
-"""
-[[attributes]]
 # start_date_written
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>

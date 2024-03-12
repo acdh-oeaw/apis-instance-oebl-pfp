@@ -22,7 +22,8 @@ class PlaceExternalAutocomplete(ExternalAutocomplete):
                 collections=["prosnet-wikidata-place-index", "prosnet-geonames-place-index"],
                 template="apis_ontology/place_external_autocomplete_result.html",
                 token=os.getenv("TYPESENSE_TOKEN", None),
-                server=os.getenv("TYPESENSE_SERVER", None))
+                server=os.getenv("TYPESENSE_SERVER", None)),
+            LobidAutocompleteAdapter(params={"filter": "type:PlaceOrGeographicName", "format": "json:preferredName"})
             ]
 
 
@@ -40,4 +41,5 @@ class InstitutionExternalAutocomplete(ExternalAutocomplete):
             TypeSenseAutocompleteAdapter(collections="prosnet-wikidata-organization-index",
                                          token=os.getenv("TYPESENSE_TOKEN", None),
                                          server=os.getenv("TYPESENSE_SERVER", None)),
+            LobidAutocompleteAdapter(params={"filter": "type:CorporateBody", "format": "json:preferredName"})
             ]
