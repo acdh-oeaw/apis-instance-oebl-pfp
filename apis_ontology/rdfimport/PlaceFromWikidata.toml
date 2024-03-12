@@ -3,7 +3,7 @@
 # from a wikidata RDF endpoint
 ##############################################
 superclass = "apis_ontology.models.Place"
-regex = "https://www.wikidata.org.*"
+regex = "http://www.wikidata.org.*"
 [[attributes]]
 # name
 sparql = """

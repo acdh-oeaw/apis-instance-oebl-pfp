@@ -9,43 +9,45 @@ sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
 SELECT ?name
 WHERE {
-  ?subject gndo:preferredNameForThePerson ?name .
-  OPTIONAL {
-    ?subject gndo:preferredNameEntityForThePerson ?med .
-    ?med gndo:forename ?first_name.
-    ?med gndo:surname ?name2 .
-    BIND(?name2 as ?name)
-  }
-  BIND(CONCAT(?name, ",", ?first_name) AS ?name)
+  ?subject gndo:preferredNameEntityForThePerson/gndo:surname ?name .
+}
+"""
+[[attributes]]
+# first_name
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?first_name
+WHERE {
+  ?subject gndo:preferredNameEntityForThePerson/gndo:forename ?first_name .
 }
 """
 [[attributes]]
 # profession
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?profession
+SELECT (GROUP_CONCAT(?professionlist) AS ?profession)
 WHERE {
-  ?subject gndo:professionOrOccupation ?profession
+  ?subject gndo:professionOrOccupation ?profession_seq.
+  ?profession_seq ?seq ?professionlist
 }
+GROUP BY ?subject
 """
 [[attributes]]
 # date_of_birth
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?date_of_birth
+SELECT ?start_date_written
 WHERE {
-  ?subject gndo:dateOfBirth ?start_date_written
-  BIND(?start_date_written AS ?date_of_birth)
+  ?subject gndo:dateOfBirth ?start_date_written .
 }
 """
 [[attributes]]
 # date_of_death
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?date_of_death
+SELECT ?end_date_written
 WHERE {
-  ?subject gndo:dateOfDeath ?end_date_written
-  BIND(?end_date_written AS ?date_of_death)
+  ?subject gndo:dateOfDeath ?end_date_written .
 }
 """
 [[attributes]]
@@ -57,4 +59,3 @@ WHERE {
   ?subject gndo:placeOfBirth ?place_of_birth
 }
 """
-

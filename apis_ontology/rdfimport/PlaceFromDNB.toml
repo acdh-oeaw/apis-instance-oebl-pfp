@@ -7,31 +7,30 @@ regex = "https://d-nb.info.*"
 # name
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?label
+SELECT ?name
 WHERE {
-  ?subject gndo:preferredNameForThePlaceOrGeographicName ?prefName
-  BIND(?prefName AS ?label)
+  ?subject gndo:preferredNameForThePlaceOrGeographicName ?name
 }
 """
 [[attributes]]
 # lon
 sparql = '''
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-SELECT ?longitude
+SELECT ?lng
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
   ?geo1 geo:asWKT ?point .
-  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+).*", "$1") as ?longitude)
+  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+).*", "$1") as ?lng)
   }
 '''
 [[attributes]]
 # lat
 sparql = '''
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-SELECT ?latitude
+SELECT ?lat
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
   ?geo1 geo:asWKT ?point .
-  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+) \\+(\\d+.\\d+) .$", "$2") as ?latitude)
+  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+) \\+(\\d+.\\d+) .$", "$2") as ?lat)
   }
 '''
