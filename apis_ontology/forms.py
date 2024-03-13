@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import PrependedText
 TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
 
 
-class LegacyStuffMixinForm(GenericModelForm):
+class PersonForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
