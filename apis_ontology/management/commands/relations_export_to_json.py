@@ -44,18 +44,21 @@ def import_relations():
             }
     }
     relationlist = {}
+
+    s = requests.Session()
+
     for relation, relationsettings in relations.items():
         nextpage = f"{SRC}/relations/{relation}/?format=json&limit=1000"
         while nextpage:
             print(nextpage)
-            page = requests.get(nextpage, headers=HEADERS)
+            page = s.get(nextpage, headers=HEADERS)
             data = page.json()
             nextpage = data["next"]
             for result in data["results"]:
                 if result["relation_type"]:
                     propdata = relationlist.get(result["relation_type"]["id"])
                     if not propdata:
-                        proppage = requests.get(result["relation_type"]["url"])
+                        proppage = s.get(result["relation_type"]["url"])
                         propdata = proppage.json()
                         relationlist[result["relation_type"]["id"]] = propdata
                     if result[relationsettings["subj"]] and result[relationsettings["obj"]]:
