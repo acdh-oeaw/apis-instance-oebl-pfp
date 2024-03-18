@@ -36,3 +36,9 @@
 </ul>
 {% endblock userlogin-menu %}
 
+{% block imprint %}
+  <div id="wrapper-footer-secondary"
+       class="footer-imprint-bar p-2 text-center">
+    <a href="{% url 'django_acdhch_functions:imprint' %}">Imprint | Impressum</a>
+  </div>
+{% endblock imprint %}
