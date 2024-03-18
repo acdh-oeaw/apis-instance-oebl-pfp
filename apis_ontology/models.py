@@ -132,8 +132,8 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
-    lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
-    lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="latitude")
+    longitude = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
     def __str__(self):
         return self.name

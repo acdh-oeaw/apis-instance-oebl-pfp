@@ -17,9 +17,9 @@ function showmap(element) {
   document.body.appendChild(mapdiv);
 
   if (typeof map != "undefined") { map.off(); map.remove(); }
-  map = L.map('popovermap', { center: [element.dataset.lat, element.dataset.lng], zoom: 7 });
+  map = L.map('popovermap', { center: [element.dataset.latitude, element.dataset.longitude], zoom: 7 });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
-  L.marker([element.dataset.lat, element.dataset.lng]).addTo(map);
+  L.marker([element.dataset.latitude, element.dataset.longitude]).addTo(map);
 
 };
 function delmap(element) {
