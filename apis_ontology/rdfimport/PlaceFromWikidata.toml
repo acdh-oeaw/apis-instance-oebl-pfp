@@ -18,22 +18,22 @@ WHERE {
 }
 """
 [[attributes]]
-# lng
+# longitude
 sparql = '''
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-SELECT ?lng
+SELECT ?longitude
 WHERE {
   ?subject wdt:P625 ?geo1 .
-  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+).*$", "$1") as ?lng)
+  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+).*$", "$1") as ?longitude)
   }
 '''
 [[attributes]]
-# lat
+# latitude
 sparql = '''
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-SELECT ?lat
+SELECT ?latitude
 WHERE {
   ?subject wdt:P625 ?geo1 .
-  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+) (\\d+\\.\\d+).*$", "$2") as ?lat)
+  BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+) (\\d+\\.\\d+).*$", "$2") as ?latitude)
   }
 '''

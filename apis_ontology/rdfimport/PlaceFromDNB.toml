@@ -13,24 +13,24 @@ WHERE {
 }
 """
 [[attributes]]
-# lon
+# longitude
 sparql = '''
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-SELECT ?lng
+SELECT ?longitude
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
   ?geo1 geo:asWKT ?point .
-  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+).*", "$1") as ?lng)
+  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+).*", "$1") as ?longitude)
   }
 '''
 [[attributes]]
-# lat
+# latitude
 sparql = '''
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-SELECT ?lat
+SELECT ?latitude
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
   ?geo1 geo:asWKT ?point .
-  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+) \\+(\\d+.\\d+) .$", "$2") as ?lat)
+  BIND(REPLACE(str(?point), "Point \\( \\+(\\d+.\\d+) \\+(\\d+.\\d+) .$", "$2") as ?latitude)
   }
 '''
