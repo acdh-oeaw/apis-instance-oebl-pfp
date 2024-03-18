@@ -7,6 +7,7 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
+from apis_core.apis_entities.abc import E53_Place
 
 
 class LegacyStuffMixin(models.Model):
@@ -131,11 +132,8 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         return f"{self.first_name} {self.surname}"
 
 
-class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
-    label = models.CharField(max_length=255, verbose_name="Name", blank=True)
-    latitude = models.FloatField(blank=True, null=True, verbose_name="latitude")
-    longitude = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
     def __str__(self):
         return self.label
