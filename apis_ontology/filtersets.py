@@ -29,7 +29,7 @@ def remove_quotes(token):
 
 
 def trigram_search_filter_person(queryset, name, value):
-    return trigram_search_filter(queryset, ["name", "first_name"], value)
+    return trigram_search_filter(queryset, ["surname", "first_name"], value)
 
 
 def trigram_search_filter_institution(queryset, name, value):

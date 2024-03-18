@@ -16,7 +16,6 @@ class LegacyStuffMixin(models.Model):
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     published = models.BooleanField(default=False)
-    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     texts = GenericRelation("Text")
     sources = GenericRelation("Source")
@@ -86,6 +85,7 @@ class Profession(GenericModel, models.Model):
 @reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
@@ -93,6 +93,7 @@ class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 @reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
@@ -104,6 +105,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         ("male", "male"),
         ("third gender", "third gender"),
     )
+    surname = models.CharField(max_length=255, verbose_name="Name", blank=True)
     first_name = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
     profession = models.ManyToManyField(Profession, blank=True)
     professioncategory = models.ForeignKey(ProfessionCategory, on_delete=models.CASCADE, null=True)
@@ -123,12 +125,13 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         return None
 
     def __str__(self):
-        return f"{self.first_name} {self.name}"
+        return f"{self.first_name} {self.surname}"
 
 
 @reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="latitude")
     lng = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
@@ -138,6 +141,7 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 @reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
