@@ -3,11 +3,30 @@ from apis_ontology.models import Person, Text
 from crispy_forms.layout import Layout, HTML, Column, Row
 from apis_core.generic.forms import GenericModelForm
 from crispy_forms.bootstrap import PrependedText
+from django.forms.fields import Field
+from django.forms.widgets import Widget
 
 TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
 
 
+class CustomWidget(Widget):
+    template_name = "custom_widget.html"
+
+    def value_from_datadict(self, data, files, name):
+        return data.getlist(name)
+
+
+class CustomField(Field):
+    widget = CustomWidget
+
+    def to_python(self, data):
+        print(f"{data=}")
+        return super().to_python(data)
+
+
 class PersonForm(GenericModelForm):
+    custom = CustomField(required=False)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
