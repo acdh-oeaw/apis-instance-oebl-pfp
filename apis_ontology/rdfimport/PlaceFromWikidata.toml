@@ -9,12 +9,12 @@ regex = "http://www.wikidata.org.*"
 sparql = """
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX schema: <http://schema.org/>
-SELECT ?name
+SELECT ?label
 WHERE {
   ?something schema:about ?subject .
   ?subject rdfs:label ?label .
   OPTIONAL { ?subject wdt:P1448/rdfs:label ?official_label }
-  BIND(COALESCE(?official_label, ?label) AS ?name)
+  BIND(COALESCE(?official_label, ?label) AS ?label)
 }
 """
 [[attributes]]

@@ -7,9 +7,9 @@ regex = "https://d-nb.info.*"
 # name
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?name
+SELECT ?label
 WHERE {
-  ?subject gndo:preferredNameForThePlaceOrGeographicName ?name
+  ?subject gndo:preferredNameForThePlaceOrGeographicName ?label
 }
 """
 [[attributes]]

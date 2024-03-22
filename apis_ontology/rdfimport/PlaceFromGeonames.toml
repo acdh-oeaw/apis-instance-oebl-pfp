@@ -8,7 +8,7 @@ regex = "https://sws.geonames.org.*"
 #FILTER (LANGMATCHES(LANG(?prefName), "de") || LANGMATCHES(LANG(?prefName), "en") || LANG(?prefName) = "")
 sparql = """
 PREFIX gn: <http://www.geonames.org/ontology#>
-SELECT ?name
+SELECT ?label
 WHERE
 {
   OPTIONAL {
@@ -20,7 +20,7 @@ WHERE
   OPTIONAL {
     ?subject gn:alternateName ?alternateName
   }
-  BIND(COALESCE(?gnname, ?officialName, ?alternateName) AS ?name)
+  BIND(COALESCE(?gnname, ?officialName, ?alternateName) AS ?label)
 }
 """
 [[attributes]]
