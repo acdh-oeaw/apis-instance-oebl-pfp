@@ -190,6 +190,8 @@ def import_entities(entities=[]):
             nextpage = data['next']
             for result in data["results"]:
                 print(result["url"])
+                if entitymodel == Place:
+                    result["label"] = result["name"]
                 result_id = result["id"]
                 if "kind" in result and result["kind"] is not None:
                     result["kind"] = result["kind"]["label"]

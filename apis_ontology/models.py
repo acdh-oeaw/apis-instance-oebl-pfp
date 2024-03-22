@@ -131,12 +131,12 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 @reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    label = models.CharField(max_length=255, verbose_name="Name", blank=True)
     latitude = models.FloatField(blank=True, null=True, verbose_name="latitude")
     longitude = models.FloatField(blank=True, null=True, verbose_name="longitude")
 
     def __str__(self):
-        return self.name
+        return self.label
 
 @reversion.register(follow=["rootobject_ptr"])
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
