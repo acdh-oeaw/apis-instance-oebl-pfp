@@ -48,8 +48,10 @@ class Source(GenericModel, models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
-        if self.author and self.orig_filename:
-            return f"{self.orig_filename}, stored by {self.author}"
+        if retstr := self.orig_filename:
+            if self.author:
+                retstr += f" stored by {self.author}"
+            return retstr
         return f"(ID: {self.id})".format(self.id)
 
 
