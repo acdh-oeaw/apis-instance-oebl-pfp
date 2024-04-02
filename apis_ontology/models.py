@@ -113,6 +113,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     professioncategory = models.ForeignKey(ProfessionCategory, on_delete=models.CASCADE, null=True)
     title = models.ManyToManyField(Title, blank=True)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
+    external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
 
     @property
     def oebl_kurzinfo(self):
