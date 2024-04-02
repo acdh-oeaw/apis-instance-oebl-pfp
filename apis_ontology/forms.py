@@ -3,6 +3,7 @@ from apis_ontology.models import Person, Text
 from crispy_forms.layout import Layout, HTML, Column, Row
 from apis_core.generic.forms import GenericModelForm
 from crispy_forms.bootstrap import PrependedText
+from apis_core.generic.forms.widgets import NewlineSeparatedListWidget
 
 TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
 
@@ -11,6 +12,7 @@ class PersonForm(GenericModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields["external_resources"].widget = NewlineSeparatedListWidget(attrs={"class": "mb-1"})
         # Create a 'More details ...' details html element, so we can
         # put some of the less important form element inside and keep
         # the form clean
