@@ -184,3 +184,10 @@ class Text(GenericModel, models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
+
+
+class Dedomination(AbstractEntity):
+    name = models.CharField()
+
+    def __str__(self):
+        return self.name
