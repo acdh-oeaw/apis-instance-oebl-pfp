@@ -17,6 +17,7 @@ SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
 
+
 def import_texts():
     nextpage = f"{SRC}/metainfo/text/?format=json&limit=1000"
     while nextpage:
@@ -25,12 +26,18 @@ def import_texts():
         data = page.json()
         nextpage = data['next']
         for result in data['results']:
-            print(result['url'])
-            newtext, created = Text.objects.get_or_create(id=result["id"])
-            newtext.text = result["text"]
-            if "kind" in result and result["kind"] is not None:
-                newtext.kind = result["kind"]["label"]
-            newtext.save()
+            # we ignore Place description the text types
+            # * Place description ÖBL (2)
+            # * Place review comments and (236)
+            # * Commentary Staribacher (5811)
+            # See: https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/172
+            if result["id"] not in [2, 236, 5811]:
+                print(result['url'])
+                newtext, created = Text.objects.get_or_create(id=result["id"])
+                newtext.text = result["text"]
+                if "kind" in result and result["kind"] is not None:
+                    newtext.kind = result["kind"]["label"]
+                newtext.save()
 
 
 def import_sources():

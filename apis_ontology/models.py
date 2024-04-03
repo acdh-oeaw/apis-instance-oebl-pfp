@@ -152,11 +152,8 @@ class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 @reversion.register
 class Text(GenericModel, models.Model):
     TEXTTYPE_CHOICES = [
-            (1, "Place description ÖBL"),
             (2, "ÖBL Haupttext"),
             (3, "ÖBL Kurzinfo"),
-            (4, "Place review comments"),
-            (5, "Commentary Staribacher"),
             (6, "Online Edition Haupttext"),
             (7, "Nachrecherche"),
             (8, "Soziale Herkunft"),
