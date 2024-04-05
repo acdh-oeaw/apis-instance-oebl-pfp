@@ -11,9 +11,7 @@ urlpatterns = [
     path("apis/", include("apis_core.urls", namespace="apis")),
     path("apis/collections/", include("apis_core.collections.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
-    path(
-        "entity/<int:pk>/", GetEntityGeneric.as_view(), name="GetEntityGenericRoot"
-    ),
+    path("entity/<int:pk>/", GetEntityGeneric.as_view(), name="GetEntityGenericRoot"),
     path("", TemplateView.as_view(template_name="base.html")),
     path("highlighter/", include("apis_highlighter.urls", namespace="highlighter")),
 ]

@@ -7,12 +7,14 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
-from apis_core.apis_history.models import VersionMixin
-from apis_core.apis_history.mixins import TempTripleHistoryMixin
+from apis_core.history.models import VersionMixin
 
 
 class LegacyStuffMixin(models.Model):
-    review = review = models.BooleanField(default=False, help_text="Should be set to True, if the data record holds up quality standards.")
+    review = review = models.BooleanField(
+        default=False,
+        help_text="Should be set to True, if the data record holds up quality standards.",
+    )
     status = models.CharField(max_length=100, blank=True)
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
@@ -43,9 +45,11 @@ class Source(GenericModel, VersionMixin):
     author = models.CharField(max_length=255, blank=True)
     orig_id = models.PositiveIntegerField(blank=True, null=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
         if retstr := self.orig_filename:
@@ -88,6 +92,7 @@ class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     def __str__(self):
         return self.name
 
+
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -95,7 +100,14 @@ class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixi
     def __str__(self):
         return self.name
 
-class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
+
+class Person(
+    LegacyStuffMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    VersionMixin,
+    # TempTripleHistoryMixin,
+):
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
@@ -125,7 +137,13 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
         return f"{self.first_name} {self.surname}"
 
 
-class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
+class Place(
+    # TempTripleHistoryMixin,
+    LegacyStuffMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    VersionMixin,
+):
     kind = models.CharField(max_length=255, blank=True, null=True)
     label = models.CharField(max_length=255, verbose_name="Name", blank=True)
     latitude = models.FloatField(blank=True, null=True, verbose_name="latitude")
@@ -134,12 +152,14 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     def __str__(self):
         return self.label
 
+
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
+
 
 class Text(GenericModel, VersionMixin):
     TEXTTYPE_CHOICES = [
@@ -170,8 +190,12 @@ class Text(GenericModel, VersionMixin):
     ]
 
     text = models.TextField(blank=True)
-    kind = models.CharField(max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES)
+    kind = models.CharField(
+        max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES
+    )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
