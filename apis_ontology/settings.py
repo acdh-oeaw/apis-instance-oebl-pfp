@@ -2,13 +2,17 @@ from apis_acdhch_default_settings.settings import *
 
 DEBUG = True
 
-INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres", "apis_core.collections"]
+INSTALLED_APPS += [
+    "apis_highlighter",
+    "django.contrib.postgres",
+    "apis_core.collections",
+]
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["django_action_logger"]
 INSTALLED_APPS += ["django_acdhch_functions"]
 
-ROOT_URLCONF = 'apis_ontology.urls'
+ROOT_URLCONF = "apis_ontology.urls"
 
 PROJECT_DEFAULT_MD = {}
 
@@ -21,10 +25,10 @@ APIS_LIST_LINKS_TO_EDIT = True
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    'formatters': {
-       'verbose': {
-           'format': '%(asctime)s %(name)-6s %(levelname)-8s %(message)s',
-       },
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(name)-6s %(levelname)-8s %(message)s",
+        },
     },
     "handlers": {
         "console": {
@@ -38,4 +42,4 @@ LOGGING = {
     },
 }
 
-LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
+LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["admin", "sessions", "auth"]

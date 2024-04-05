@@ -1,4 +1,3 @@
-import reversion
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -8,10 +7,14 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
+from apis_core.history.models import VersionMixin
 
 
 class LegacyStuffMixin(models.Model):
-    review = review = models.BooleanField(default=False, help_text="Should be set to True, if the data record holds up quality standards.")
+    review = review = models.BooleanField(
+        default=False,
+        help_text="Should be set to True, if the data record holds up quality standards.",
+    )
     status = models.CharField(max_length=100, blank=True)
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
@@ -35,17 +38,18 @@ class LegacyStuffMixin(models.Model):
         return uri
 
 
-@reversion.register
-class Source(GenericModel, models.Model):
+class Source(GenericModel, VersionMixin):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
     pubinfo = models.CharField(max_length=400, blank=True)
     author = models.CharField(max_length=255, blank=True)
     orig_id = models.PositiveIntegerField(blank=True, null=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
         if retstr := self.orig_filename:
@@ -55,24 +59,21 @@ class Source(GenericModel, models.Model):
         return f"(ID: {self.id})".format(self.id)
 
 
-@reversion.register
-class Title(GenericModel, models.Model):
+class Title(GenericModel, VersionMixin):
     name = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.name
 
 
-@reversion.register
-class ProfessionCategory(GenericModel, models.Model):
+class ProfessionCategory(GenericModel, VersionMixin):
     name = models.CharField(max_length=255, blank=False)
 
     def __str__(self):
         return self.name
 
 
-@reversion.register
-class Profession(GenericModel, models.Model):
+class Profession(GenericModel, VersionMixin):
     class Meta:
         ordering = ("name",)
 
@@ -84,24 +85,29 @@ class Profession(GenericModel, models.Model):
         return self.name or f"No name ({self.id})"
 
 
-@reversion.register(follow=["rootobject_ptr"])
-class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
 
-@reversion.register(follow=["rootobject_ptr"])
-class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+
+class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
 
-@reversion.register(follow=["rootobject_ptr"])
-class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+
+class Person(
+    LegacyStuffMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    VersionMixin,
+    # TempTripleHistoryMixin,
+):
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
@@ -131,8 +137,13 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         return f"{self.first_name} {self.surname}"
 
 
-@reversion.register(follow=["rootobject_ptr"])
-class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Place(
+    # TempTripleHistoryMixin,
+    LegacyStuffMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    VersionMixin,
+):
     kind = models.CharField(max_length=255, blank=True, null=True)
     label = models.CharField(max_length=255, verbose_name="Name", blank=True)
     latitude = models.FloatField(blank=True, null=True, verbose_name="latitude")
@@ -141,16 +152,16 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.label
 
-@reversion.register(follow=["rootobject_ptr"])
-class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+
+class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity, VersionMixin):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
         return self.name
 
-@reversion.register
-class Text(GenericModel, models.Model):
+
+class Text(GenericModel, VersionMixin):
     TEXTTYPE_CHOICES = [
             (2, "ÖBL Haupttext"),
             (3, "ÖBL Kurzinfo"),
@@ -179,8 +190,12 @@ class Text(GenericModel, models.Model):
     ]
 
     text = models.TextField(blank=True)
-    kind = models.CharField(max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES)
+    kind = models.CharField(
+        max_length=255, blank=True, null=True, choices=TEXTTYPE_CHOICES
+    )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
