@@ -2,7 +2,7 @@ from apis_acdhch_default_settings.settings import *
 
 DEBUG = True
 
-INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres", "apis_core.collections"]
+INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres", "apis_core.collections", "apis_core.history"]
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["django_action_logger"]
