@@ -62,6 +62,10 @@ class PersonForm(GenericModelForm):
             all_other_fields.remove("profession")
             all_other_fields.remove("professioncategory")
             all_other_fields.insert(3, Row(Column("profession"), Column("professioncategory")))
+        if {"profession_father", "profession_mother"} <= set(all_other_fields):
+            all_other_fields.remove("profession_father")
+            all_other_fields.remove("profession_mother")
+            all_other_fields.insert(4, Row(Column("profession_father"), Column("profession_mother")))
 
         self.helper.layout = Layout(*all_other_fields, more_details)
 
