@@ -1,4 +1,3 @@
-import reversion
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -35,7 +34,6 @@ class LegacyStuffMixin(models.Model):
         return uri
 
 
-@reversion.register
 class Source(GenericModel, models.Model):
     orig_filename = models.CharField(max_length=255, blank=True)
     indexed = models.BooleanField(default=False)
@@ -55,7 +53,6 @@ class Source(GenericModel, models.Model):
         return f"(ID: {self.id})".format(self.id)
 
 
-@reversion.register
 class Title(GenericModel, models.Model):
     name = models.CharField(max_length=255, blank=True)
 
@@ -63,7 +60,6 @@ class Title(GenericModel, models.Model):
         return self.name
 
 
-@reversion.register
 class ProfessionCategory(GenericModel, models.Model):
     name = models.CharField(max_length=255, blank=False)
 
@@ -71,7 +67,6 @@ class ProfessionCategory(GenericModel, models.Model):
         return self.name
 
 
-@reversion.register
 class Profession(GenericModel, models.Model):
     class Meta:
         ordering = ("name",)
@@ -84,7 +79,6 @@ class Profession(GenericModel, models.Model):
         return self.name or f"No name ({self.id})"
 
 
-@reversion.register(follow=["rootobject_ptr"])
 class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -92,7 +86,6 @@ class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.name
 
-@reversion.register(follow=["rootobject_ptr"])
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -100,7 +93,6 @@ class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.name
 
-@reversion.register(follow=["rootobject_ptr"])
 class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     GENDER_CHOICES = (
         ("female", "female"),
@@ -131,7 +123,6 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         return f"{self.first_name} {self.surname}"
 
 
-@reversion.register(follow=["rootobject_ptr"])
 class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     label = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -141,7 +132,7 @@ class Place(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.label
 
-@reversion.register(follow=["rootobject_ptr"])
+
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -149,7 +140,7 @@ class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.name
 
-@reversion.register
+
 class Text(GenericModel, models.Model):
     TEXTTYPE_CHOICES = [
             (2, "ÖBL Haupttext"),
