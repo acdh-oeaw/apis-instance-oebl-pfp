@@ -27,7 +27,7 @@ class PersonForm(GenericModelForm):
                     pass
             if ttype not in TEXTTYPE_CHOICES_MAIN:
                 more_details.append(ttype)
-        more_details.extend(["notes", "status", "review", "published"])
+        more_details.extend(["status", "review", "published"])
         more_details.append(HTML("</details>"))
 
         all_other_fields = [f for f in self.fields if f not in more_details]
@@ -66,6 +66,9 @@ class PersonForm(GenericModelForm):
             all_other_fields.remove("profession_father")
             all_other_fields.remove("profession_mother")
             all_other_fields.insert(4, Row(Column("profession_father"), Column("profession_mother")))
+        if {"notes"} <= set(all_other_fields):
+            all_other_fields.remove("notes")
+            all_other_fields.insert(5, "notes")
 
         self.helper.layout = Layout(*all_other_fields, more_details)
 
