@@ -113,17 +113,51 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
     external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
 
-    @property
-    def oebl_kurzinfo(self):
-        if self.texts.filter(kind="ÖBL Kurzinfo").exists():
-            return self.texts.get(kind="ÖBL Kurzinfo")
-        return None
-
-    @property
-    def oebl_haupttext(self):
-        if self.texts.filter(kind="ÖBL Haupttext").exists():
-            return self.texts.get(kind="ÖBL Haupttext")
-        return None
+    #texts
+    # "ÖBL Haupttext"
+    oebl_haupttext = models.TextField(blank=True, verbose_name="ÖBL Haupttext")
+    # "ÖBL Kurzinfo"
+    oebl_kurzinfo = models.TextField(blank=True, verbose_name="ÖBL Kurzinfo")
+    # "Online Edition Haupttext"
+    online_edition_haupttext = models.TextField(blank=True, verbose_name="Online Edition Haupttext")
+    # "Nachrecherche"
+    nachrecherche = models.TextField(blank=True)
+    # "Soziale Herkunft"
+    soziale_herkunft = models.TextField(blank=True)
+    # "Verwandtschaft"
+    verwandtschaft = models.TextField(blank=True)
+    # "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"
+    ausbildung_studium_studienreise = models.TextField(blank=True, verbose_name="Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben")
+    # "Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte"
+    berufstaetigkeit_lebenstationen = models.TextField(blank=True, verbose_name="Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte")
+    # "Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben"
+    mitgliedschaften_orden_auszeichnungen = models.TextField(blank=True, verbose_name="Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben")
+    # "Literatur"
+    literatur = models.TextField(blank=True)
+    # "Beruf(e)"
+    berufe = models.TextField(blank=True)
+    # "Sterbedatum"
+    sterbedatum = models.TextField(blank=True)
+    # "Adelsprädikat"
+    adelspraedikat = models.TextField(blank=True)
+    # "Übersiedlung, Emigration, Remigration"
+    uebersiedlung_emigration = models.TextField(blank=True, verbose_name="Übersiedlung, Emigration, Remigration")
+    # "Weitere Namensformen"
+    weitere_namensformen = models.TextField(blank=True)
+    # "Geburtsdatum"
+    geburtsdatum = models.TextField(blank=True)
+    # "Sterbeort"
+    sterbeort = models.TextField(blank=True)
+    # "Geburtsort"
+    geburtsort = models.TextField(blank=True)
+    # "Religion(en)"
+    religionen = models.TextField(blank=True)
+    # "Name"
+    name_text = models.TextField(blank=True, verbose_name="Name")
+    # "Pseudonyme"
+    pseudonyme = models.TextField(blank=True)
+    # "ÖBL Werkverzeichnis"
+    oebl_werkverzeichnis = models.TextField(blank=True, verbose_name="ÖBL Werkverzeichnis")
 
     def __str__(self):
         return f"{self.first_name} {self.surname}"
