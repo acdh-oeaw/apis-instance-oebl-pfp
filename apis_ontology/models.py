@@ -183,7 +183,7 @@ class Text(GenericModel, models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
 
-class Dedomination(AbstractEntity):
+class Denomination(AbstractEntity):
     name = models.CharField()
 
     def __str__(self):
