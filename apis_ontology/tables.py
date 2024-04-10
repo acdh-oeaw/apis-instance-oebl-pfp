@@ -9,7 +9,7 @@ class PersonTable(AbstractEntityTable):
         model = Person
         fields = ["surname", "first_name", "start_date", "end_date"]
         exclude = ["desc"]
-        row_attrs = {"title": lambda record: record.oebl_kurzinfo.text if record.oebl_kurzinfo else None }
+        row_attrs = {"title": lambda record: record.oebl_kurzinfo }
 
 
     surname = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)

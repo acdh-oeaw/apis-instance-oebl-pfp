@@ -10,7 +10,7 @@
 {{ block.super }}
 <div class="row justify-content-center align-items-center">
   <span class="kurzinfo mr-2">
-    {{ object.oebl_kurzinfo.text }}
+    {{ object.oebl_kurzinfo }}
     {% if object.sources.all %}
     <i>({% for source in object.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
     {% endif %}
