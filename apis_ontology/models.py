@@ -11,11 +11,8 @@ from apis_core.apis_entities.abc import E53_Place
 
 
 class LegacyStuffMixin(models.Model):
-    review = review = models.BooleanField(default=False, help_text="Should be set to True, if the data record holds up quality standards.")
-    status = models.CharField(max_length=100, blank=True)
-    references = models.TextField(blank=True, null=True)
+    references = models.TextField(blank=True, null=True) # nur bei personen
     notes = models.TextField(blank=True, null=True)
-    published = models.BooleanField(default=False)
 
     texts = GenericRelation("Text")
     sources = GenericRelation("Source")

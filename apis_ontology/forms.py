@@ -27,7 +27,6 @@ class PersonForm(GenericModelForm):
                     pass
             if ttype not in TEXTTYPE_CHOICES_MAIN:
                 more_details.append(ttype)
-        more_details.extend(["status", "review", "published"])
         more_details.append(HTML("</details>"))
 
         all_other_fields = [f for f in self.fields if f not in more_details]
