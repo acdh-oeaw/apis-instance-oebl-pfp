@@ -1,11 +1,13 @@
+import json
 import re
 import requests
 import os
+import pathlib
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, Text, ProfessionCategory
+from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, ProfessionCategory
 from apis_core.apis_metainfo.models import Uri, RootObject
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 
@@ -16,28 +18,6 @@ SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
-
-
-def import_texts():
-    nextpage = f"{SRC}/metainfo/text/?format=json&limit=1000"
-    while nextpage:
-        print(nextpage)
-        page = requests.get(nextpage, headers=HEADERS)
-        data = page.json()
-        nextpage = data['next']
-        for result in data['results']:
-            # we ignore Place description the text types
-            # * Place description ÖBL (2)
-            # * Place review comments and (236)
-            # * Commentary Staribacher (5811)
-            # See: https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/172
-            if result["id"] not in [2, 236, 5811]:
-                print(result['url'])
-                newtext, created = Text.objects.get_or_create(id=result["id"])
-                newtext.text = result["text"]
-                if "kind" in result and result["kind"] is not None:
-                    newtext.kind = result["kind"]["label"]
-                newtext.save()
 
 
 def import_sources():
@@ -185,11 +165,13 @@ def import_professions():
 
 
 def import_entities(entities=[]):
+    texts = json.loads(pathlib.Path("texts.json").read_text())
+    text_to_entity_mapping = dict()
     entities = entities or [Event, Institution, Person, Place, Work]
 
     for entitymodel in entities:
         entity = entitymodel.__name__.lower()
-        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=500"
+        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=1000"
         while nextpage:
             print(nextpage)
             page = requests.get(nextpage, headers=HEADERS)
@@ -246,14 +228,20 @@ def import_entities(entities=[]):
                             source.save()
                         except Source.DoesNotExist:
                             print(f"Source does not exist: {result['source']['id']}")
-                for rtext in result["text"]:
-                    if "id" in rtext:
-                        try:
-                            text = Text.objects.get(pk=rtext["id"])
-                            text.content_object = newentity
-                            text.save()
-                        except Text.DoesNotExist:
-                            print(f"Text does not exist: {rtext['id']}")
+                textids = [str(text["id"]) for text in result["text"]]
+                entity_texts = {key: text for key, text in texts.items() if key in textids}
+                for key, entity_text in entity_texts.items():
+                    done = False
+                    text_type = entity_text["type"]
+                    for field in newentity._meta.fields:
+                        if field.verbose_name == text_type or field.name == text_type.lower():
+                            setattr(newentity, field.name, entity_text["text"])
+                            done = True
+                            text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
+                            newentity.save()
+                    if not done:
+                        print(entity_text)
+        pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
 
 
 class Command(BaseCommand):
@@ -266,7 +254,6 @@ class Command(BaseCommand):
         parser.add_argument("--entities", action="store_true")
         parser.add_argument("--uris", action="store_true")
         parser.add_argument("--sources", action="store_true")
-        parser.add_argument("--texts", action="store_true")
         parser.add_argument("--event", action="store_true")
         parser.add_argument("--institution", action="store_true")
         parser.add_argument("--person", action="store_true")
@@ -279,10 +266,6 @@ class Command(BaseCommand):
             options["urls"] = True
             options["sources"] = True
             options["professions"] = True
-            options["texts"] = True
-
-        if options["texts"]:
-            import_texts()
 
         if options["professions"]:
             import_professions()
