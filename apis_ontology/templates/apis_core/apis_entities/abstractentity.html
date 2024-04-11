@@ -12,7 +12,11 @@
   <span class="kurzinfo mr-2">
     {{ object.oebl_kurzinfo }}
     {% if object.sources.all %}
-    <i>({% for source in object.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>{% endfor %})</i>
+    <i>
+      ({% for source in object.sources.all %}<span title="{{ source.orig_filename }}">{{ source.pubinfo }}</span>
+      <a href="https://www.biographien.ac.at/oebl/oebl_{{ source.orig_filename|make_list|first }}/{{ source.orig_filename}}">&#8599;</a>)
+      {% endfor %}
+    </i>
     {% endif %}
   </span>
 {% collection_content_objects object "64,65" as collection_content_objects %}
