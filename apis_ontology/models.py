@@ -11,7 +11,6 @@ from apis_core.apis_entities.abc import E53_Place
 
 
 class LegacyStuffMixin(models.Model):
-    references = models.TextField(blank=True, null=True) # nur bei personen
     notes = models.TextField(blank=True, null=True)
 
     sources = GenericRelation("Source")
@@ -111,6 +110,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     title = models.ManyToManyField(Title, blank=True)
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
     external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
+    references = models.TextField(blank=True, null=True)
 
     #texts
     # "ÖBL Haupttext"
