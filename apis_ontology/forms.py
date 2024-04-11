@@ -1,11 +1,8 @@
-from django.forms import CharField, Textarea
-from apis_ontology.models import Person, Text
+from apis_ontology.models import Person
 from crispy_forms.layout import Layout, HTML, Column, Row
 from apis_core.generic.forms import GenericModelForm
 from crispy_forms.bootstrap import PrependedText
 from apis_core.generic.forms.widgets import NewlineSeparatedListWidget
-
-TEXTTYPE_CHOICES_MAIN = ["ÖBL Haupttext", "ÖBL Werkverzeichnis"]
 
 
 class PersonForm(GenericModelForm):
@@ -16,18 +13,29 @@ class PersonForm(GenericModelForm):
         # Create a 'More details ...' details html element, so we can
         # put some of the less important form element inside and keep
         # the form clean
-        more_details = Layout(HTML("<details><summary>More details</summary>"))
-        for ttypenr, ttype in Text.TEXTTYPE_CHOICES:
-            self.fields[ttype] = CharField(required=False, widget=Textarea)
-            if instance := kwargs.get("instance"):
-                try:
-                    text = instance.texts.get(kind=ttype)
-                    self.fields[ttype].initial = text.text
-                except Text.DoesNotExist:
-                    pass
-            if ttype not in TEXTTYPE_CHOICES_MAIN:
-                more_details.append(ttype)
-        more_details.append(HTML("</details>"))
+        more_details = Layout(
+                HTML("<details><summary>More details</summary>"),
+                "oebl_kurzinfo",
+                "online_edition_haupttext",
+                "nachrecherche",
+                "soziale_herkunft",
+                "verwandtschaft",
+                "ausbildung_studium_studienreise",
+                "berufstaetigkeit_lebenstationen",
+                "mitgliedschaften_orden_auszeichnungen",
+                "literatur",
+                "berufe",
+                "sterbedatum",
+                "adelspraedikat",
+                "uebersiedlung_emigration",
+                "weitere_namensformen",
+                "geburtsdatum",
+                "sterbeort",
+                "geburtsort",
+                "religionen",
+                "name_text",
+                "pseudonyme",
+                HTML("</details>"))
 
         all_other_fields = [f for f in self.fields if f not in more_details]
 
@@ -70,12 +78,3 @@ class PersonForm(GenericModelForm):
             all_other_fields.insert(5, "notes")
 
         self.helper.layout = Layout(*all_other_fields, more_details)
-
-    def save(self, *args, **kwargs):
-        obj = super().save(*args, **kwargs)
-        for ttypenr, ttype in Text.TEXTTYPE_CHOICES:
-            if self.cleaned_data[ttype]:
-                text, created = obj.texts.get_or_create(kind=ttype)
-                text.text = self.cleaned_data[ttype]
-                text.save()
-        return obj
