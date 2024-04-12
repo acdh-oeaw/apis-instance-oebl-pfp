@@ -4,6 +4,12 @@ from django_tables2.utils import A
 from .models import Person
 
 
+class BiographienLinkColumn(tables.TemplateColumn):
+    def __init__(self, *args, **kwargs):
+        template_name = "columns/biographien_link.html"
+        super().__init__(template_name=template_name, orderable=False, exclude_from_export=True, verbose_name="", empty_values=(), *args, **kwargs)
+
+
 class PersonTable(AbstractEntityTable):
     class Meta:
         model = Person
@@ -14,6 +20,7 @@ class PersonTable(AbstractEntityTable):
 
     surname = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
     forename = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
+    biographien_link = BiographienLinkColumn()
 
     def render_surname(self, record):
         return record.surname or "No name"
