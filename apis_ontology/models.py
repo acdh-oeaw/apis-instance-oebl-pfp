@@ -161,6 +161,12 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return f"{self.forename} {self.surname}"
 
+    @property
+    def biographien_urls(self):
+        base = "https://www.biographien.ac.at/oebl/oebl_"
+        links = [f"{base}{source.orig_filename[0]}/{source.orig_filename}" for source in self.sources.all() if source.orig_filename.endswith(".xml")]
+        return links
+
 
 class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
