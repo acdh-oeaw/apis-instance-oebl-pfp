@@ -179,6 +179,9 @@ def import_entities(entities=[]):
             nextpage = data['next']
             for result in data["results"]:
                 print(result["url"])
+                if entitymodel is Person:
+                    result["surname"] = result["name"]
+                    result["forename"] = result["first_name"]
                 if entitymodel == Place:
                     result["label"] = result["name"]
                 result_id = result["id"]
