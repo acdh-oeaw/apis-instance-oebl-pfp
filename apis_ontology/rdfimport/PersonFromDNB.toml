@@ -7,18 +7,20 @@ regex = "https://d-nb.info.*"
 # name
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?name
+SELECT ?surname
 WHERE {
   ?subject gndo:preferredNameEntityForThePerson/gndo:surname ?name .
+  BIND(?name AS ?surname)
 }
 """
 [[attributes]]
 # first_name
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?first_name
+SELECT ?forename
 WHERE {
   ?subject gndo:preferredNameEntityForThePerson/gndo:forename ?first_name .
+  BIND(?first_name as ?forename)
 }
 """
 [[attributes]]

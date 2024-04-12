@@ -102,7 +102,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         ("third gender", "third gender"),
     )
     surname = models.CharField(max_length=255, verbose_name="Name", blank=True)
-    first_name = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
+    forename = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
     profession = models.ManyToManyField(Profession, blank=True)
     professioncategory = models.ForeignKey(ProfessionCategory, on_delete=models.CASCADE, null=True)
     profession_father = models.ManyToManyField(Parentprofession, blank=True, related_name="father_person_set")
@@ -159,7 +159,7 @@ class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     oebl_werkverzeichnis = models.TextField(blank=True, verbose_name="ÖBL Werkverzeichnis")
 
     def __str__(self):
-        return f"{self.first_name} {self.surname}"
+        return f"{self.forename} {self.surname}"
 
 
 class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):

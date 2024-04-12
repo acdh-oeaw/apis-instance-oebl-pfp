@@ -8,18 +8,20 @@ regex = "http://www.wikidata.org.*"
 # name
 sparql = """
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-SELECT ?first_name
+SELECT ?forename
 WHERE {
   ?person wdt:P735/rdfs:label ?first_name .
+  BIND(?first_name AS ?forename)
 }
 """
 [[attributes]]
 # name
 sparql = """
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-SELECT ?name
+SELECT ?surname
 WHERE {
   ?subject wdt:P734/rdfs:label ?name
+  BIND(?name as ?surname)
 }
 """
 [[attributes]]

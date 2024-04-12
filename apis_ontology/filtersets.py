@@ -8,7 +8,7 @@ from apis_core.apis_entities.filtersets import AbstractEntityFilterSet
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 from django.contrib.contenttypes.models import ContentType
 
-PERSON_HELP_TEXT = "Search for similar words in <em>first_name</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
+PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 
 
@@ -29,7 +29,7 @@ def remove_quotes(token):
 
 
 def trigram_search_filter_person(queryset, name, value):
-    return trigram_search_filter(queryset, ["surname", "first_name"], value)
+    return trigram_search_filter(queryset, ["surname", "forename"], value)
 
 
 def trigram_search_filter_institution(queryset, name, value):
@@ -88,7 +88,7 @@ class PersonFilterSet(LegacyStuffMixinFilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filters.move_to_end("first_name", False)
+        self.filters.move_to_end("forename", False)
         self.filters.move_to_end("collection", False)
         self.filters.move_to_end("search", False)
 

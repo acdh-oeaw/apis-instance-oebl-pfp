@@ -7,13 +7,13 @@ from .models import Person
 class PersonTable(AbstractEntityTable):
     class Meta:
         model = Person
-        fields = ["surname", "first_name", "start_date", "end_date"]
+        fields = ["surname", "forename", "start_date", "end_date"]
         exclude = ["desc"]
         row_attrs = {"title": lambda record: record.oebl_kurzinfo }
 
 
     surname = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
-    first_name = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
+    forename = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
 
     def render_surname(self, record):
         return record.surname or "No name"

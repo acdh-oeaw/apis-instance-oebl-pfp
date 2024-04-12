@@ -13,7 +13,7 @@ DB_COLLATION = ("binary" if "sqlite" in settings.DATABASES["default"]["ENGINE"] 
 
 
 def PersonListViewQueryset(*args):
-    return Person.objects.all().order_by(Collate("surname", DB_COLLATION), Collate("first_name", DB_COLLATION))
+    return Person.objects.all().order_by(Collate("surname", DB_COLLATION), Collate("forename", DB_COLLATION))
 
 
 class PlaceExternalAutocomplete(ExternalAutocomplete):

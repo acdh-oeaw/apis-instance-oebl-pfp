@@ -42,13 +42,13 @@ class PersonForm(GenericModelForm):
         # lets combine some of the form elements that belong together
         # into rows in columns and use bootstraps PrependedText to replace
         # the label of the form fields
-        if {"first_name", "surname"} <= set(all_other_fields):
+        if {"forename", "surname"} <= set(all_other_fields):
             all_other_fields.remove("surname")
-            all_other_fields.remove("first_name")
+            all_other_fields.remove("forename")
             row = Row(
-                    Column(PrependedText("first_name", self.fields["first_name"].label)),
+                    Column(PrependedText("forename", "Vorname")),
                     Column(PrependedText("surname", self.fields["surname"].label)))
-            self.fields["first_name"].label = self.fields["surname"].label = False
+            self.fields["forename"].label = self.fields["surname"].label = False
             all_other_fields.insert(0, row)
         if {"start_date_written", "end_date_written"} <= set(all_other_fields):
             all_other_fields.remove("start_date_written")
