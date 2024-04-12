@@ -39,3 +39,5 @@ LOGGING = {
 }
 
 LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
+
+LANGUAGE_CODE = "de"
