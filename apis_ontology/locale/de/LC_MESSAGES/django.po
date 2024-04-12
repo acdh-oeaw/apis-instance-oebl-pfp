@@ -1,0 +1,91 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-12 08:10+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apis_ontology/models.py:60
+msgid "Title"
+msgstr "Titel"
+
+#: apis_ontology/models.py:61
+msgid "Titles"
+msgstr "Titel"
+
+#: apis_ontology/models.py:71
+msgid "Profession Category"
+msgstr "Berufsgruppe"
+
+#: apis_ontology/models.py:72
+msgid "Profession Categories"
+msgstr "Berufsgruppen"
+
+#: apis_ontology/models.py:78
+msgid "Profession"
+msgstr "Beruf"
+
+#: apis_ontology/models.py:79
+msgid "Professions"
+msgstr "Berufe"
+
+#: apis_ontology/models.py:101
+msgid "Event"
+msgstr "Ereignis"
+
+#: apis_ontology/models.py:102
+msgid "Events"
+msgstr "Ereignisse"
+
+#: apis_ontology/models.py:113
+msgid "Institution"
+msgstr "Institution"
+
+#: apis_ontology/models.py:114
+msgid "Institutions"
+msgstr "Institutionen"
+
+#: apis_ontology/models.py:184
+msgid "Person"
+msgstr "Person"
+
+#: apis_ontology/models.py:185
+msgid "Persons"
+msgstr "Personen"
+
+#: apis_ontology/models.py:195
+msgid "Place"
+msgstr "Ort"
+
+#: apis_ontology/models.py:196
+msgid "Places"
+msgstr "Orte"
+
+#: apis_ontology/models.py:207
+msgid "Work"
+msgstr "Werk"
+
+#: apis_ontology/models.py:208
+msgid "Works"
+msgstr "Werke"
+
+#: apis_ontology/models.py:218
+msgid "Denomination"
+msgstr "Konfession"
+
+#: apis_ontology/models.py:219
+msgid "Denominations"
+msgstr "Konfessionen"

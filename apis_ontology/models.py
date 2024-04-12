@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.core.models import LegacyDateMixin
@@ -56,6 +57,10 @@ class Title(GenericModel, models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _("Title")
+        verbose_name_plural = _("Titles")
+
 
 class ProfessionCategory(GenericModel, models.Model):
     name = models.CharField(max_length=255, blank=False)
@@ -63,10 +68,16 @@ class ProfessionCategory(GenericModel, models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _("Profession Category")
+        verbose_name_plural = _("Profession Categories")
+
 
 class Profession(GenericModel, models.Model):
     class Meta:
         ordering = ("name",)
+        verbose_name = _("Profession")
+        verbose_name_plural = _("Professions")
 
     name = models.CharField(max_length=255, blank=True)
     oldids = models.TextField(null=True)
@@ -87,6 +98,10 @@ class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _("Event")
+        verbose_name_plural = _("Events")
+
 
 class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
@@ -94,6 +109,10 @@ class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _("Institution")
+        verbose_name_plural = _("Institutions")
 
 
 class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
@@ -168,12 +187,20 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         links = [f"{base}{source.orig_filename[0]}/{source.orig_filename}" for source in self.sources.all() if source.orig_filename.endswith(".xml")]
         return links
 
+    class Meta:
+        verbose_name = _("Person")
+        verbose_name_plural = _("Persons")
+
 
 class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.label
+
+    class Meta:
+        verbose_name = _("Place")
+        verbose_name_plural = _("Places")
 
 
 class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
@@ -183,6 +210,10 @@ class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = _("Work")
+        verbose_name_plural = _("Works")
+
 
 class Denomination(AbstractEntity):
     name = models.CharField()
@@ -191,4 +222,5 @@ class Denomination(AbstractEntity):
         return self.name
 
     class Meta:
-        verbose_name = "Konfession"
+        verbose_name = _("Denomination")
+        verbose_name_plural = _("Denominations")
