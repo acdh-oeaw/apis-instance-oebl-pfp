@@ -229,6 +229,7 @@ def import_entities(entities=[]):
                             text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
                     if not done:
                         print(entity_text)
+                newentity.save()
 
                 newentity.title.add(*titlelist)
                 newentity.profession.add(*professionlist)
