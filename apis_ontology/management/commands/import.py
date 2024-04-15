@@ -20,22 +20,6 @@ TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
 
 
-def import_sources():
-    nextpage = f"{SRC}/metainfo/source/?format=json&limit=1000"
-    while nextpage:
-        print(nextpage)
-        page = requests.get(nextpage, headers=HEADERS)
-        data = page.json()
-        nextpage = data['next']
-        for result in data["results"]:
-            print(result["url"])
-            newsource, created = Source.objects.get_or_create(id=result["id"])
-            for attribute in result:
-                if hasattr(newsource, attribute):
-                    setattr(newsource, attribute, result[attribute])
-                newsource.save()
-
-
 def import_uris():
     nextpage = f"{SRC}/metainfo/uri/?format=json&limit=1000"
     while nextpage:
@@ -167,6 +151,7 @@ def import_professions():
 def import_entities(entities=[]):
     texts = json.loads(pathlib.Path("texts.json").read_text())
     text_to_entity_mapping = dict()
+    sources = json.loads(pathlib.Path("sources.json").read_text())
     entities = entities or [Event, Institution, Person, Place, Work]
 
     for entitymodel in entities:
@@ -225,12 +210,11 @@ def import_entities(entities=[]):
                         SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
                 if result["source"] is not None:
                     if "id" in result["source"]:
-                        try:
-                            source = Source.objects.get(pk=result["source"]["id"])
-                            source.content_object = newentity
-                            source.save()
-                        except Source.DoesNotExist:
-                            print(f"Source does not exist: {result['source']['id']}")
+                        source_data = sources.get(str(result["source"]["id"]))
+                        print(source_data)
+                        source, _ = Source.objects.get_or_create(pk=result["source"]["id"], **source_data)
+                        source.content_object = newentity
+                        source.save()
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
                 for key, entity_text in entity_texts.items():
