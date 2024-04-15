@@ -8,6 +8,7 @@ from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
 from apis_core.apis_entities.abc import E53_Place
+from apis_core.history.models import VersionMixin
 
 
 class LegacyStuffMixin(models.Model):
@@ -95,7 +96,7 @@ class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         return self.name
 
 
-class Person(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
