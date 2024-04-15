@@ -21,6 +21,10 @@ def fetch_sources():
         data = page.json()
         nextpage = data['next']
         for result in data["results"]:
+            if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2), S. 112f.":
+                result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2, 1954), S. 112f."
+            if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27), S. 126":
+                result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27, 1974), S. 126"
             print(result["url"])
             sources[result["id"]] = {
                     "orig_filename": result["orig_filename"],
