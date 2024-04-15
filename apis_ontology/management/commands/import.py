@@ -211,10 +211,11 @@ def import_entities(entities=[]):
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         source_data = sources.get(str(result["source"]["id"]))
-                        source, _ = Source.objects.get_or_create(pk=result["source"]["id"], **source_data)
+                        source, _ = Source.objects.get_or_create(pk=result["source"]["id"])
+                        for field in source_data:
+                            setattr(source, field, source_data[field])
                         source.content_object = newentity
                         source.save()
-                        date = parse_source_date(source)
                         newentity._history_date = parse_source_date(source)
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
