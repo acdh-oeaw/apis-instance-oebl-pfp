@@ -3,6 +3,7 @@ import re
 import requests
 import os
 import pathlib
+import datetime
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
@@ -18,6 +19,20 @@ SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
+
+
+def parse_source_date(source):
+    date = None
+    if source.pubinfo.startswith("\u00d6BL 1815-1950, Bd. ") or source.pubinfo.startswith("\u00d6BL Online-Edition, Bd."):
+        close_pos = source.pubinfo.find(")")
+        date = source.pubinfo[close_pos-4:close_pos]
+        date = datetime.datetime(int(date), 1, 1)
+    if source.pubinfo.startswith("\u00d6BL Online-Edition, Lfg."):
+        close_pos = source.pubinfo.find(")")
+        # we should parse the whole date
+        day, month, year = source.pubinfo[close_pos-10:close_pos].split(".")
+        date = datetime.datetime(int(year), int(month), int(day))
+    return date
 
 
 def import_uris():
@@ -193,28 +208,14 @@ def import_entities(entities=[]):
                 for attribute in result:
                     if hasattr(newentity, attribute):
                         setattr(newentity, attribute, result[attribute])
-                for title in titlelist:
-                    newentity.title.add(title)
-                for profession in professionlist:
-                    newentity.profession.add(profession)
-                if professioncategory:
-                    newentity.professioncategory = professioncategory
-                newentity.save()
-                if "collection" in result:
-                    for collection in result["collection"]:
-                        importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
-                        newcol, created = SkosCollection.objects.get_or_create(name=collection["label"])
-                        newcol.parent = importcol
-                        newcol.save()
-                        ct = ContentType.objects.get_for_model(newentity)
-                        SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         source_data = sources.get(str(result["source"]["id"]))
-                        print(source_data)
                         source, _ = Source.objects.get_or_create(pk=result["source"]["id"], **source_data)
                         source.content_object = newentity
                         source.save()
+                        date = parse_source_date(source)
+                        newentity._history_date = parse_source_date(source)
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
                 for key, entity_text in entity_texts.items():
@@ -225,9 +226,22 @@ def import_entities(entities=[]):
                             setattr(newentity, field.name, entity_text["text"])
                             done = True
                             text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
-                            newentity.save()
                     if not done:
                         print(entity_text)
+
+                newentity.title.add(*titlelist)
+                newentity.profession.add(*professionlist)
+                if professioncategory:
+                    newentity.professioncategory = professioncategory
+
+                if "collection" in result:
+                    for collection in result["collection"]:
+                        importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
+                        newcol, created = SkosCollection.objects.get_or_create(name=collection["label"])
+                        newcol.parent = importcol
+                        newcol.save()
+                        ct = ContentType.objects.get_for_model(newentity)
+                        SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
         pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
 
 
