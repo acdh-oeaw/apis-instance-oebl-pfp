@@ -208,15 +208,18 @@ def import_entities(entities=[]):
                 for attribute in result:
                     if hasattr(newentity, attribute):
                         setattr(newentity, attribute, result[attribute])
+                tag = None
+                history_date = datetime.datetime(2024, 1, 1)
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         source_data = sources.get(str(result["source"]["id"]))
+                        tag = source_data["pubinfo"]
                         source, _ = Source.objects.get_or_create(pk=result["source"]["id"])
                         for field in source_data:
                             setattr(source, field, source_data[field])
                         source.content_object = newentity
                         source.save()
-                        newentity._history_date = parse_source_date(source)
+                        history_date = parse_source_date(source)
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
                 for key, entity_text in entity_texts.items():
@@ -235,6 +238,17 @@ def import_entities(entities=[]):
                 newentity.profession.add(*professionlist)
                 if professioncategory:
                     newentity.professioncategory = professioncategory
+                today = datetime.datetime.today()
+                newentity.history.filter(history_date__year=today.year, history_date__month=today.month, history_date__day=today.day).delete()
+                newentity.history.filter(history_date__year=2024, history_date__month=1, history_date__day=1).delete()
+                if history_date:
+                    newentity._history_date = history_date
+                    newentity.history.filter(history_date=history_date).delete()
+
+                newentity.save()
+
+                if tag:
+                    newentity.history.filter(history_date=newentity._history_date).update(version_tag=tag)
 
                 if "collection" in result:
                     for collection in result["collection"]:
