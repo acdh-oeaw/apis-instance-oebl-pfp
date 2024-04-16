@@ -142,7 +142,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Nachrecherche"
     nachrecherche = models.TextField(blank=True)
     # "Soziale Herkunft"
-    soziale_herkunft = models.TextField(blank=True)
+    soziale_herkunft = models.TextField(blank=True, verbose_name="Soziale Herkunft")
     # "Verwandtschaft"
     verwandtschaft = models.TextField(blank=True)
     # "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"
@@ -158,11 +158,11 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Sterbedatum"
     sterbedatum = models.TextField(blank=True)
     # "Adelsprädikat"
-    adelspraedikat = models.TextField(blank=True)
+    adelspraedikat = models.TextField(blank=True, verbose_name="Adelsprädikat")
     # "Übersiedlung, Emigration, Remigration"
     uebersiedlung_emigration = models.TextField(blank=True, verbose_name="Übersiedlung, Emigration, Remigration")
     # "Weitere Namensformen"
-    weitere_namensformen = models.TextField(blank=True)
+    weitere_namensformen = models.TextField(blank=True, verbose_name="Weiter Namensformen")
     # "Geburtsdatum"
     geburtsdatum = models.TextField(blank=True)
     # "Sterbeort"
@@ -170,7 +170,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Geburtsort"
     geburtsort = models.TextField(blank=True)
     # "Religion(en)"
-    religionen = models.TextField(blank=True)
+    religionen = models.TextField(blank=True, verbose_name="Religion(en)")
     # "Name"
     name_text = models.TextField(blank=True, verbose_name="Name")
     # "Pseudonyme"
