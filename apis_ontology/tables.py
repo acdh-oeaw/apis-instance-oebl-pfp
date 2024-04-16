@@ -18,8 +18,8 @@ class PersonTable(AbstractEntityTable):
         row_attrs = {"title": lambda record: record.oebl_kurzinfo }
 
 
-    surname = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
-    forename = tables.LinkColumn("apis:apis_entities:generic_entities_edit_view", args=[A("self_contenttype.name"), A("pk")], empty_values=[],)
+    surname = tables.Column(linkify=lambda record: record.get_edit_url(), empty_values=[],)
+    forename = tables.Column(linkify=lambda record: record.get_edit_url(), empty_values=[],)
     biographien_link = BiographienLinkColumn()
 
     def render_surname(self, record):
