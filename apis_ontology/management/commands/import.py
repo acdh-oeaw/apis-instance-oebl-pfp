@@ -155,6 +155,9 @@ def import_entities(entities=[]):
                         SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
 
                 for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] == result_id):
+                    # we skip this one, as it has the same uri as 60379
+                    if uri_id == "60485":
+                        continue
                     uriobj, _ = Uri.objects.get_or_create(pk=uri_id)
                     for attribute in uri:
                         setattr(uriobj, attribute, uri[attribute])
