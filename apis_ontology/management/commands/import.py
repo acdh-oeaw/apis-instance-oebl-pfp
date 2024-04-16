@@ -9,30 +9,14 @@ from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 
 from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, ProfessionCategory
-from apis_core.apis_metainfo.models import Uri, RootObject
+from apis_core.apis_metainfo.models import Uri
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
-
-from django.db import utils
 
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
 
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
-
-
-def parse_source_date(source):
-    date = None
-    if source.pubinfo.startswith("\u00d6BL 1815-1950, Bd. ") or source.pubinfo.startswith("\u00d6BL Online-Edition, Bd."):
-        close_pos = source.pubinfo.find(")")
-        date = source.pubinfo[close_pos-4:close_pos]
-        date = datetime.datetime(int(date), 1, 1)
-    if source.pubinfo.startswith("\u00d6BL Online-Edition, Lfg."):
-        close_pos = source.pubinfo.find(")")
-        # we should parse the whole date
-        day, month, year = source.pubinfo[close_pos-10:close_pos].split(".")
-        date = datetime.datetime(int(year), int(month), int(day))
-    return date
 
 
 def import_professions():
@@ -70,16 +54,22 @@ def import_professions():
                 professioncat.save()
 
 
+def is_entity(revision_tuple, rel_id, rel_type):
+    rev_id, revision = revision_tuple
+    return rev_id == rel_id and revision["model"] == rel_type
+
+
 def import_entities(entities=[]):
     texts = json.loads(pathlib.Path("texts.json").read_text())
     text_to_entity_mapping = dict()
     sources = json.loads(pathlib.Path("sources.json").read_text())
     uris = json.loads(pathlib.Path("uris.json").read_text())
+    revisions = json.loads(pathlib.Path("data/reversion.json").read_text())
     entities = entities or [Event, Institution, Person, Place, Work]
 
     for entitymodel in entities:
         entity = entitymodel.__name__.lower()
-        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=1000"
+        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=100"
         while nextpage:
             print(nextpage)
             page = requests.get(nextpage, headers=HEADERS)
@@ -116,18 +106,14 @@ def import_entities(entities=[]):
                 for attribute in result:
                     if hasattr(newentity, attribute):
                         setattr(newentity, attribute, result[attribute])
-                tag = None
-                history_date = datetime.datetime(2024, 1, 1)
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         source_data = sources.get(str(result["source"]["id"]))
-                        tag = source_data["pubinfo"]
                         source, _ = Source.objects.get_or_create(pk=result["source"]["id"])
                         for field in source_data:
                             setattr(source, field, source_data[field])
                         source.content_object = newentity
                         source.save()
-                        history_date = parse_source_date(source)
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
                 for key, entity_text in entity_texts.items():
@@ -146,17 +132,18 @@ def import_entities(entities=[]):
                 newentity.profession.add(*professionlist)
                 if professioncategory:
                     newentity.professioncategory = professioncategory
-                today = datetime.datetime.today()
-                newentity.history.filter(history_date__year=today.year, history_date__month=today.month, history_date__day=today.day).delete()
-                newentity.history.filter(history_date__year=2024, history_date__month=1, history_date__day=1).delete()
-                if history_date:
-                    newentity._history_date = history_date
-                    newentity.history.filter(history_date=history_date).delete()
+
+                newentity.history.filter(history_date__year=2024).delete()
+                newentity.history.filter(history_date__year=2017).delete()
+                newentity._history_date = datetime.datetime(2017, 12, 31)
+                ent_revisions = list(filter(lambda x: is_entity(x, str(result_id), entity), revisions.items()))
+                if ent_revisions:
+                    revid, revision = ent_revisions[0]
+                    timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
+                    newentity.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
+                    newentity._history_date = timestamp
 
                 newentity.save()
-
-                if tag:
-                    newentity.history.filter(history_date=newentity._history_date).update(version_tag=tag)
 
                 if "collection" in result:
                     for collection in result["collection"]:

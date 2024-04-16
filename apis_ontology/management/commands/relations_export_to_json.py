@@ -63,6 +63,7 @@ def import_relations():
                         relationlist[result["relation_type"]["id"]] = propdata
                     if result[relationsettings["subj"]] and result[relationsettings["obj"]]:
                         RELATIONS[result["id"]] = {
+                            "type": relation,
                             "name": propdata["name"],
                             "name_reverse": propdata["name_reverse"] or propdata["name"] + " (reverse)",
                             "subj": result[relationsettings["subj"]]["id"],
