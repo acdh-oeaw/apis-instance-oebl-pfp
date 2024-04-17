@@ -226,7 +226,8 @@ def import_entities(entities=[]):
                     timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
                     newentity.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
                     newentity._history_date = timestamp
-                    revision_user, _ = User.objects.get_or_create(username=revision["user"])
+                    if revision.get("user") is not None:
+                        revision_user, _ = User.objects.get_or_create(username=revision["user"])
 
                 newentity.save()
                 if revision_user:
