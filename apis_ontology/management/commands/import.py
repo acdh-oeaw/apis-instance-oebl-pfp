@@ -7,6 +7,7 @@ import datetime
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 
 from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, ProfessionCategory
 from apis_core.apis_metainfo.models import Uri
@@ -17,6 +18,83 @@ SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
+
+texts_file = pathlib.Path("texts.json")
+sources_file = pathlib.Path("sources.json")
+uris_file = pathlib.Path("uris.json")
+
+
+def create_texts_file():
+    texts = dict()
+    nextpage = f"{SRC}/metainfo/text/?format=json&limit=5000"
+    s = requests.Session()
+    while nextpage:
+        print(nextpage)
+        page = s.get(nextpage, headers=HEADERS)
+        data = page.json()
+        nextpage = data['next']
+        for result in data['results']:
+            ttype = None
+            if result["kind"] is not None:
+                ttype = result["kind"]["label"]
+                if ttype == "Soziale Herkunft: ":
+                    ttype = "Soziale Herkunft"
+                if ttype == "\u00dcbersiedlungen, Emigration, Remigration":
+                    ttype = "\u00dcbersiedlung, Emigration, Remigration"
+            # we ignore the text types
+            # * Place description ÖBL (2)
+            # * Place review comments and (236)
+            # * Commentary Staribacher (5811)
+            # See: https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/172
+            if ttype not in ["Place description ÖBL", "Place review comments", "Commentary Staribacher", None]:
+                texts[result["id"]] = {"text": result["text"], "type": ttype}
+    texts_file.write_text(json.dumps(texts, indent=2))
+
+
+def create_sources_file():
+    sources = dict()
+
+    nextpage = f"{SRC}/metainfo/source/?format=json&limit=5000"
+    s = requests.Session()
+    while nextpage:
+        print(nextpage)
+        page = s.get(nextpage, headers=HEADERS)
+        data = page.json()
+        nextpage = data['next']
+        for result in data["results"]:
+            if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2), S. 112f.":
+                result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2, 1954), S. 112f."
+            if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27), S. 126":
+                result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27, 1974), S. 126"
+            sources[result["id"]] = {
+                    "orig_filename": result["orig_filename"],
+                    "pubinfo": result["pubinfo"],
+                    "author": result["author"]
+            }
+    sources_file.write_text(json.dumps(sources, indent=2))
+
+
+def create_uris_file():
+    uris = dict()
+
+    nextpage = f"{SRC}/metainfo/uri/?format=json&limit=5000"
+    s = requests.Session()
+    while nextpage:
+        print(nextpage)
+        page = s.get(nextpage, headers=HEADERS)
+        data = page.json()
+        nextpage = data['next']
+        for result in data['results']:
+            if result["uri"] == "https://apis-edits.acdh-dev.oeaw.ac.at/entity/None/":
+                continue
+            if result["uri"] == "":
+                continue
+            del result["url"]
+            uri_id = result.pop("id")
+            if entity := result.get("entity"):
+                result["entity"] = entity["id"]
+            uris[uri_id] = result
+    uris_file.write_text(json.dumps(uris, indent=2))
 
 
 def import_professions():
@@ -60,10 +138,10 @@ def is_entity(revision_tuple, rel_id, rel_type):
 
 
 def import_entities(entities=[]):
-    texts = json.loads(pathlib.Path("texts.json").read_text())
+    texts = json.loads(texts_file.read_text())
     text_to_entity_mapping = dict()
-    sources = json.loads(pathlib.Path("sources.json").read_text())
-    uris = json.loads(pathlib.Path("uris.json").read_text())
+    sources = json.loads(sources_file.read_text())
+    uris = json.loads(uris_file.read_text())
     revisions = json.loads(pathlib.Path("data/reversion.json").read_text())
     entities = entities or [Event, Institution, Person, Place, Work]
 
@@ -85,6 +163,7 @@ def import_entities(entities=[]):
                 result_id = result["id"]
                 if "kind" in result and result["kind"] is not None:
                     result["kind"] = result["kind"]["label"]
+
                 professionlist = []
                 professioncategory = None
                 if "profession" in result:
@@ -96,16 +175,19 @@ def import_entities(entities=[]):
                                 if profession["id"] in list(map(int, dbprofession.oldids.splitlines())):
                                     professionlist.append(dbprofession)
                     del result["profession"]
+
                 titlelist = []
                 if "title" in result:
                     for title in result["title"]:
                         newtitle, created = Title.objects.get_or_create(name=title)
                         titlelist.append(newtitle)
                     del result["title"]
+
                 newentity, created = entitymodel.objects.get_or_create(pk=result_id)
                 for attribute in result:
                     if hasattr(newentity, attribute):
                         setattr(newentity, attribute, result[attribute])
+
                 if result["source"] is not None:
                     if "id" in result["source"]:
                         source_data = sources.get(str(result["source"]["id"]))
@@ -125,7 +207,7 @@ def import_entities(entities=[]):
                             done = True
                             text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
                     if not done:
-                        print(entity_text)
+                        print(f"Could not save text: {entity_text}")
                 newentity.save()
 
                 newentity.title.add(*titlelist)
@@ -133,18 +215,22 @@ def import_entities(entities=[]):
                 if professioncategory:
                     newentity.professioncategory = professioncategory
 
+                # set up versions
                 newentity.history.filter(history_date__year=2024).delete()
                 newentity.history.filter(history_date__year=2017).delete()
                 newentity._history_date = datetime.datetime(2017, 12, 31)
                 ent_revisions = list(filter(lambda x: is_entity(x, str(result_id), entity), revisions.items()))
+                revision_user = None
                 if ent_revisions:
-                    print(ent_revisions)
                     revid, revision = ent_revisions[0]
                     timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
                     newentity.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
                     newentity._history_date = timestamp
+                    revision_user, _ = User.objects.get_or_create(username=revision["user"])
 
                 newentity.save()
+                if revision_user:
+                    newentity.history.filter(history_date=timestamp).update(history_user=revision_user.id)
 
                 if "collection" in result:
                     for collection in result["collection"]:
@@ -156,9 +242,6 @@ def import_entities(entities=[]):
                         SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
 
                 for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] == result_id):
-                    # we skip this one, as it has the same uri as 60379
-                    if uri_id == "60485":
-                        continue
                     uriobj, _ = Uri.objects.get_or_create(uri=uri["uri"])
                     for attribute in uri:
                         setattr(uriobj, attribute, uri[attribute])
@@ -174,8 +257,6 @@ class Command(BaseCommand):
 
         parser.add_argument("--professions", action="store_true")
         parser.add_argument("--entities", action="store_true")
-        parser.add_argument("--uris", action="store_true")
-        parser.add_argument("--sources", action="store_true")
         parser.add_argument("--event", action="store_true")
         parser.add_argument("--institution", action="store_true")
         parser.add_argument("--person", action="store_true")
@@ -183,20 +264,19 @@ class Command(BaseCommand):
         parser.add_argument("--work", action="store_true")
 
     def handle(self, *args, **options):
+        if not texts_file.exists():
+            create_texts_file()
+        if not sources_file.exists():
+            create_sources_file()
+        if not uris_file.exists():
+            create_uris_file()
+
         if options["all"]:
             options["entities"] = True
-            options["urls"] = True
-            options["sources"] = True
             options["professions"] = True
 
         if options["professions"]:
             import_professions()
-
-        if options["sources"]:
-            import_sources()
-
-        if options["uris"]:
-            import_uris()
 
         entities = []
 
