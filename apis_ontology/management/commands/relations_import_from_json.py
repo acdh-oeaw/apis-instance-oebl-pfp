@@ -130,6 +130,7 @@ def import_relations():
                         tt._history_date = timestamp
                         revision_user, _ = User.objects.get_or_create(username=revision["user"])
                     tt.save()
+                    tt.history.filter(history_date=timestamp).update(history_type="+")
                     if revision_user:
                         tt.history.filter(history_date=timestamp).update(history_user=revision_user.id)
                 except Exception as e:
@@ -146,5 +147,6 @@ class Command(BaseCommand):
     help = "Import relation data from legacy APIS instance"
 
     def handle(self, *args, **options):
-        fetch_relations()
+        if not relation_file.exists():
+            fetch_relations()
         import_relations()
