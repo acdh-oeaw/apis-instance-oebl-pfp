@@ -154,7 +154,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Literatur"
     literatur = models.TextField(blank=True)
     # "Beruf(e)"
-    berufe = models.TextField(blank=True)
+    berufe = models.TextField(blank=True, verbose_name="Beruf(e)")
     # "Sterbedatum"
     sterbedatum = models.TextField(blank=True)
     # "Adelsprädikat"
@@ -162,7 +162,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Übersiedlung, Emigration, Remigration"
     uebersiedlung_emigration = models.TextField(blank=True, verbose_name="Übersiedlung, Emigration, Remigration")
     # "Weitere Namensformen"
-    weitere_namensformen = models.TextField(blank=True, verbose_name="Weiter Namensformen")
+    weitere_namensformen = models.TextField(blank=True, verbose_name="Weitere Namensformen")
     # "Geburtsdatum"
     geburtsdatum = models.TextField(blank=True)
     # "Sterbeort"
