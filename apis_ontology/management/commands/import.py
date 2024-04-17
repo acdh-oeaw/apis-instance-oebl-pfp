@@ -69,7 +69,7 @@ def import_entities(entities=[]):
 
     for entitymodel in entities:
         entity = entitymodel.__name__.lower()
-        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=100"
+        nextpage = f"{SRC}/entities/{entity}/?format=json&limit=1000"
         while nextpage:
             print(nextpage)
             page = requests.get(nextpage, headers=HEADERS)
@@ -138,6 +138,7 @@ def import_entities(entities=[]):
                 newentity._history_date = datetime.datetime(2017, 12, 31)
                 ent_revisions = list(filter(lambda x: is_entity(x, str(result_id), entity), revisions.items()))
                 if ent_revisions:
+                    print(ent_revisions)
                     revid, revision = ent_revisions[0]
                     timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
                     newentity.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
@@ -158,7 +159,7 @@ def import_entities(entities=[]):
                     # we skip this one, as it has the same uri as 60379
                     if uri_id == "60485":
                         continue
-                    uriobj, _ = Uri.objects.get_or_create(pk=uri_id)
+                    uriobj, _ = Uri.objects.get_or_create(uri=uri["uri"])
                     for attribute in uri:
                         setattr(uriobj, attribute, uri[attribute])
                     uriobj.save()
