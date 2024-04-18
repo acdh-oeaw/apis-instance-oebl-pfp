@@ -91,7 +91,7 @@ class Parentprofession(GenericModel, models.Model):
     label = models.CharField()
 
 
-class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Event(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
@@ -103,7 +103,7 @@ class Event(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         verbose_name_plural = _("Events")
 
 
-class Institution(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Institution(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
@@ -192,7 +192,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         verbose_name_plural = _("Persons")
 
 
-class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Place(E53_Place, VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -203,7 +203,7 @@ class Place(E53_Place, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         verbose_name_plural = _("Places")
 
 
-class Work(LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
+class Work(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
