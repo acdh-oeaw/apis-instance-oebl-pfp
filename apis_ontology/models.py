@@ -38,6 +38,7 @@ class Source(GenericModel, models.Model):
     pubinfo = models.CharField(max_length=400, blank=True)
     author = models.CharField(max_length=255, blank=True)
     orig_id = models.PositiveIntegerField(blank=True, null=True)
+    pdf_filename = models.CharField(blank=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     object_id = models.PositiveIntegerField(blank=True, null=True)
