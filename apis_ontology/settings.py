@@ -5,7 +5,7 @@ DEBUG = True
 INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres", "apis_core.collections", "apis_core.history"]
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
-INSTALLED_APPS += ["django_action_logger"]
+#INSTALLED_APPS += ["django_action_logger"]
 INSTALLED_APPS += ["django_acdhch_functions"]
 
 ROOT_URLCONF = 'apis_ontology.urls'

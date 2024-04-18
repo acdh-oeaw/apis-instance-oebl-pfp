@@ -19,5 +19,5 @@ urlpatterns = [
 ]
 
 urlpatterns += staticfiles_urlpatterns()
-urlpatterns += [path("logger/", include("django_action_logger.urls")),]
+#urlpatterns += [path("logger/", include("django_action_logger.urls")),]
 urlpatterns += [path("", include("django_acdhch_functions.urls")),]
