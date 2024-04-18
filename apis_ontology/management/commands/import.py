@@ -210,8 +210,10 @@ def import_entities(entities=[]):
                         print(f"Could not save text: {entity_text}")
                 newentity.save()
 
-                newentity.title.add(*titlelist)
-                newentity.profession.add(*professionlist)
+                if titlelist:
+                    newentity.title.add(*titlelist)
+                if professionlist:
+                    newentity.profession.add(*professionlist)
                 if professioncategory:
                     newentity.professioncategory = professioncategory
 
