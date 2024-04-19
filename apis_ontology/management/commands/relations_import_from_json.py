@@ -113,7 +113,10 @@ def import_relations():
                 prop.obj_class.add(ct)
             if subj and obj and prop:
                 try:
-                    tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
+                    tt, created = TempTriple.objects.get_or_create(id=id)
+                    tt.prop = prop
+                    tt.subj = subj
+                    tt.obj = obj
                     for attribute in relation:
                         if hasattr(tt, attribute) and attribute not in ["id", "subj", "obj"]:
                             setattr(tt, attribute, relation[attribute])
@@ -128,7 +131,8 @@ def import_relations():
                         timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
                         tt.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
                         tt._history_date = timestamp
-                        revision_user, _ = User.objects.get_or_create(username=revision["user"])
+                        if revision.get("user") is not None:
+                            revision_user, _ = User.objects.get_or_create(username=revision["user"])
                     tt.save()
                     tt.history.filter(history_date=timestamp).update(history_type="+")
                     if revision_user:
