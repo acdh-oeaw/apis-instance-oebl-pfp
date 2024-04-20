@@ -9,7 +9,7 @@ from simple_history.utils import get_history_model_for_model
 
 from apis_ontology.models import Person, Source, Profession, ProfessionCategory
 
-ns = {'b': 'http://www.biographien.ac.at'}
+ns = {"b": "http://www.biographien.ac.at"}
 
 
 def calculate_textual_offsets(parent, field_name):
@@ -18,14 +18,23 @@ def calculate_textual_offsets(parent, field_name):
     for node in parent.iter():
         if node.tag in ["Haupttext", "Kurzdefinition"]:
             if node.text is not None:
-                running_offset += len(unicodedata.normalize("NFC", (node.text if node.text else "")))
+                running_offset += len(
+                    unicodedata.normalize("NFC", (node.text if node.text else ""))
+                )
             continue
         textlen = len(unicodedata.normalize("NFC", (node.text if node.text else "")))
         offsets.append(
-                {"orig_string": node.text, "start": running_offset, "end": running_offset + textlen, "text_field_name": field_name}
+            {
+                "orig_string": node.text,
+                "start": running_offset,
+                "end": running_offset + textlen,
+                "text_field_name": field_name,
+            }
         )
         running_offset += textlen
-        running_offset += len(unicodedata.normalize("NFC", (node.tail if node.tail else "")))
+        running_offset += len(
+            unicodedata.normalize("NFC", (node.tail if node.tail else ""))
+        )
     return offsets
 
 
@@ -38,7 +47,7 @@ def transliterate_v1(text: str) -> str:
 
 def text_or_iter(node) -> str:
     if node:
-        return ''.join(node.itertext())
+        return "".join(node.itertext())
     return getattr(node, "text")
 
 
@@ -59,13 +68,15 @@ def get_b_or_d(node):
 
 def get_date_from_pubinfo_string(pubinfo):
     date = None
-    if pubinfo.startswith("\u00d6BL 1815-1950, Bd. ") or pubinfo.startswith("\u00d6BL Online-Edition, Bd."):
+    if pubinfo.startswith("\u00d6BL 1815-1950, Bd. ") or pubinfo.startswith(
+        "\u00d6BL Online-Edition, Bd."
+    ):
         close_pos = pubinfo.find(")")
-        date = pubinfo[close_pos-4:close_pos]
+        date = pubinfo[close_pos - 4 : close_pos]
         date = datetime.datetime(int(date), 1, 1)
     if pubinfo.startswith("\u00d6BL Online-Edition, Lfg."):
         close_pos = pubinfo.find(")")
-        day, month, year = pubinfo[close_pos-10:close_pos].split(".")
+        day, month, year = pubinfo[close_pos - 10 : close_pos].split(".")
         date = datetime.datetime(int(year), int(month), int(day))
     return date.isoformat()
 
@@ -76,13 +87,15 @@ def extractperson(file):
 
     person = {}
     person["surname"] = root.find("./Lexikonartikel/Schlagwort/Hauptbezeichnung").text
-    person["forename"] = root.find("./Lexikonartikel/Schlagwort/Nebenbezeichnung[@Type='Vorname']").text
+    person["forename"] = root.find(
+        "./Lexikonartikel/Schlagwort/Nebenbezeichnung[@Type='Vorname']"
+    ).text
 
     metadata = {
-            "pdf_file": root.get("pdf_file"),
-            "gnd": root.get("gnd"),
-            "doi": root.get("doi"),
-            "nummer": root.get("Nummer")
+        "pdf_file": root.get("pdf_file"),
+        "gnd": root.get("gnd"),
+        "doi": root.get("doi"),
+        "nummer": root.get("Nummer"),
     }
     pubinfo = root.find("./Lexikonartikel/PubInfo")
     if pubinfo is not None:
@@ -96,8 +109,14 @@ def extractperson(file):
     if berufsgruppe is not None:
         professions = berufsgruppe.text or ""
         professions = professions.replace("und", ",")
-        person["profession"] = [Profession.objects.get(name=profession.strip()) for profession in professions.split(",") if profession]
-        person["professioncategory"] = ProfessionCategory.objects.get(name=berufsgruppe.get("Berufsgruppe"))
+        person["profession"] = [
+            Profession.objects.get(name=profession.strip())
+            for profession in professions.split(",")
+            if profession
+        ]
+        person["professioncategory"] = ProfessionCategory.objects.get(
+            name=berufsgruppe.get("Berufsgruppe")
+        )
 
     gebdat = root.find("./Lexikonartikel/Vita/Geburt")
     if gebdat is not None:
@@ -127,11 +146,15 @@ def extractperson(file):
     kurzinfo = root.find("./Lexikonartikel/Kurzdefinition")
     if kurzinfo is not None:
         person["oebl_kurzinfo"] = text_or_iter(kurzinfo)
-        person["metadata"]["annnotations_kurzinfo"] = calculate_textual_offsets(kurzinfo, "oebl_kurzinfo")
+        person["metadata"]["annnotations_kurzinfo"] = calculate_textual_offsets(
+            kurzinfo, "oebl_kurzinfo"
+        )
     haupttext = root.find("./Lexikonartikel/Haupttext")
     if haupttext is not None:
         person["oebl_haupttext"] = text_or_iter(haupttext)
-        person["metadata"]["annotations_haupttext"] = calculate_textual_offsets(haupttext, "oebl_haupttext")
+        person["metadata"]["annotations_haupttext"] = calculate_textual_offsets(
+            haupttext, "oebl_haupttext"
+        )
     werk = root.find("./Lexikonartikel/Werk")
     if werk is not None:
         person["oebl_werkverzeichnis"] = text_or_iter(werk)
@@ -155,7 +178,7 @@ def extractperson(file):
     except Source.DoesNotExist:
         print(f"Does not exist {metadata['nummer']}")
 
-    #print(person)
+    # print(person)
     if dbperson is not None:
         HistoricalPerson = get_history_model_for_model(Person)
         attributes = dict(person)
@@ -166,6 +189,7 @@ def extractperson(file):
         attributes["history_change_reason"] = ""
         attributes["history_type"] = "~"
         attributes["id"] = dbperson.id
+        attributes["rootobject_ptr_id"] = dbperson.id
         HistoricalPerson.objects.create(**attributes)
 
 
@@ -179,7 +203,7 @@ class Command(BaseCommand):
         files = []
         for path in options["path"]:
             if path.is_dir():
-                for file in path.glob('**/*.xml'):
+                for file in path.glob("**/*.xml"):
                     files.append(file)
             else:
                 files.append(path)
