@@ -86,10 +86,16 @@ def extractperson(file):
     root = ET.parse(file).getroot()
 
     person = {}
-    person["surname"] = root.find("./Lexikonartikel/Schlagwort/Hauptbezeichnung").text
-    person["forename"] = root.find(
-        "./Lexikonartikel/Schlagwort/Nebenbezeichnung[@Type='Vorname']"
-    ).text
+    person["surname"] = (
+        root.find("./Lexikonartikel/Schlagwort/Hauptbezeichnung")
+        .text.replace(",", "")
+        .strip()
+    )
+    person["forename"] = (
+        root.find("./Lexikonartikel/Schlagwort/Nebenbezeichnung[@Type='Vorname']")
+        .text.replace(",", "")
+        .strip()
+    )
 
     metadata = {
         "pdf_file": root.get("pdf_file"),
