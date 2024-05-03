@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import CharField, TextField
 import unidecode
 import unicodedata
 import json
@@ -73,7 +74,11 @@ def get_date_from_pubinfo_string(pubinfo):
     ):
         close_pos = pubinfo.find(")")
         date = pubinfo[close_pos - 4 : close_pos]
-        date = datetime.datetime(int(date), 1, 1)
+        try:
+            date = datetime.datetime(int(date), 1, 1)
+        except ValueError:
+            date = datetime.datetime(1950, 1, 1)
+            print(f"Could not parse date from {pubinfo}, using 1950-01-01")
     if pubinfo.startswith("\u00d6BL Online-Edition, Lfg."):
         close_pos = pubinfo.find(")")
         day, month, year = pubinfo[close_pos - 10 : close_pos].split(".")
@@ -114,15 +119,23 @@ def extractperson(file):
     berufsgruppe = root.find("./Lexikonartikel/Vita/Berufsgruppe")
     if berufsgruppe is not None:
         professions = berufsgruppe.text or ""
-        professions = professions.replace("und", ",")
+        professions = professions.replace(" und ", ",")
         person["profession"] = [
-            Profession.objects.get(name=profession.strip())
+            Profession.objects.get_or_create(name=profession.strip())[0]
             for profession in professions.split(",")
             if profession
         ]
-        person["professioncategory"] = ProfessionCategory.objects.get(
-            name=berufsgruppe.get("Berufsgruppe")
-        )
+        try:
+            person["professioncategory"] = ProfessionCategory.objects.get(
+                name=berufsgruppe.get("Berufsgruppe")
+            )
+        except ProfessionCategory.DoesNotExist:
+            print(
+                f"ProfessionCategory {berufsgruppe.get('Berufsgruppe')} does not exist"
+            )
+            person["professioncategory"] = ProfessionCategory.objects.get_or_create(
+                name="?"
+            )[0]
 
     gebdat = root.find("./Lexikonartikel/Vita/Geburt")
     if gebdat is not None:
@@ -188,7 +201,17 @@ def extractperson(file):
     if dbperson is not None:
         HistoricalPerson = get_history_model_for_model(Person)
         attributes = dict(person)
-        del attributes["profession"]
+        # Add empty string for all CharFields and TextFields that are not set in person dict yet
+        for field in Person._meta.get_fields():
+            if isinstance(field, (CharField, TextField)) and (
+                field.name not in attributes or attributes[field.name] is None
+            ):
+                attributes[field.name] = ""
+
+        try:
+            del attributes["profession"]
+        except KeyError:
+            pass
         del attributes["metadata"]
         attributes["history_date"] = metadata["date"]
         attributes["history_user"] = None
