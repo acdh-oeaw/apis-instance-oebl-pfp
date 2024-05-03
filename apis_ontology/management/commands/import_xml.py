@@ -125,17 +125,10 @@ def extractperson(file):
             for profession in professions.split(",")
             if profession
         ]
-        try:
-            person["professioncategory"] = ProfessionCategory.objects.get(
-                name=berufsgruppe.get("Berufsgruppe")
-            )
-        except ProfessionCategory.DoesNotExist:
-            print(
-                f"ProfessionCategory {berufsgruppe.get('Berufsgruppe')} does not exist"
-            )
-            person["professioncategory"] = ProfessionCategory.objects.get_or_create(
-                name="?"
-            )[0]
+
+        person["professioncategory"] = ProfessionCategory.objects.get_or_create(
+            name=berufsgruppe.get("Berufsgruppe", "?")
+        )[0]
 
     gebdat = root.find("./Lexikonartikel/Vita/Geburt")
     if gebdat is not None:
@@ -208,10 +201,12 @@ def extractperson(file):
             ):
                 attributes[field.name] = ""
 
-        try:
-            del attributes["profession"]
-        except KeyError:
-            pass
+        # try:
+        #     del attributes["profession"]
+        # except KeyError:
+        #     pass
+        if "profession" in attributes:
+            profession = attributes.pop("profession")
         del attributes["metadata"]
         attributes["history_date"] = metadata["date"]
         attributes["history_user"] = None
@@ -219,7 +214,18 @@ def extractperson(file):
         attributes["history_type"] = "~"
         attributes["id"] = dbperson.id
         attributes["rootobject_ptr_id"] = dbperson.id
-        HistoricalPerson.objects.create(**attributes)
+        hp = HistoricalPerson.objects.create(**attributes)
+        for p in profession:
+            thtb = Person.profession.through.objects.filter(
+                person_id=hp.id, profession_id=p.id
+            )
+            if thtb.count() == 1:
+                id_ent = thtb[0].id
+            else:
+                id_ent = 1
+            hp.profession.model(
+                id=id_ent, history=hp, profession=p, person=dbperson
+            ).save()
 
 
 class Command(BaseCommand):
