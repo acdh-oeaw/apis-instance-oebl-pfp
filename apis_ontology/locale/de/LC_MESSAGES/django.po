@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-12 08:10+0000\n"
+"POT-Creation-Date: 2024-05-06 07:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,50 +42,54 @@ msgstr "Beruf"
 msgid "Professions"
 msgstr "Berufe"
 
-#: apis_ontology/models.py:101
+#: apis_ontology/models.py:102
 msgid "Event"
 msgstr "Ereignis"
 
-#: apis_ontology/models.py:102
+#: apis_ontology/models.py:103
 msgid "Events"
 msgstr "Ereignisse"
 
-#: apis_ontology/models.py:113
+#: apis_ontology/models.py:115
 msgid "Institution"
 msgstr "Institution"
 
-#: apis_ontology/models.py:114
+#: apis_ontology/models.py:116
 msgid "Institutions"
 msgstr "Institutionen"
 
-#: apis_ontology/models.py:184
+#: apis_ontology/models.py:135
+msgid "Notes"
+msgstr "Notizen"
+
+#: apis_ontology/models.py:193
 msgid "Person"
 msgstr "Person"
 
-#: apis_ontology/models.py:185
+#: apis_ontology/models.py:194
 msgid "Persons"
 msgstr "Personen"
 
-#: apis_ontology/models.py:195
+#: apis_ontology/models.py:205
 msgid "Place"
 msgstr "Ort"
 
-#: apis_ontology/models.py:196
+#: apis_ontology/models.py:206
 msgid "Places"
 msgstr "Orte"
 
-#: apis_ontology/models.py:207
+#: apis_ontology/models.py:218
 msgid "Work"
 msgstr "Werk"
 
-#: apis_ontology/models.py:208
+#: apis_ontology/models.py:219
 msgid "Works"
 msgstr "Werke"
 
-#: apis_ontology/models.py:218
+#: apis_ontology/models.py:229
 msgid "Denomination"
 msgstr "Konfession"
 
-#: apis_ontology/models.py:219
+#: apis_ontology/models.py:230
 msgid "Denominations"
 msgstr "Konfessionen"

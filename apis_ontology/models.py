@@ -13,8 +13,6 @@ from apis_core.history.models import VersionMixin
 
 
 class LegacyStuffMixin(models.Model):
-    notes = models.TextField(blank=True, null=True)
-
     sources = GenericRelation("Source")
 
     class Meta:
@@ -95,6 +93,7 @@ class Parentprofession(GenericModel, models.Model):
 class Event(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
         return self.name
@@ -107,6 +106,7 @@ class Event(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
 class Institution(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
         return self.name
@@ -132,6 +132,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
     external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
     references = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     #texts
     # "ÖBL Haupttext"
@@ -195,6 +196,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
 
 class Place(E53_Place, VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
         return self.label
@@ -207,6 +209,7 @@ class Place(E53_Place, VersionMixin, LegacyStuffMixin, LegacyDateMixin, Abstract
 class Work(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
         return self.name
