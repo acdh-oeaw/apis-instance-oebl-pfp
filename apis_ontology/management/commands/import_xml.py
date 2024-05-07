@@ -1,4 +1,5 @@
 import datetime
+from apis_core.apis_metainfo.models import Uri
 from django.db.models import CharField, TextField
 import unidecode
 import unicodedata
@@ -101,12 +102,13 @@ def extractperson(file):
         .text.replace(",", "")
         .strip()
     )
-
+    eoebl_id = root.get("eoebl_id")
     metadata = {
-        "pdf_file": root.get("pdf_file"),
-        "gnd": root.get("gnd"),
-        "doi": root.get("doi"),
-        "nummer": root.get("Nummer"),
+        "pdf_file": root.get("pdf_file", ""),
+        "gnd": root.get("gnd", ""),
+        "doi": root.get("doi", ""),
+        "nummer": root.get("Nummer", ""),
+        "oebl_id": int(eoebl_id) if eoebl_id is not None else None,
     }
     pubinfo = root.find("./Lexikonartikel/PubInfo")
     if pubinfo is not None:
@@ -172,7 +174,8 @@ def extractperson(file):
         person["oebl_werkverzeichnis"] = text_or_iter(werk)
     literatur = root.find("./Lexikonartikel/Literatur")
     if literatur is not None:
-        person["references"] = text_or_iter(literatur)
+        if literatur.text is not None:
+            person["references"] = text_or_iter(literatur).replace("L.: ", "").strip()
     externe_verweise = root.findall("./Lexikonartikel/Externer_Verweis")
     person["external_resources"] = [el.get("href") for el in externe_verweise]
     bilder = root.findall("./Lexikonartikel/Medien/Bild")
@@ -184,14 +187,42 @@ def extractperson(file):
     metadata["nummer"] = metadata["nummer"].replace("_print", "")
 
     dbperson = None
-    try:
-        source = Source.objects.get(orig_filename=metadata["nummer"])
-        dbperson = source.content_object
-    except Source.DoesNotExist:
-        print(f"Does not exist {metadata['nummer']}")
-
-    # print(person)
+    source = Source.objects.filter(orig_filename=metadata["nummer"])
+    if source.count() == 1:
+        dbperson = source.first().content_object
+    else:
+        print(f"Does not exist {metadata['nummer']}, searching for GND")
+        if "gnd" in person["metadata"]:
+            if len(person["metadata"]["gnd"]) > 2:
+                dbperson = Uri.objects.filter(
+                    uri__contains=f"//d-nb.info/gnd/{person['metadata']['gnd']}"
+                ).first()
+                if dbperson is not None:
+                    dbperson = dbperson.root_object
+                else:
+                    print(f"Does not exist {metadata['nummer']}")
+    check_hp = False
+    history_date_recalc = False
     if dbperson is not None:
+        try:
+            if len(dbperson.oebl_haupttext) + 5 < len(person["oebl_haupttext"]):
+                check_hp = False
+                history_date_recalc = True
+            else:
+                check_hp = True
+        except TypeError as e:
+            print(f"Error in comparing lengths of Haupttexts {e}")
+        try:
+            if len(dbperson.oebl_haupttext.strip()) == person["oebl_haupttext"].strip():
+                dbperson.oebl_haupttext = person["oebl_haupttext"]
+                dbperson.oebl_kurzinfo = person["oebl_kurzinfo"]
+                dbperson.oebl_werkverzeichnis = person["oebl_werkverzeichnis"]
+                dbperson.references = person["references"]
+                dbperson.skip_history_when_saving = True
+                dbperson.save()
+        except Exception as e:
+            print(f"Error in comparing Haupttexts {e}")
+    if check_hp:
         HistoricalPerson = get_history_model_for_model(Person)
         attributes = dict(person)
         # Add empty string for all CharFields and TextFields that are not set in person dict yet
@@ -200,11 +231,6 @@ def extractperson(file):
                 field.name not in attributes or attributes[field.name] is None
             ):
                 attributes[field.name] = ""
-
-        # try:
-        #     del attributes["profession"]
-        # except KeyError:
-        #     pass
         if "profession" in attributes:
             profession = attributes.pop("profession")
         del attributes["metadata"]
@@ -226,6 +252,81 @@ def extractperson(file):
             hp.profession.model(
                 id=id_ent, history=hp, profession=p, person=dbperson
             ).save()
+    else:
+        print(f"No source found Creating {metadata['nummer']}")
+        attributes = dict(person)
+        # Add empty string for all CharFields and TextFields that are not set in person dict yet
+        for field in Person._meta.get_fields():
+            if isinstance(field, (CharField, TextField)) and (
+                field.name not in attributes or attributes[field.name] is None
+            ):
+                attributes[field.name] = ""
+        if "profession" in attributes:
+            profession = attributes.pop("profession")
+        del attributes["metadata"]
+        if history_date_recalc:
+            db_h_rec = dbperson.history.most_recent()
+            db_h_rec.history_date = datetime.datetime.fromisoformat(
+                metadata["date"]
+            ) - datetime.timedelta(days=1)
+            db_h_rec.save()
+        attributes["_history_date"] = metadata["date"]
+        if dbperson is not None:
+            for key, value in attributes.items():
+                setattr(dbperson, key, value)
+            dbperson.save()
+        else:
+            dbperson = Person.objects.create(**attributes)
+        for p in profession:
+            dbperson.profession.add(p)
+        author = root.find(".//Lexikonartikel/Autor")
+        if author is not None:
+            author = author.text
+            if author is not None:
+                author = author.replace("(", "").replace(")", "").strip()
+            else:
+                author = ""
+        else:
+            author = ""
+        source = Source.objects.create(
+            orig_filename=metadata["nummer"],
+            content_object=dbperson,
+            author=author,
+            pdf_filename=metadata["pdf_file"],
+            orig_id=metadata["oebl_id"],
+        )
+    if "gnd" in person["metadata"]:
+        if len(person["metadata"]["gnd"]) > 2:
+            u1 = Uri.objects.filter(
+                uri=f"https://d-nb.info/gnd/{person['metadata']['gnd']}",
+                root_object=dbperson,
+            )
+            if u1.count() == 0:
+                try:
+                    Uri.objects.create(
+                        uri=f"https://d-nb.info/gnd/{person['metadata']['gnd']}",
+                        root_object=dbperson,
+                    )
+                except Exception as e:
+                    print(
+                        f"Could not create GND uri for {person['metadata']['gnd']}, person id: {dbperson.id}, {e}"
+                    )
+
+    if "doi" in person["metadata"]:
+        if len(person["metadata"]["doi"]) > 2:
+            u2 = Uri.objects.filter(
+                uri=f"https://doi.org/{person['metadata']['doi']}", root_object=dbperson
+            )
+            if u2.count() == 0:
+                try:
+                    Uri.objects.create(
+                        uri=f"https://doi.org/{person['metadata']['doi']}",
+                        root_object=dbperson,
+                    )
+                except Exception as e:
+                    print(
+                        f"Could not create DOI uri for {person['metadata']['doi']}, person id: {dbperson.id}, {e}"
+                    )
 
 
 class Command(BaseCommand):
