@@ -4,6 +4,7 @@ import requests
 import os
 import pathlib
 import datetime
+from collections import defaultdict
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
@@ -145,9 +146,24 @@ def import_entities(entities=[]):
     revisions = json.loads(pathlib.Path("data/reversion.json").read_text())
     entities = entities or [Event, Institution, Person, Place, Work]
 
+    professioncategory_cache = ProfessionCategory.objects.all()
+    profession_cache = Profession.objects.all()
+    title_cache = defaultdict(list)
+    collections = defaultdict(list)
+    rev_users = {rev["user"] for revid, rev in revisions.items()}
+    user_cache = {}
+    for username in rev_users:
+        if username:
+            user_cache[username], _ = User.objects.get_or_create(username=username)
+
+    importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
+
+    result_ids = []
+
     for entitymodel in entities:
         entity = entitymodel.__name__.lower()
         nextpage = f"{SRC}/entities/{entity}/?format=json&limit=1000"
+        content_type = ContentType.objects.get_for_model(entitymodel)
         while nextpage:
             print(nextpage)
             page = requests.get(nextpage, headers=HEADERS)
@@ -161,6 +177,7 @@ def import_entities(entities=[]):
                 if entitymodel == Place:
                     result["label"] = result["name"]
                 result_id = result["id"]
+                result_ids.append(result_id)
                 if "kind" in result and result["kind"] is not None:
                     result["kind"] = result["kind"]["label"]
 
@@ -168,19 +185,17 @@ def import_entities(entities=[]):
                 professioncategory = None
                 if "profession" in result:
                     for profession in result["profession"]:
-                        if int(profession["id"]) in list(ProfessionCategory.objects.all().values_list('id', flat=True)):
-                            professioncategory = ProfessionCategory.objects.get(id=profession["id"])
+                        if int(profession["id"]) in list(professioncategory_cache.values_list('id', flat=True)):
+                            professioncategory = professioncategory_cache.get(id=profession["id"])
                         else:
-                            for dbprofession in Profession.objects.all():
+                            for dbprofession in profession_cache:
                                 if profession["id"] in list(map(int, dbprofession.oldids.splitlines())):
                                     professionlist.append(dbprofession)
                     del result["profession"]
 
-                titlelist = []
                 if "title" in result:
                     for title in result["title"]:
-                        newtitle, created = Title.objects.get_or_create(name=title)
-                        titlelist.append(newtitle)
+                        title_cache[title].append(result_id)
                     del result["title"]
 
                 newentity, created = entitymodel.objects.get_or_create(pk=result_id)
@@ -190,12 +205,9 @@ def import_entities(entities=[]):
 
                 if result["source"] is not None:
                     if "id" in result["source"]:
-                        source_data = sources.get(str(result["source"]["id"]))
-                        source, _ = Source.objects.get_or_create(pk=result["source"]["id"])
-                        for field in source_data:
-                            setattr(source, field, source_data[field])
-                        source.content_object = newentity
-                        source.save()
+                        sources[str(result["source"]["id"])]["content_type"] = content_type
+                        sources[str(result["source"]["id"])]["object_id"] = newentity.id
+
                 textids = [str(text["id"]) for text in result["text"]]
                 entity_texts = {key: text for key, text in texts.items() if key in textids}
                 for key, entity_text in entity_texts.items():
@@ -208,58 +220,67 @@ def import_entities(entities=[]):
                             text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
                     if not done:
                         print(f"Could not save text: {entity_text}")
-                newentity.save()
-
-                if titlelist:
-                    newentity.title.add(*titlelist)
-                if professionlist:
-                    newentity.profession.add(*professionlist)
-                if professioncategory:
-                    newentity.professioncategory = professioncategory
 
                 # set up versions
+                # 2024 and 2014 were tests, lets delete them if they still exist
                 newentity.history.filter(history_date__year=2024).delete()
-                newentity.history.filter(history_date__year=2017).delete()
+                newentity.history.filter(history_date__year=2014).delete()
                 newentity._history_date = datetime.datetime(2017, 12, 31)
                 ent_revisions = list(filter(lambda x: is_entity(x, str(result_id), entity), revisions.items()))
-                revision_user = None
                 if ent_revisions:
                     revid, revision = ent_revisions[0]
                     timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
-                    newentity.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
                     newentity._history_date = timestamp
                     if revision.get("user") is not None:
-                        revision_user, _ = User.objects.get_or_create(username=revision["user"])
+                        newentity._history_user = user_cache[revision["user"]]
+                newentity.history.filter(history_date=newentity._history_date).delete()
 
-                newentity.save()
-                if revision_user:
-                    newentity.history.filter(history_date=timestamp).update(history_user=revision_user.id)
+                if professioncategory:
+                    newentity.professioncategory = professioncategory
+                # this triggers a save()
+                if professionlist:
+                    newentity.profession.add(*professionlist)
 
                 if "collection" in result:
                     for collection in result["collection"]:
-                        importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
-                        newcol, created = SkosCollection.objects.get_or_create(name=collection["label"])
-                        newcol.parent = importcol
-                        newcol.save()
-                        ct = ContentType.objects.get_for_model(newentity)
-                        SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=ct.id, object_id=newentity.id)
+                        collections[collection["label"]].append((content_type.id, newentity.id))
 
-                for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] == result_id):
-                    uriobj, _ = Uri.objects.get_or_create(uri=uri["uri"])
-                    for attribute in uri:
-                        setattr(uriobj, attribute, uri[attribute])
-                    uriobj.save()
-        pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
+    print("Sources...")
+    for source in sources:
+        if hasattr(source, "content_type"):
+            newsource, _ = Source.objects.get_or_create(pk=source["id"])
+            newsource.content_type = source.pop("content_type")
+            newsource.object_id = source.pop("object_id")
+            for field in source:
+                setattr(newsource, field, source[field])
+            newsource.save()
+
+    print("Collections...")
+    for collection in collections:
+        newcol, created = SkosCollection.objects.get_or_create(name=collection, parent=importcol)
+        for content_type_id, entity_id in collections[collection]:
+            SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=content_type_id, object_id=entity_id)
+
+    print("Titles...")
+    for title in title_cache:
+        newtitle, created = Title.objects.get_or_create(name=title)
+        persons = Person.objects.filter(id__in=title_cache[title])
+        newtitle.person_set.add(persons)
+
+    print("Uris...")
+    for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] in result_ids):
+        uriobj, _ = Uri.objects.get_or_create(uri=uri["uri"])
+        for attribute in uri:
+            setattr(uriobj, attribute, uri[attribute])
+        uriobj.save()
+
+    pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
 
 
 class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
     def add_arguments(self, parser):
-        parser.add_argument("--all", action="store_true")
-
-        parser.add_argument("--professions", action="store_true")
-        parser.add_argument("--entities", action="store_true")
         parser.add_argument("--event", action="store_true")
         parser.add_argument("--institution", action="store_true")
         parser.add_argument("--person", action="store_true")
@@ -274,15 +295,9 @@ class Command(BaseCommand):
         if not uris_file.exists():
             create_uris_file()
 
-        if options["all"]:
-            options["entities"] = True
-            options["professions"] = True
-
-        if options["professions"]:
-            import_professions()
+        import_professions()
 
         entities = []
-
         if options["event"]:
             entities.append(Event)
         if options["institution"]:
@@ -294,5 +309,4 @@ class Command(BaseCommand):
         if options["work"]:
             entities.append(Work)
 
-        if options["entities"]:
-            import_entities(entities)
+        import_entities(entities)
