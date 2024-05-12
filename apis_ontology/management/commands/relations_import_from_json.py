@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from apis_core.apis_relations.models import Property, TempTriple
 from apis_core.apis_metainfo.models import RootObject
+from simple_history.utils import get_history_model_for_model
 
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 TOKEN = os.environ.get("TOKEN")
@@ -16,6 +17,7 @@ COPYFIELDS = ['review', 'start_date', 'start_start_date', 'start_end_date', 'end
 
 
 relation_file = pathlib.Path("relations.json")
+
 
 def fetch_relations():
     relations = {
@@ -93,46 +95,56 @@ def import_relations():
     relations = json.loads(relation_file.read_text())
     revisions = json.loads(pathlib.Path("data/reversion.json").read_text())
 
+    property_cache = {}
+    rev_users = {rev["user"] for revid, rev in revisions.items()}
+    user_cache = {}
+    for username in rev_users:
+        if username:
+            user_cache[username], _ = User.objects.get_or_create(username=username)
+
     l = len(relations)
     p = 0
 
     for id, relation in relations.items():
         p += 1
-        #print(f"{p}/{l}:\t {id}: {relation['name']}")
-        prop, created = Property.objects.get_or_create(name_forward=relation["name"], name_reverse=relation["name_reverse"])
+        print(f"{p}/{l}:\t {id}: {relation['name']}")
+        property_identifier = f"{relation['name']}___{relation['name_reverse']}"
+        prop = property_cache.get(property_identifier, {}).get("property", None)
+        if prop is None:
+            prop, created = Property.objects.get_or_create(name_forward=relation["name"], name_reverse=relation["name_reverse"])
+            property_cache[property_identifier] = {"property": prop, "subj_class": [], "obj_class": []}
+
         try:
             subj = None
             if subj := relation["subj"]:
                 subj = RootObject.objects_inheritance.get_subclass(pk=subj)
                 ct = ContentType.objects.get_for_model(subj)
-                prop.subj_class.add(ct)
+                property_cache[property_identifier]["subj_class"].append(ct)
             obj = None
             if obj := relation["obj"]:
                 obj = RootObject.objects_inheritance.get_subclass(pk=obj)
                 ct = ContentType.objects.get_for_model(obj)
-                prop.obj_class.add(ct)
+                property_cache[property_identifier]["obj_class"].append(ct)
             if subj and obj and prop:
                 try:
                     tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
                     for attribute in relation:
                         if hasattr(tt, attribute) and attribute not in ["id", "subj", "obj"]:
                             setattr(tt, attribute, relation[attribute])
-                    tt.save()
                     tt.history.filter(history_date__year=2024).delete()
                     tt.history.filter(history_date__year=2017).delete()
                     tt._history_date = datetime.datetime(2017, 12, 31)
                     rel_revisions = list(filter(lambda x: is_relation(x, str(id), relation["type"]), revisions.items()))
-                    revision_user = None
                     if rel_revisions:
                         rid, revision = rel_revisions[0]
                         timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
-                        tt.history.filter(history_date__year=timestamp.year, history_date__month=timestamp.month, history_date__day=timestamp.day).delete()
                         tt._history_date = timestamp
-                        revision_user, _ = User.objects.get_or_create(username=revision["user"])
+                        if revision.get("user") is not None:
+                            tt._history_user = user_cache[revision["user"]]
+                    tt.history.filter(history_date=tt._history_date).delete()
+
                     tt.save()
-                    tt.history.filter(history_date=timestamp).update(history_type="+")
-                    if revision_user:
-                        tt.history.filter(history_date=timestamp).update(history_user=revision_user.id)
+                    #tt.history.filter(history_date=timestamp).update(history_type="+")
                 except Exception as e:
                     print(e)
                     print(relation)
@@ -141,6 +153,12 @@ def import_relations():
         except RootObject.DoesNotExist as e:
             print(relation)
             print(e)
+
+    th = get_history_model_for_model(TempTriple)
+    th.objects.filter(id__in=[revid for revid, rev in relations.items()]).update(history_type="+")
+    for property_identifier, prop in property_cache.items():
+        prop["property"].subj_class.add(*prop["subj_class"])
+        prop["property"].obj_class.add(*prop["obj_class"])
 
 
 class Command(BaseCommand):
