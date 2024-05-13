@@ -119,12 +119,20 @@ def import_relations():
             if subj := relation["subj"]:
                 subj = RootObject.objects_inheritance.get_subclass(pk=subj)
                 ct = ContentType.objects.get_for_model(subj)
-                property_cache[property_identifier]["subj_class"].append(ct)
+                if ct not in property_cache[property_identifier]["subj_class"]:
+                    property_cache[property_identifier]["subj_class"].append(ct)
+                    # we have to add this before creating the temptriple
+                    # otherwise it raises an exception
+                    prop.subj_class.add(ct)
             obj = None
             if obj := relation["obj"]:
                 obj = RootObject.objects_inheritance.get_subclass(pk=obj)
                 ct = ContentType.objects.get_for_model(obj)
-                property_cache[property_identifier]["obj_class"].append(ct)
+                if ct not in property_cache[property_identifier]["obj_class"]:
+                    property_cache[property_identifier]["obj_class"].append(ct)
+                    # we have to add this before creating the temptriple
+                    # otherwise it raises an exception
+                    prop.obj_class.add(ct)
             if subj and obj and prop:
                 try:
                     tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
