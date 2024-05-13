@@ -271,7 +271,10 @@ def import_entities(entities=[]):
 
     print("Uris...")
     for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] in result_ids):
-        uriobj, _ = Uri.objects.get_or_create(uri=uri["uri"])
+        # see https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/10
+        if uri_id == 60485:
+            continue
+        uriobj, _ = Uri.objects.get_or_create(id=uri_id) #, uri=uri["uri"])
         for attribute in uri:
             setattr(uriobj, attribute, uri[attribute])
         uriobj.save()
