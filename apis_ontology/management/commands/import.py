@@ -1,3 +1,4 @@
+import csv
 import json
 import re
 import requests
@@ -13,6 +14,7 @@ from django.contrib.auth.models import User
 from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, ProfessionCategory
 from apis_core.apis_metainfo.models import Uri
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
+from apis_highlighter.models import AnnotationProject
 
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 
@@ -277,6 +279,15 @@ def import_entities(entities=[]):
     pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
 
 
+def import_annotation_projects():
+    print("Annotation projects...")
+    reader = csv.DictReader(pathlib.Path("data/highlighter_projects_oebl_export_10-2023.csv.csv").open())
+    for row in reader:
+        ap, _ = AnnotationProject.objects.get_or_create(pk=row["id"])
+        ap.name = row["name"]
+        ap.save()
+
+
 class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
@@ -295,6 +306,7 @@ class Command(BaseCommand):
         if not uris_file.exists():
             create_uris_file()
 
+        import_annotation_projects()
         import_professions()
 
         entities = []
