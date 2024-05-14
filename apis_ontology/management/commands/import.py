@@ -222,6 +222,7 @@ def import_entities(entities=[]):
                             text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
                     if not done:
                         print(f"Could not save text: {entity_text}")
+                newentity.save()
 
                 # set up versions
                 # 2024 and 2014 were tests, lets delete them if they still exist
@@ -272,7 +273,7 @@ def import_entities(entities=[]):
     print("Uris...")
     for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] in result_ids):
         # see https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/10
-        if uri_id == 60485:
+        if uri_id == "60485":
             continue
         uriobj, _ = Uri.objects.get_or_create(id=uri_id) #, uri=uri["uri"])
         for attribute in uri:
