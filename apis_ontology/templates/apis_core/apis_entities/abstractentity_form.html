@@ -1,37 +1,11 @@
 {% extends "apis_core/apis_entities/abstractentity_form.html" %}
 {% load apis_highlighter %}
+{% load static %}
 
 {% block scriptHeader %}
 {{ block.super }}
-<script type="text/javascript">
-function showmap(element) {
-  $('.popover').remove();
-  var rect = element.getBoundingClientRect();
-
-  mapdiv = document.createElement("div");
-  mapdiv.classList.add("popover");
-  mapdiv.setAttribute("id", "popovermap");
-  ptop = rect.top + window.scrollY - 250;
-  pleft = rect.left + window.scrollX - 550;
-  $(mapdiv).offset({top: ptop, left: pleft});
-  document.body.appendChild(mapdiv);
-
-  if (typeof map != "undefined") { map.off(); map.remove(); }
-  map = L.map('popovermap', { center: [element.dataset.latitude, element.dataset.longitude], zoom: 7 });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
-  L.marker([element.dataset.latitude, element.dataset.longitude]).addTo(map);
-
-};
-function delmap(element) {
-  $('.popover').remove();
-}
-</script>
-<style>
-#popovermap {
-  width: 500px;
-  height: 500px;
-}
-</style>
+<script src="{% static 'js/E53_Place.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/E53_Place.css' %}" />
 {% endblock %}
 
 {% block col-one %}
