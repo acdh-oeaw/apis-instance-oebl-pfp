@@ -1,0 +1,52 @@
+##############################################
+# Create an entity `oebl.Person`
+# from a wikidata RDF endpoint
+##############################################
+superclass = "oebl.models.Person"
+regex = "http://www.wikidata.org.*"
+[[attributes]]
+# name
+sparql = """
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?forename
+WHERE {
+  ?person wdt:P735/rdfs:label ?first_name .
+  BIND(?first_name AS ?forename)
+}
+"""
+[[attributes]]
+# name
+sparql = """
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?surname
+WHERE {
+  ?subject wdt:P734/rdfs:label ?name
+  BIND(?name as ?surname)
+}
+"""
+[[attributes]]
+# name
+sparql = """
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX schema: <http://schema.org/>
+SELECT ?name
+WHERE {
+  ?something schema:about ?subject .
+  ?subject rdfs:label ?first_name1 .
+  OPTIONAL { ?subject wdt:P734/rdfs:label ?first_name2 }
+  BIND(COALESCE(?first_name2, ?first_name1) AS ?name)
+}
+"""
+[[attributes]]
+# start_date_written
+sparql = """
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?start_date_written ?end_date_written
+WHERE {
+  ?subject wdt:P569 ?birth_date .
+  ?subject wdt:P570 ?death
+  BIND(CONCAT(STR(YEAR(?birth_date)),"-",STR(MONTH(?birth_date)),"-",STR(DAY(?birth_date))) AS ?start_date_written)
+  BIND(CONCAT(STR(YEAR(?death)),"-",STR(MONTH(?death)),"-",STR(DAY(?death))) AS ?end_date_written)
+}
+"""

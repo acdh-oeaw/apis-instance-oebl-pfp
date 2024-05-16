@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "APIS instance OEBL"
 authors = ["Birger Schacht <birger.schacht@oeaw.ac.at>"]
 license = "MIT"
-packages = [{include = "apis_ontology"}]
+packages = [{include = "oebl"}]
 
 
 [tool.poetry.dependencies]
