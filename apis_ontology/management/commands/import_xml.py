@@ -1,4 +1,6 @@
 import datetime
+import logging
+import re
 from apis_core.apis_metainfo.models import Uri
 from django.db.models import CharField, TextField
 import unidecode
@@ -12,6 +14,16 @@ from simple_history.utils import get_history_model_for_model
 from apis_ontology.models import Person, Source, Profession, ProfessionCategory
 
 ns = {"b": "http://www.biographien.ac.at"}
+
+logging.basicConfig(
+    filename=f"create_harmonized_xmls_{datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')}.log",
+    filemode="a",
+    format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.DEBUG,
+)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def calculate_textual_offsets(parent, field_name):
@@ -69,6 +81,7 @@ def get_b_or_d(node):
 
 
 def get_date_from_pubinfo_string(pubinfo):
+    pubinfo = re.sub(r"\n\s+", " ", pubinfo)
     date = None
     if pubinfo.startswith("\u00d6BL 1815-1950, Bd. ") or pubinfo.startswith(
         "\u00d6BL Online-Edition, Bd."
@@ -88,7 +101,7 @@ def get_date_from_pubinfo_string(pubinfo):
 
 
 def extractperson(file):
-    print(file)
+    logger.info(f"Processing {file}")
     root = ET.parse(file).getroot()
 
     person = {}
@@ -188,6 +201,8 @@ def extractperson(file):
 
     dbperson = None
     source = Source.objects.filter(orig_filename=metadata["nummer"])
+    if source.count() == 0 and metadata.get("oebl_id", None) is not None:
+        source = Source.objects.filter(orig_id=metadata["oebl_id"])
     if source.count() == 1:
         dbperson = source.first().content_object
     else:
@@ -200,10 +215,12 @@ def extractperson(file):
                 if dbperson is not None:
                     dbperson = dbperson.root_object
                 else:
-                    print(f"Does not exist {metadata['nummer']}")
+                    logger.info(f"Could not find {person['metadata']['gnd']} in DB")
+    if dbperson is None:
+        logger.info(f"Could not find {metadata['nummer']} in DB")
     check_hp = False
     history_date_recalc = False
-    if dbperson is not None:
+    if dbperson is not None and "oebl_haupttext" in person:
         try:
             if len(dbperson.oebl_haupttext) + 5 < len(person["oebl_haupttext"]):
                 check_hp = False
@@ -211,7 +228,7 @@ def extractperson(file):
             else:
                 check_hp = True
         except TypeError as e:
-            print(f"Error in comparing lengths of Haupttexts {e}")
+            logger.warning(f"Error in comparing lengths of Haupttexts {e}")
         try:
             if len(dbperson.oebl_haupttext.strip()) == person["oebl_haupttext"].strip():
                 dbperson.oebl_haupttext = person["oebl_haupttext"]
@@ -221,7 +238,7 @@ def extractperson(file):
                 dbperson.skip_history_when_saving = True
                 dbperson.save()
         except Exception as e:
-            print(f"Error in comparing Haupttexts {e}")
+            logger.warning(f"Error in comparing Haupttexts {e}")
     if check_hp:
         HistoricalPerson = get_history_model_for_model(Person)
         attributes = dict(person)
@@ -253,7 +270,7 @@ def extractperson(file):
                 id=id_ent, history=hp, profession=p, person=dbperson
             ).save()
     else:
-        print(f"No source found Creating {metadata['nummer']}")
+        logger.info(f"No source found Creating {metadata['nummer']}")
         attributes = dict(person)
         # Add empty string for all CharFields and TextFields that are not set in person dict yet
         for field in Person._meta.get_fields():
@@ -308,7 +325,7 @@ def extractperson(file):
                         root_object=dbperson,
                     )
                 except Exception as e:
-                    print(
+                    logger.error(
                         f"Could not create GND uri for {person['metadata']['gnd']}, person id: {dbperson.id}, {e}"
                     )
 
@@ -324,7 +341,7 @@ def extractperson(file):
                         root_object=dbperson,
                     )
                 except Exception as e:
-                    print(
+                    logger.error(
                         f"Could not create DOI uri for {person['metadata']['doi']}, person id: {dbperson.id}, {e}"
                     )
 
