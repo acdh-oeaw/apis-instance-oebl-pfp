@@ -15,13 +15,13 @@ from apis_ontology.models import Person, Source, Profession, ProfessionCategory
 
 ns = {"b": "http://www.biographien.ac.at"}
 
-logging.basicConfig(
-    filename=f"create_harmonized_xmls_{datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')}.log",
-    filemode="a",
-    format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
-    datefmt="%H:%M:%S",
-    level=logging.DEBUG,
-)
+# logging.basicConfig(
+#     filename=f"import_xmls_{datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')}.log",
+#     filemode="a",
+#     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
+#     datefmt="%H:%M:%S",
+#     level=logging.DEBUG,
+# )
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -52,6 +52,17 @@ def calculate_textual_offsets(parent, field_name):
     return offsets
 
 
+def remove_newline_and_tabs(text: str) -> str:
+    if text is None:
+        return text
+    text = text.strip()
+    text = text.replace("\n", " ")
+    text = text.replace("\t", " ")
+    text = text.replace("\r", " ")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
 def transliterate_v1(text: str) -> str:
     if text is None:
         return text
@@ -61,8 +72,8 @@ def transliterate_v1(text: str) -> str:
 
 def text_or_iter(node) -> str:
     if node:
-        return "".join(node.itertext())
-    return getattr(node, "text")
+        return remove_newline_and_tabs("".join(node.itertext()))
+    return remove_newline_and_tabs(getattr(node, "text"))
 
 
 def get_b_or_d(node):
@@ -92,7 +103,7 @@ def get_date_from_pubinfo_string(pubinfo):
             date = datetime.datetime(int(date), 1, 1)
         except ValueError:
             date = datetime.datetime(1950, 1, 1)
-            print(f"Could not parse date from {pubinfo}, using 1950-01-01")
+            logger.warning(f"Could not parse date from {pubinfo}, using 1950-01-01")
     if pubinfo.startswith("\u00d6BL Online-Edition, Lfg."):
         close_pos = pubinfo.find(")")
         day, month, year = pubinfo[close_pos - 10 : close_pos].split(".")
@@ -124,6 +135,7 @@ def extractperson(file):
         "oebl_id": int(eoebl_id) if eoebl_id is not None else None,
     }
     pubinfo = root.find("./Lexikonartikel/PubInfo")
+    author = root.find(".//Lexikonartikel/Autor")
     if pubinfo is not None:
         pubinfo = pubinfo.text
         metadata["pubinfo"] = pubinfo
@@ -206,7 +218,7 @@ def extractperson(file):
     if source.count() == 1:
         dbperson = source.first().content_object
     else:
-        print(f"Does not exist {metadata['nummer']}, searching for GND")
+        logger.info(f"Does not exist {metadata['nummer']}, searching for GND")
         if "gnd" in person["metadata"]:
             if len(person["metadata"]["gnd"]) > 2:
                 dbperson = Uri.objects.filter(
@@ -230,11 +242,13 @@ def extractperson(file):
         except TypeError as e:
             logger.warning(f"Error in comparing lengths of Haupttexts {e}")
         try:
-            if len(dbperson.oebl_haupttext.strip()) == person["oebl_haupttext"].strip():
+            if len(dbperson.oebl_haupttext.strip()) == len(
+                person["oebl_haupttext"].strip()
+            ):
                 dbperson.oebl_haupttext = person["oebl_haupttext"]
                 dbperson.oebl_kurzinfo = person["oebl_kurzinfo"]
-                dbperson.oebl_werkverzeichnis = person["oebl_werkverzeichnis"]
-                dbperson.references = person["references"]
+                dbperson.oebl_werkverzeichnis = person["oebl_werkverzeichnis"] or ""
+                dbperson.references = person["references"] or ""
                 dbperson.skip_history_when_saving = True
                 dbperson.save()
         except Exception as e:
@@ -269,6 +283,24 @@ def extractperson(file):
             hp.profession.model(
                 id=id_ent, history=hp, profession=p, person=dbperson
             ).save()
+        if source.count() == 1 and "_print.xml" not in str(file):
+            source = source.first()
+            source.orig_filename = metadata["nummer"]
+            source.author = author if author is not None else ""
+            source.pubinfo = metadata["pubinfo"]
+            source.pdf_filename = metadata["pdf_file"] if metadata["pdf_file"] else ""
+            source.orig_id = metadata["oebl_id"] if metadata["oebl_id"] else None
+            source.save()
+        elif "_print.xml" in str(file):
+            source = Source.objects.create(
+                orig_filename=metadata["nummer"],
+                author=author if author is not None else "",
+                pubinfo=metadata["pubinfo"],
+                pdf_filename=metadata["pdf_file"] if metadata["pdf_file"] else "",
+                orig_id=metadata["oebl_id"] if metadata["oebl_id"] else None,
+                content_object=hp,
+            )
+
     else:
         logger.info(f"No source found Creating {metadata['nummer']}")
         attributes = dict(person)
@@ -296,7 +328,6 @@ def extractperson(file):
             dbperson = Person.objects.create(**attributes)
         for p in profession:
             dbperson.profession.add(p)
-        author = root.find(".//Lexikonartikel/Autor")
         if author is not None:
             author = author.text
             if author is not None:
@@ -360,6 +391,10 @@ class Command(BaseCommand):
                     files.append(file)
             else:
                 files.append(path)
+        # filtered_files = [x for x in files if "Abel" in x.stem]
+
+        # for file in filtered_files:
+        #     extractperson(file)
 
         for file in sorted(files):
             extractperson(file)
