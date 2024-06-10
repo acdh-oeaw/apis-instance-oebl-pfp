@@ -106,7 +106,7 @@ class InstitutionFilterSet(LegacyStuffMixinFilterSet):
 
 class PlaceFilterSet(LegacyStuffMixinFilterSet):
     search = django_filters.CharFilter(
-            method=trigram_search_filter_institution,
+            method=trigram_search_filter_place,
             label="Search",
             help_text=HELP_TEXT)
 
