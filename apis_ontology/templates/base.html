@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 
+{% block main-menu %}
+{{ block.super }}
+<li class="nav-item dropdown">
+  <a href="#"
+     class="nav-link dropdown-toggle"
+     data-toggle="dropdown"
+     role="button"
+     aria-haspopup="true"
+     aria-expanded="false">
+    Others
+    <span class="caret" />
+  </a>
+  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <a class="dropdown-item" href="{% url "apis_core:generic:list" "apis_ontology.parentprofession" %}">Parent Professions</a>
+  </div>
+</li>
+{% endblock main-menu %}
+
 {% block imprint %}
   <div id="wrapper-footer-secondary"
        class="footer-imprint-bar p-2 text-center">
