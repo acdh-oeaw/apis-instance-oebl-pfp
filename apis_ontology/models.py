@@ -10,6 +10,7 @@ from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
 from apis_core.apis_entities.abc import E53_Place
 from apis_core.history.models import VersionMixin
+from apis_core.utils.fields import NewlineSeparatedListField
 
 
 class LegacyStuffMixin(models.Model):
@@ -133,6 +134,7 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+    alternative_names = NewlineSeparatedListField(blank=True, verbose_name=_("Alternative Names"))
 
     #texts
     # "ÖBL Haupttext"
