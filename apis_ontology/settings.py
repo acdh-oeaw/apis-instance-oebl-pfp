@@ -6,6 +6,7 @@ INSTALLED_APPS += ["apis_highlighter", "django.contrib.postgres", "apis_core.col
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["django_acdhch_functions"]
+INSTALLED_APPS += ["auditlog"]
 
 ROOT_URLCONF = 'apis_ontology.urls'
 
@@ -40,3 +41,5 @@ LOGGING = {
 LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
 
 LANGUAGE_CODE = "de"
+
+MIDDLEWARE += ['auditlog.middleware.AuditlogMiddleware']
