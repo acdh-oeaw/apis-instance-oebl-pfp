@@ -14,6 +14,7 @@ apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.23.0"
 apis-highlighter-ng = "^0.4.0"
 apis-acdhch-default-settings = "1.0.0"
 django-acdhch-functions = "^0.1.3"
+django-auditlog = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

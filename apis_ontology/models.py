@@ -12,6 +12,8 @@ from apis_core.apis_entities.abc import E53_Place
 from apis_core.history.models import VersionMixin
 from apis_core.utils.fields import NewlineSeparatedListField
 
+from auditlog.registry import auditlog
+
 
 class LegacyStuffMixin(models.Model):
     sources = GenericRelation("Source")
@@ -230,3 +232,16 @@ class Denomination(AbstractEntity):
     class Meta:
         verbose_name = _("Denomination")
         verbose_name_plural = _("Denominations")
+
+
+auditlog.register(Source, serialize_data=True)
+auditlog.register(Title, serialize_data=True)
+auditlog.register(ProfessionCategory, serialize_data=True)
+auditlog.register(Profession, serialize_data=True)
+auditlog.register(Parentprofession, serialize_data=True)
+auditlog.register(Event, serialize_data=True)
+auditlog.register(Institution, serialize_data=True)
+auditlog.register(Person, serialize_data=True, m2m_fields={"profession", "title", "profession_mother", "profession_mother"})
+auditlog.register(Place, serialize_data=True)
+auditlog.register(Work, serialize_data=True)
+auditlog.register(Denomination, serialize_data=True)
