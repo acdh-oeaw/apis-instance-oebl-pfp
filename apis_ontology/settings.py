@@ -43,3 +43,5 @@ LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
 LANGUAGE_CODE = "de"
 
 MIDDLEWARE += ['auditlog.middleware.AuditlogMiddleware']
+
+APIS_BASE_URI = "https://oebl-pfp.acdh-ch-dev.oeaw.ac.at"
