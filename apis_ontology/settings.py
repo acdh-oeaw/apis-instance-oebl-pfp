@@ -45,3 +45,14 @@ LANGUAGE_CODE = "de"
 MIDDLEWARE += ['auditlog.middleware.AuditlogMiddleware']
 
 APIS_BASE_URI = "https://oebl-pfp.acdh-ch-dev.oeaw.ac.at"
+
+# this is a workaround to disable pagintation in the relations
+# listing on the entities pages
+APIS_ENTITIES = {
+        "Event": {"relations_per_page": 1000},
+        "Institution": {"relations_per_page": 1000},
+        "Person": {"relations_per_page": 1000},
+        "Place": {"relations_per_page": 1000},
+        "Work": {"relations_per_page": 1000},
+        "Denomination": {"relations_per_page": 1000},
+        }
