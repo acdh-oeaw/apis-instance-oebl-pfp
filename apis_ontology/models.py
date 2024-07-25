@@ -76,6 +76,8 @@ class ProfessionCategory(GenericModel, models.Model):
 
 
 class Profession(GenericModel, models.Model):
+    _default_search_fields = ["name"]
+
     class Meta:
         ordering = ("name",)
         verbose_name = _("Profession")
