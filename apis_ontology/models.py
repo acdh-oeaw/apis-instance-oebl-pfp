@@ -100,6 +100,8 @@ class Event(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
+    _default_search_fields = ["name", "notes", "kind"]
+
     def __str__(self):
         return self.name
 
@@ -216,6 +218,8 @@ class Work(LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    _default_search_fields = ["name", "notes", "kind"]
 
     def __str__(self):
         return self.name
