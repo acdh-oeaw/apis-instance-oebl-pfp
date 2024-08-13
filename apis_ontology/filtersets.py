@@ -81,35 +81,33 @@ class PersonFilterSet(LegacyStuffMixinFilterSet):
         label="Collections",
         method=collection_method,
     )
-    search = django_filters.CharFilter(
-            method=trigram_search_filter_person,
-            label="Search",
-            help_text=PERSON_HELP_TEXT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("forename", False)
         self.filters.move_to_end("collection", False)
         self.filters.move_to_end("search", False)
+        self.filters["search"] = django_filters.CharFilter(
+            method=trigram_search_filter_person,
+            label="Search",
+            help_text=PERSON_HELP_TEXT)
 
 
 class InstitutionFilterSet(LegacyStuffMixinFilterSet):
-    search = django_filters.CharFilter(
-            method=trigram_search_filter_institution,
-            label="Search",
-            help_text=HELP_TEXT)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("search", False)
+        self.filters["search"] = django_filters.CharFilter(
+                method=trigram_search_filter_institution,
+                label="Search",
+                help_text=HELP_TEXT)
 
 
 class PlaceFilterSet(LegacyStuffMixinFilterSet):
-    search = django_filters.CharFilter(
-            method=trigram_search_filter_place,
-            label="Search",
-            help_text=HELP_TEXT)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("search", False)
+        self.filters["search"] = django_filters.CharFilter(
+                method=trigram_search_filter_place,
+                label="Search",
+                help_text=HELP_TEXT)
