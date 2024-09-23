@@ -1,8 +1,8 @@
-from apis_acdhch_default_settings.settings import *
+from apis_acdhch_default_settings.settings import * # noqa: F403
 
 DEBUG = True
 
-INSTALLED_APPS += [
+INSTALLED_APPS += [ # noqa: F405
     "apis_highlighter",
     "django.contrib.postgres",
     "apis_core.collections",
@@ -47,7 +47,7 @@ LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
 
 LANGUAGE_CODE = "de"
 
-MIDDLEWARE += [
+MIDDLEWARE += [ # noqa: F405
     "auditlog.middleware.AuditlogMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
