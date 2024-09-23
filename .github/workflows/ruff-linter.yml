@@ -1,0 +1,11 @@
+#SPDX-FileCopyrightText: 2024 Birger Schacht
+#SPDX-License-Identifier: MIT
+name: Run ruff linter
+
+on: [push, pull_request]
+
+jobs:
+  ruff:
+    uses: acdh-oeaw/prosnet-workflows/.github/workflows/poetry-ruff.yml@v0.4.2
+    with:
+      src: "."
