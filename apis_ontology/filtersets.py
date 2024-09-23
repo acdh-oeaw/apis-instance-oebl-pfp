@@ -12,7 +12,7 @@ PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em
 HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 
 
-PATTERN = re.compile(r'''((?:[^ "']|"[^"]*"|'[^']*')+)''')
+PATTERN = re.compile(r"""((?:[^ "']|"[^"]*"|'[^']*')+)""")
 
 #########
 # helpers
@@ -49,13 +49,19 @@ def trigram_search_filter(queryset, fields, value):
         for field in fields:
             trig_vector_list.append(TrigramWordSimilarity(token, field))
     trig_vector = Greatest(*trig_vector_list, None)
-    return queryset.annotate(similarity=trig_vector).filter(similarity__gt=0.4).order_by("-similarity")
+    return (
+        queryset.annotate(similarity=trig_vector)
+        .filter(similarity__gt=0.4)
+        .order_by("-similarity")
+    )
 
 
 def collection_method(queryset, name, value):
     if value:
         content_type = ContentType.objects.get_for_model(queryset.model)
-        scco = SkosCollectionContentObject.objects.filter(content_type=content_type, collection__in=value).values("object_id")
+        scco = SkosCollectionContentObject.objects.filter(
+            content_type=content_type, collection__in=value
+        ).values("object_id")
         return queryset.filter(id__in=scco)
     return queryset
 
@@ -66,12 +72,12 @@ def collection_method(queryset, name, value):
 class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
     class Meta(AbstractEntityFilterSet.Meta):
         filter_overrides = {
-             models.CharField: {
-                 'filter_class': django_filters.CharFilter,
-                 'extra': lambda f: {
-                     'lookup_expr': 'icontains',
-                 },
-             },
+            models.CharField: {
+                "filter_class": django_filters.CharFilter,
+                "extra": lambda f: {
+                    "lookup_expr": "icontains",
+                },
+            },
         }
 
 
@@ -90,7 +96,8 @@ class PersonFilterSet(LegacyStuffMixinFilterSet):
         self.filters["search"] = django_filters.CharFilter(
             method=trigram_search_filter_person,
             label="Search",
-            help_text=PERSON_HELP_TEXT)
+            help_text=PERSON_HELP_TEXT,
+        )
 
 
 class InstitutionFilterSet(LegacyStuffMixinFilterSet):
@@ -98,9 +105,10 @@ class InstitutionFilterSet(LegacyStuffMixinFilterSet):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("search", False)
         self.filters["search"] = django_filters.CharFilter(
-                method=trigram_search_filter_institution,
-                label="Search",
-                help_text=HELP_TEXT)
+            method=trigram_search_filter_institution,
+            label="Search",
+            help_text=HELP_TEXT,
+        )
 
 
 class PlaceFilterSet(LegacyStuffMixinFilterSet):
@@ -108,6 +116,5 @@ class PlaceFilterSet(LegacyStuffMixinFilterSet):
         super().__init__(*args, **kwargs)
         self.filters.move_to_end("search", False)
         self.filters["search"] = django_filters.CharFilter(
-                method=trigram_search_filter_place,
-                label="Search",
-                help_text=HELP_TEXT)
+            method=trigram_search_filter_place, label="Search", help_text=HELP_TEXT
+        )

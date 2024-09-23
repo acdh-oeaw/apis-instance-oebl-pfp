@@ -41,9 +41,11 @@ class Source(GenericModel, models.Model):
     orig_id = models.PositiveIntegerField(blank=True, null=True)
     pdf_filename = models.CharField(blank=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, blank=True, null=True
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
         if retstr := self.orig_filename:
@@ -130,25 +132,44 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
         ("third gender", "third gender"),
     )
     surname = models.CharField(max_length=255, verbose_name="Name", blank=True)
-    forename = models.CharField(max_length=255, help_text="The persons´s forename. In case of more then one name...", blank=True, null=True)
+    forename = models.CharField(
+        max_length=255,
+        help_text="The persons´s forename. In case of more then one name...",
+        blank=True,
+        null=True,
+    )
     profession = models.ManyToManyField(Profession, blank=True)
-    professioncategory = models.ForeignKey(ProfessionCategory, on_delete=models.CASCADE, null=True, blank=True)
-    profession_father = models.ManyToManyField(Parentprofession, blank=True, related_name="father_person_set")
-    profession_mother = models.ManyToManyField(Parentprofession, blank=True, related_name="mother_person_set")
+    professioncategory = models.ForeignKey(
+        ProfessionCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    profession_father = models.ManyToManyField(
+        Parentprofession, blank=True, related_name="father_person_set"
+    )
+    profession_mother = models.ManyToManyField(
+        Parentprofession, blank=True, related_name="mother_person_set"
+    )
     title = models.ManyToManyField(Title, blank=True)
-    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, blank=True, null=True)
-    external_resources = models.CharField(verbose_name="Externe Verweise", blank=True, null=True)
+    gender = models.CharField(
+        max_length=15, choices=GENDER_CHOICES, blank=True, null=True
+    )
+    external_resources = models.CharField(
+        verbose_name="Externe Verweise", blank=True, null=True
+    )
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
-    alternative_names = NewlineSeparatedListField(blank=True, verbose_name=_("Alternative Names"))
+    alternative_names = NewlineSeparatedListField(
+        blank=True, verbose_name=_("Alternative Names")
+    )
 
-    #texts
+    # texts
     # "ÖBL Haupttext"
     oebl_haupttext = models.TextField(blank=True, verbose_name="ÖBL Haupttext")
     # "ÖBL Kurzinfo"
     oebl_kurzinfo = models.TextField(blank=True, verbose_name="ÖBL Kurzinfo")
     # "Online Edition Haupttext"
-    online_edition_haupttext = models.TextField(blank=True, verbose_name="Online Edition Haupttext")
+    online_edition_haupttext = models.TextField(
+        blank=True, verbose_name="Online Edition Haupttext"
+    )
     # "Nachrecherche"
     nachrecherche = models.TextField(blank=True)
     # "Soziale Herkunft"
@@ -156,11 +177,20 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Verwandtschaft"
     verwandtschaft = models.TextField(blank=True)
     # "Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben"
-    ausbildung_studium_studienreise = models.TextField(blank=True, verbose_name="Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben")
+    ausbildung_studium_studienreise = models.TextField(
+        blank=True,
+        verbose_name="Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben",
+    )
     # "Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte"
-    berufstaetigkeit_lebenstationen = models.TextField(blank=True, verbose_name="Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte")
+    berufstaetigkeit_lebenstationen = models.TextField(
+        blank=True,
+        verbose_name="Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte",
+    )
     # "Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben"
-    mitgliedschaften_orden_auszeichnungen = models.TextField(blank=True, verbose_name="Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben")
+    mitgliedschaften_orden_auszeichnungen = models.TextField(
+        blank=True,
+        verbose_name="Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben",
+    )
     # "Literatur"
     literatur = models.TextField(blank=True)
     # "Beruf(e)"
@@ -170,9 +200,13 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Adelsprädikat"
     adelspraedikat = models.TextField(blank=True, verbose_name="Adelsprädikat")
     # "Übersiedlung, Emigration, Remigration"
-    uebersiedlung_emigration = models.TextField(blank=True, verbose_name="Übersiedlung, Emigration, Remigration")
+    uebersiedlung_emigration = models.TextField(
+        blank=True, verbose_name="Übersiedlung, Emigration, Remigration"
+    )
     # "Weitere Namensformen"
-    weitere_namensformen = models.TextField(blank=True, verbose_name="Weitere Namensformen")
+    weitere_namensformen = models.TextField(
+        blank=True, verbose_name="Weitere Namensformen"
+    )
     # "Geburtsdatum"
     geburtsdatum = models.TextField(blank=True)
     # "Sterbeort"
@@ -186,7 +220,9 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     # "Pseudonyme"
     pseudonyme = models.TextField(blank=True)
     # "ÖBL Werkverzeichnis"
-    oebl_werkverzeichnis = models.TextField(blank=True, verbose_name="ÖBL Werkverzeichnis")
+    oebl_werkverzeichnis = models.TextField(
+        blank=True, verbose_name="ÖBL Werkverzeichnis"
+    )
 
     def __str__(self):
         return f"{self.forename} {self.surname}"
@@ -194,7 +230,11 @@ class Person(VersionMixin, LegacyStuffMixin, LegacyDateMixin, AbstractEntity):
     @property
     def biographien_urls(self):
         base = "https://www.biographien.ac.at/oebl/oebl_"
-        links = [f"{base}{source.orig_filename[0]}/{source.orig_filename}" for source in self.sources.all() if source.orig_filename.endswith(".xml")]
+        links = [
+            f"{base}{source.orig_filename[0]}/{source.orig_filename}"
+            for source in self.sources.all()
+            if source.orig_filename.endswith(".xml")
+        ]
         return links
 
     class Meta:
@@ -247,7 +287,11 @@ auditlog.register(Profession, serialize_data=True)
 auditlog.register(Parentprofession, serialize_data=True)
 auditlog.register(Event, serialize_data=True)
 auditlog.register(Institution, serialize_data=True)
-auditlog.register(Person, serialize_data=True, m2m_fields={"profession", "title", "profession_mother", "profession_mother"})
+auditlog.register(
+    Person,
+    serialize_data=True,
+    m2m_fields={"profession", "title", "profession_mother", "profession_mother"},
+)
 auditlog.register(Place, serialize_data=True)
 auditlog.register(Work, serialize_data=True)
 auditlog.register(Denomination, serialize_data=True)
