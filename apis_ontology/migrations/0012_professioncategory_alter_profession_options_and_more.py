@@ -5,40 +5,51 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0011_unaccent_20231214_0830'),
+        ("apis_ontology", "0011_unaccent_20231214_0830"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProfessionCategory',
+            name="ProfessionCategory",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
             ],
         ),
         migrations.AlterModelOptions(
-            name='profession',
-            options={'ordering': ('name',)},
+            name="profession",
+            options={"ordering": ("name",)},
         ),
         migrations.RemoveField(
-            model_name='profession',
-            name='parent',
+            model_name="profession",
+            name="parent",
         ),
         migrations.AddField(
-            model_name='profession',
-            name='oldids',
+            model_name="profession",
+            name="oldids",
             field=models.TextField(null=True),
         ),
         migrations.AddField(
-            model_name='profession',
-            name='oldnames',
+            model_name="profession",
+            name="oldnames",
             field=models.TextField(null=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='professioncategory',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='apis_ontology.professioncategory'),
+            model_name="person",
+            name="professioncategory",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="apis_ontology.professioncategory",
+            ),
         ),
     ]

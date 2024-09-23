@@ -4,70 +4,69 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0025_rename_dedomination_denomination'),
+        ("apis_ontology", "0025_rename_dedomination_denomination"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='event',
-            name='published',
+            model_name="event",
+            name="published",
         ),
         migrations.RemoveField(
-            model_name='event',
-            name='review',
+            model_name="event",
+            name="review",
         ),
         migrations.RemoveField(
-            model_name='event',
-            name='status',
+            model_name="event",
+            name="status",
         ),
         migrations.RemoveField(
-            model_name='institution',
-            name='published',
+            model_name="institution",
+            name="published",
         ),
         migrations.RemoveField(
-            model_name='institution',
-            name='review',
+            model_name="institution",
+            name="review",
         ),
         migrations.RemoveField(
-            model_name='institution',
-            name='status',
+            model_name="institution",
+            name="status",
         ),
         migrations.RemoveField(
-            model_name='person',
-            name='published',
+            model_name="person",
+            name="published",
         ),
         migrations.RemoveField(
-            model_name='person',
-            name='review',
+            model_name="person",
+            name="review",
         ),
         migrations.RemoveField(
-            model_name='person',
-            name='status',
+            model_name="person",
+            name="status",
         ),
         migrations.RemoveField(
-            model_name='place',
-            name='published',
+            model_name="place",
+            name="published",
         ),
         migrations.RemoveField(
-            model_name='place',
-            name='review',
+            model_name="place",
+            name="review",
         ),
         migrations.RemoveField(
-            model_name='place',
-            name='status',
+            model_name="place",
+            name="status",
         ),
         migrations.RemoveField(
-            model_name='work',
-            name='published',
+            model_name="work",
+            name="published",
         ),
         migrations.RemoveField(
-            model_name='work',
-            name='review',
+            model_name="work",
+            name="review",
         ),
         migrations.RemoveField(
-            model_name='work',
-            name='status',
+            model_name="work",
+            name="status",
         ),
     ]

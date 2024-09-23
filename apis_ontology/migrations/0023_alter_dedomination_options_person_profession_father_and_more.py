@@ -4,24 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0022_merge_0021_dedomination_0021_parentprofession'),
+        ("apis_ontology", "0022_merge_0021_dedomination_0021_parentprofession"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='dedomination',
-            options={'verbose_name': 'Konfession'},
+            name="dedomination",
+            options={"verbose_name": "Konfession"},
         ),
         migrations.AddField(
-            model_name='person',
-            name='profession_father',
-            field=models.ManyToManyField(blank=True, related_name='father_person_set', to='apis_ontology.parentprofession'),
+            model_name="person",
+            name="profession_father",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="father_person_set",
+                to="apis_ontology.parentprofession",
+            ),
         ),
         migrations.AddField(
-            model_name='person',
-            name='profession_mother',
-            field=models.ManyToManyField(blank=True, related_name='mother_person_set', to='apis_ontology.parentprofession'),
+            model_name="person",
+            name="profession_mother",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="mother_person_set",
+                to="apis_ontology.parentprofession",
+            ),
         ),
     ]

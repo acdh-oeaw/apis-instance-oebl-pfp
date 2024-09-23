@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0028_delete_text'),
+        ("apis_ontology", "0028_delete_text"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='event',
-            name='references',
+            model_name="event",
+            name="references",
         ),
         migrations.RemoveField(
-            model_name='institution',
-            name='references',
+            model_name="institution",
+            name="references",
         ),
         migrations.RemoveField(
-            model_name='place',
-            name='references',
+            model_name="place",
+            name="references",
         ),
         migrations.RemoveField(
-            model_name='work',
-            name='references',
+            model_name="work",
+            name="references",
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0016_rename_name_person_surname'),
+        ("apis_ontology", "0016_rename_name_person_surname"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='place',
-            old_name='lat',
-            new_name='latitude',
+            model_name="place",
+            old_name="lat",
+            new_name="latitude",
         ),
         migrations.RenameField(
-            model_name='place',
-            old_name='lng',
-            new_name='longitude',
+            model_name="place",
+            old_name="lng",
+            new_name="longitude",
         ),
     ]

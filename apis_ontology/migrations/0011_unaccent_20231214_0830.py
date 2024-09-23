@@ -5,11 +5,8 @@ from django.contrib.postgres.operations import UnaccentExtension
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0010_alter_text_kind'),
+        ("apis_ontology", "0010_alter_text_kind"),
     ]
 
-    operations = [
-        UnaccentExtension()
-    ]
+    operations = [UnaccentExtension()]

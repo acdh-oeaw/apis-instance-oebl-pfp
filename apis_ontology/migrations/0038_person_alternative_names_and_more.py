@@ -5,20 +5,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0037_alter_event_notes_alter_institution_notes_and_more'),
+        ("apis_ontology", "0037_alter_event_notes_alter_institution_notes_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='person',
-            name='alternative_names',
-            field=apis_core.utils.fields.NewlineSeparatedListField(blank=True, verbose_name='Alternative Names'),
+            model_name="person",
+            name="alternative_names",
+            field=apis_core.utils.fields.NewlineSeparatedListField(
+                blank=True, verbose_name="Alternative Names"
+            ),
         ),
         migrations.AddField(
-            model_name='versionperson',
-            name='alternative_names',
-            field=apis_core.utils.fields.NewlineSeparatedListField(blank=True, verbose_name='Alternative Names'),
+            model_name="versionperson",
+            name="alternative_names",
+            field=apis_core.utils.fields.NewlineSeparatedListField(
+                blank=True, verbose_name="Alternative Names"
+            ),
         ),
     ]

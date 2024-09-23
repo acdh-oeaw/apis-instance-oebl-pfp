@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("apis_ontology", "0017_rename_lat_place_latitude_rename_lng_place_longitude"),
     ]

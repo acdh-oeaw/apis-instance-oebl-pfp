@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0018_rename_name_place_label'),
+        ("apis_ontology", "0018_rename_name_place_label"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='person',
-            name='external_resources',
-            field=models.CharField(blank=True, null=True, verbose_name='Externe Verweise'),
+            model_name="person",
+            name="external_resources",
+            field=models.CharField(
+                blank=True, null=True, verbose_name="Externe Verweise"
+            ),
         ),
     ]

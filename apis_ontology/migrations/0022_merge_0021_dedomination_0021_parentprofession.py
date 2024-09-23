@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0021_dedomination'),
-        ('apis_ontology', '0021_parentprofession'),
+        ("apis_ontology", "0021_dedomination"),
+        ("apis_ontology", "0021_parentprofession"),
     ]
 
-    operations = [
-    ]
+    operations = []
