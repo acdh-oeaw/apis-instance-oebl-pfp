@@ -11,7 +11,17 @@ from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 
-from apis_ontology.models import Event, Institution, Person, Place, Work, Title, Profession, Source, ProfessionCategory
+from apis_ontology.models import (
+    Event,
+    Institution,
+    Person,
+    Place,
+    Work,
+    Title,
+    Profession,
+    Source,
+    ProfessionCategory,
+)
 from apis_core.apis_metainfo.models import Uri
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 from apis_highlighter.models import AnnotationProject
@@ -35,8 +45,8 @@ def create_texts_file():
         print(nextpage)
         page = s.get(nextpage, headers=HEADERS)
         data = page.json()
-        nextpage = data['next']
-        for result in data['results']:
+        nextpage = data["next"]
+        for result in data["results"]:
             ttype = None
             if result["kind"] is not None:
                 ttype = result["kind"]["label"]
@@ -49,7 +59,12 @@ def create_texts_file():
             # * Place review comments and (236)
             # * Commentary Staribacher (5811)
             # See: https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/172
-            if ttype not in ["Place description ÖBL", "Place review comments", "Commentary Staribacher", None]:
+            if ttype not in [
+                "Place description ÖBL",
+                "Place review comments",
+                "Commentary Staribacher",
+                None,
+            ]:
                 texts[result["id"]] = {"text": result["text"], "type": ttype}
     texts_file.write_text(json.dumps(texts, indent=2))
 
@@ -63,16 +78,16 @@ def create_sources_file():
         print(nextpage)
         page = s.get(nextpage, headers=HEADERS)
         data = page.json()
-        nextpage = data['next']
+        nextpage = data["next"]
         for result in data["results"]:
             if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2), S. 112f.":
                 result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 1 (Lfg. 2, 1954), S. 112f."
             if result["pubinfo"] == "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27), S. 126":
                 result["pubinfo"] = "\u00d6BL 1815-1950, Bd. 6 (Lfg. 27, 1974), S. 126"
             sources[result["id"]] = {
-                    "orig_filename": result["orig_filename"],
-                    "pubinfo": result["pubinfo"],
-                    "author": result["author"]
+                "orig_filename": result["orig_filename"],
+                "pubinfo": result["pubinfo"],
+                "author": result["author"],
             }
     sources_file.write_text(json.dumps(sources, indent=2))
 
@@ -86,8 +101,8 @@ def create_uris_file():
         print(nextpage)
         page = s.get(nextpage, headers=HEADERS)
         data = page.json()
-        nextpage = data['next']
-        for result in data['results']:
+        nextpage = data["next"]
+        for result in data["results"]:
             if result["uri"] == "https://apis-edits.acdh-dev.oeaw.ac.at/entity/None/":
                 continue
             if result["uri"] == "":
@@ -106,31 +121,38 @@ def import_professions():
         print(nextpage)
         page = requests.get(nextpage, headers=HEADERS)
         data = page.json()
-        nextpage = data['next']
+        nextpage = data["next"]
         for result in data["results"]:
             tokens = re.split(r" und |,", result["name"])
             for pos, token in enumerate(tokens):
                 if token.startswith("-"):
-                    token = tokens[pos-1] + token
-                profession, created = Profession.objects.get_or_create(name=token.strip())
+                    token = tokens[pos - 1] + token
+                profession, created = Profession.objects.get_or_create(
+                    name=token.strip()
+                )
                 if profession.oldids:
                     existing = set(profession.oldids.splitlines())
                     existing.add(str(result["id"]))
-                    profession.oldids = '\n'.join(list(existing))
+                    profession.oldids = "\n".join(list(existing))
                 else:
                     profession.oldids = result["id"]
                 if profession.oldnames:
                     existing = set(profession.oldnames.splitlines())
                     existing.add(str(result["name"]))
-                    profession.oldnames = '\n'.join(list(existing))
+                    profession.oldnames = "\n".join(list(existing))
                 else:
                     profession.oldnames = result["name"]
                 for attribute in result:
-                    if hasattr(profession, attribute) and attribute not in ["name", "id"]:
+                    if hasattr(profession, attribute) and attribute not in [
+                        "name",
+                        "id",
+                    ]:
                         setattr(profession, attribute, result[attribute])
                 profession.save()
             if result["parent_class"]:
-                professioncat, created = ProfessionCategory.objects.get_or_create(id=result["parent_class"]["id"])
+                professioncat, created = ProfessionCategory.objects.get_or_create(
+                    id=result["parent_class"]["id"]
+                )
                 professioncat.name = result["parent_class"]["label"]
                 professioncat.save()
 
@@ -158,7 +180,9 @@ def import_entities(entities=[]):
         if username:
             user_cache[username], _ = User.objects.get_or_create(username=username)
 
-    importcol, created = SkosCollection.objects.get_or_create(name="imported collections")
+    importcol, created = SkosCollection.objects.get_or_create(
+        name="imported collections"
+    )
 
     result_ids = []
 
@@ -170,7 +194,7 @@ def import_entities(entities=[]):
             print(nextpage)
             page = requests.get(nextpage, headers=HEADERS)
             data = page.json()
-            nextpage = data['next']
+            nextpage = data["next"]
             for result in data["results"]:
                 print(result["url"])
                 if entitymodel is Person:
@@ -187,11 +211,17 @@ def import_entities(entities=[]):
                 professioncategory = None
                 if "profession" in result:
                     for profession in result["profession"]:
-                        if int(profession["id"]) in list(professioncategory_cache.values_list('id', flat=True)):
-                            professioncategory = professioncategory_cache.get(id=profession["id"])
+                        if int(profession["id"]) in list(
+                            professioncategory_cache.values_list("id", flat=True)
+                        ):
+                            professioncategory = professioncategory_cache.get(
+                                id=profession["id"]
+                            )
                         else:
                             for dbprofession in profession_cache:
-                                if profession["id"] in list(map(int, dbprofession.oldids.splitlines())):
+                                if profession["id"] in list(
+                                    map(int, dbprofession.oldids.splitlines())
+                                ):
                                     professionlist.append(dbprofession)
                     del result["profession"]
 
@@ -207,19 +237,29 @@ def import_entities(entities=[]):
 
                 if result["source"] is not None:
                     if "id" in result["source"]:
-                        sources[str(result["source"]["id"])]["content_type"] = content_type
+                        sources[str(result["source"]["id"])]["content_type"] = (
+                            content_type
+                        )
                         sources[str(result["source"]["id"])]["object_id"] = newentity.id
 
                 textids = [str(text["id"]) for text in result["text"]]
-                entity_texts = {key: text for key, text in texts.items() if key in textids}
+                entity_texts = {
+                    key: text for key, text in texts.items() if key in textids
+                }
                 for key, entity_text in entity_texts.items():
                     done = False
                     text_type = entity_text["type"]
                     for field in newentity._meta.fields:
-                        if field.verbose_name == text_type or field.name == text_type.lower():
+                        if (
+                            field.verbose_name == text_type
+                            or field.name == text_type.lower()
+                        ):
                             setattr(newentity, field.name, entity_text["text"])
                             done = True
-                            text_to_entity_mapping[key] = {"entity_id": newentity.id, "field_name": field.name}
+                            text_to_entity_mapping[key] = {
+                                "entity_id": newentity.id,
+                                "field_name": field.name,
+                            }
                     if not done:
                         print(f"Could not save text: {entity_text}")
                 newentity.save()
@@ -229,7 +269,12 @@ def import_entities(entities=[]):
                 newentity.history.filter(history_date__year=2024).delete()
                 newentity.history.filter(history_date__year=2014).delete()
                 newentity._history_date = datetime.datetime(2017, 12, 31)
-                ent_revisions = list(filter(lambda x: is_entity(x, str(result_id), entity), revisions.items()))
+                ent_revisions = list(
+                    filter(
+                        lambda x: is_entity(x, str(result_id), entity),
+                        revisions.items(),
+                    )
+                )
                 if ent_revisions:
                     revid, revision = ent_revisions[0]
                     timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
@@ -246,7 +291,9 @@ def import_entities(entities=[]):
 
                 if "collection" in result:
                     for collection in result["collection"]:
-                        collections[collection["label"]].append((content_type.id, newentity.id))
+                        collections[collection["label"]].append(
+                            (content_type.id, newentity.id)
+                        )
 
     print("Sources...")
     for source in sources:
@@ -260,9 +307,13 @@ def import_entities(entities=[]):
 
     print("Collections...")
     for collection in collections:
-        newcol, created = SkosCollection.objects.get_or_create(name=collection, parent=importcol)
+        newcol, created = SkosCollection.objects.get_or_create(
+            name=collection, parent=importcol
+        )
         for content_type_id, entity_id in collections[collection]:
-            SkosCollectionContentObject.objects.get_or_create(collection=newcol, content_type_id=content_type_id, object_id=entity_id)
+            SkosCollectionContentObject.objects.get_or_create(
+                collection=newcol, content_type_id=content_type_id, object_id=entity_id
+            )
 
     print("Titles...")
     for title in title_cache:
@@ -271,21 +322,27 @@ def import_entities(entities=[]):
         newtitle.person_set.add(persons)
 
     print("Uris...")
-    for uri_id, uri in list((k, v) for k, v in uris.items() if v["entity"] in result_ids):
+    for uri_id, uri in list(
+        (k, v) for k, v in uris.items() if v["entity"] in result_ids
+    ):
         # see https://github.com/acdh-oeaw/apis-instance-oebl-pnp/issues/10
         if uri_id == "60485":
             continue
-        uriobj, _ = Uri.objects.get_or_create(id=uri_id) #, uri=uri["uri"])
+        uriobj, _ = Uri.objects.get_or_create(id=uri_id)  # , uri=uri["uri"])
         for attribute in uri:
             setattr(uriobj, attribute, uri[attribute])
         uriobj.save()
 
-    pathlib.Path("text_to_entity_mapping.json").write_text(json.dumps(text_to_entity_mapping, indent=2))
+    pathlib.Path("text_to_entity_mapping.json").write_text(
+        json.dumps(text_to_entity_mapping, indent=2)
+    )
 
 
 def import_annotation_projects():
     print("Annotation projects...")
-    reader = csv.DictReader(pathlib.Path("data/highlighter_projects_oebl_export_10-2023.csv.csv").open())
+    reader = csv.DictReader(
+        pathlib.Path("data/highlighter_projects_oebl_export_10-2023.csv.csv").open()
+    )
     for row in reader:
         ap, _ = AnnotationProject.objects.get_or_create(pk=row["id"])
         ap.name = row["name"]

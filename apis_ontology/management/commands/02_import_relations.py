@@ -13,7 +13,22 @@ from simple_history.utils import get_history_model_for_model
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 TOKEN = os.environ.get("TOKEN")
 HEADERS = {"Authorization": f"Token {TOKEN}"}
-COPYFIELDS = ['review', 'start_date', 'start_start_date', 'start_end_date', 'end_date', 'end_start_date', 'end_end_date', 'start_date_written', 'end_date_written', 'status', 'references', 'notes', 'published', 'source']
+COPYFIELDS = [
+    "review",
+    "start_date",
+    "start_start_date",
+    "start_end_date",
+    "end_date",
+    "end_start_date",
+    "end_end_date",
+    "start_date_written",
+    "end_date_written",
+    "status",
+    "references",
+    "notes",
+    "published",
+    "source",
+]
 
 
 relation_file = pathlib.Path("relations.json")
@@ -21,34 +36,31 @@ relation_file = pathlib.Path("relations.json")
 
 def fetch_relations():
     relations = {
-            'personevent': {
-                "subj": "related_person",
-                "obj": "related_event",
-            },
-            'personinstitution': {
-                "subj": "related_person",
-                "obj": "related_institution"
-            },
-            "personperson": {
-                "subj": "related_personA",
-                "obj": "related_personB",
-            },
-            "personplace": {
-                "subj": "related_person",
-                "obj": "related_place",
-            },
-            "personwork": {
-                "subj": "related_person",
-                "obj": "related_work",
-            },
-            "placeplace": {
-                "subj": "related_placeA",
-                "obj": "related_placeB",
-            },
-            "institutioninstitution": {
-                "subj": "related_institutionA",
-                "obj": "related_institutionB",
-            }
+        "personevent": {
+            "subj": "related_person",
+            "obj": "related_event",
+        },
+        "personinstitution": {"subj": "related_person", "obj": "related_institution"},
+        "personperson": {
+            "subj": "related_personA",
+            "obj": "related_personB",
+        },
+        "personplace": {
+            "subj": "related_person",
+            "obj": "related_place",
+        },
+        "personwork": {
+            "subj": "related_person",
+            "obj": "related_work",
+        },
+        "placeplace": {
+            "subj": "related_placeA",
+            "obj": "related_placeB",
+        },
+        "institutioninstitution": {
+            "subj": "related_institutionA",
+            "obj": "related_institutionB",
+        },
     }
     relationlist = {}
     RELATIONS = {}
@@ -69,11 +81,15 @@ def fetch_relations():
                         proppage = s.get(result["relation_type"]["url"])
                         propdata = proppage.json()
                         relationlist[result["relation_type"]["id"]] = propdata
-                    if result[relationsettings["subj"]] and result[relationsettings["obj"]]:
+                    if (
+                        result[relationsettings["subj"]]
+                        and result[relationsettings["obj"]]
+                    ):
                         RELATIONS[result["id"]] = {
                             "type": relation,
                             "name": propdata["name"],
-                            "name_reverse": propdata["name_reverse"] or propdata["name"] + " (reverse)",
+                            "name_reverse": propdata["name_reverse"]
+                            or propdata["name"] + " (reverse)",
                             "subj": result[relationsettings["subj"]]["id"],
                             "obj": result[relationsettings["obj"]]["id"],
                         }
@@ -111,8 +127,14 @@ def import_relations():
         property_identifier = f"{relation['name']}___{relation['name_reverse']}"
         prop = property_cache.get(property_identifier, {}).get("property", None)
         if prop is None:
-            prop, created = Property.objects.get_or_create(name_forward=relation["name"], name_reverse=relation["name_reverse"])
-            property_cache[property_identifier] = {"property": prop, "subj_class": [], "obj_class": []}
+            prop, created = Property.objects.get_or_create(
+                name_forward=relation["name"], name_reverse=relation["name_reverse"]
+            )
+            property_cache[property_identifier] = {
+                "property": prop,
+                "subj_class": [],
+                "obj_class": [],
+            }
 
         try:
             subj = None
@@ -135,24 +157,37 @@ def import_relations():
                     prop.obj_class.add(ct)
             if subj and obj and prop:
                 try:
-                    tt, created = TempTriple.objects.get_or_create(id=id, prop=prop, subj=subj, obj=obj)
+                    tt, created = TempTriple.objects.get_or_create(
+                        id=id, prop=prop, subj=subj, obj=obj
+                    )
                     for attribute in relation:
-                        if hasattr(tt, attribute) and attribute not in ["id", "subj", "obj"]:
+                        if hasattr(tt, attribute) and attribute not in [
+                            "id",
+                            "subj",
+                            "obj",
+                        ]:
                             setattr(tt, attribute, relation[attribute])
                     tt.history.filter(history_date__year=2024).delete()
                     tt.history.filter(history_date__year=2017).delete()
                     tt._history_date = datetime.datetime(2017, 12, 31)
-                    rel_revisions = list(filter(lambda x: is_relation(x, str(id), relation["type"]), revisions.items()))
+                    rel_revisions = list(
+                        filter(
+                            lambda x: is_relation(x, str(id), relation["type"]),
+                            revisions.items(),
+                        )
+                    )
                     if rel_revisions:
                         rid, revision = rel_revisions[0]
-                        timestamp = datetime.datetime.fromisoformat(revision["timestamp"])
+                        timestamp = datetime.datetime.fromisoformat(
+                            revision["timestamp"]
+                        )
                         tt._history_date = timestamp
                         if revision.get("user") is not None:
                             tt._history_user = user_cache[revision["user"]]
                     tt.history.filter(history_date=tt._history_date).delete()
 
                     tt.save()
-                    #tt.history.filter(history_date=timestamp).update(history_type="+")
+                    # tt.history.filter(history_date=timestamp).update(history_type="+")
                 except Exception as e:
                     print(e)
                     print(relation)
@@ -163,7 +198,9 @@ def import_relations():
             print(e)
 
     th = get_history_model_for_model(TempTriple)
-    th.objects.filter(id__in=[revid for revid, rev in relations.items()]).update(history_type="+")
+    th.objects.filter(id__in=[revid for revid, rev in relations.items()]).update(
+        history_type="+"
+    )
     for property_identifier, prop in property_cache.items():
         prop["property"].subj_class.add(*prop["subj_class"])
         prop["property"].obj_class.add(*prop["obj_class"])

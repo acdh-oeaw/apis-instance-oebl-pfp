@@ -9,13 +9,13 @@ from apis_core.apis_relations.models import TempTriple
 from django.contrib.auth.models import User
 
 user_mapping = {
-        12: 'sennierer',
-        14: 'mkaiser',
-        16: 'ABernad',
-        24: 'PRumpolt',
-        25: 'KLejtovicz',
-        26: 'spacy_user',
-        27: 'APiechl',
+    12: "sennierer",
+    14: "mkaiser",
+    16: "ABernad",
+    24: "PRumpolt",
+    25: "KLejtovicz",
+    26: "spacy_user",
+    27: "APiechl",
 }
 
 
@@ -23,15 +23,23 @@ class Command(BaseCommand):
     help = "Import data from legacy APIS instance"
 
     def handle(self, *args, **options):
-        text_to_entity_mapping = json.loads(pathlib.Path("text_to_entity_mapping.json").read_text())
+        text_to_entity_mapping = json.loads(
+            pathlib.Path("text_to_entity_mapping.json").read_text()
+        )
 
-        reader = csv.DictReader(pathlib.Path("data/annotations_oebl_export_10-2023.csv").open())
+        reader = csv.DictReader(
+            pathlib.Path("data/annotations_oebl_export_10-2023.csv").open()
+        )
         for row in reader:
             if row["content_type_id"] and row["object_id"]:
-                ann, _ = Annotation.objects.get_or_create(pk=row["id"], start=row["start"], end=row["end"])
+                ann, _ = Annotation.objects.get_or_create(
+                    pk=row["id"], start=row["start"], end=row["end"]
+                )
                 ann.orig_string = row["orig_string"]
                 try:
-                    user = User.objects.get(username=user_mapping[int(row["user_added_id"])])
+                    user = User.objects.get(
+                        username=user_mapping[int(row["user_added_id"])]
+                    )
                     ann.user = user
                 except User.DoesNotExist:
                     pass
@@ -60,6 +68,8 @@ class Command(BaseCommand):
                         print(obj)
                         ann.content_object = obj
 
-                    project, _ = AnnotationProject.objects.get_or_create(pk=row["annotation_project_id"])
+                    project, _ = AnnotationProject.objects.get_or_create(
+                        pk=row["annotation_project_id"]
+                    )
                     ann.project = project
                     ann.save()
