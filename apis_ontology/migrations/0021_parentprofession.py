@@ -5,17 +5,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0020_alter_text_kind'),
+        ("apis_ontology", "0020_alter_text_kind"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Parentprofession',
+            name="Parentprofession",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('label', models.CharField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("label", models.CharField()),
             ],
             bases=(apis_core.generic.abc.GenericModel, models.Model),
         ),

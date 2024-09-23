@@ -4,15 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0015_event_name_institution_name_person_name_place_name_and_more'),
+        (
+            "apis_ontology",
+            "0015_event_name_institution_name_person_name_place_name_and_more",
+        ),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='person',
-            old_name='name',
-            new_name='surname',
+            model_name="person",
+            old_name="name",
+            new_name="surname",
         ),
     ]

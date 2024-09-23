@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0002_alter_event_status_alter_institution_status_and_more'),
+        ("apis_ontology", "0002_alter_event_status_alter_institution_status_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='kind',
+            model_name="event",
+            name="kind",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='institution',
-            name='kind',
+            model_name="institution",
+            name="kind",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='kind',
+            model_name="place",
+            name="kind",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='work',
-            name='kind',
+            model_name="work",
+            name="kind",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

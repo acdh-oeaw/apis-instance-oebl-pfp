@@ -4,70 +4,69 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0036_source_pdf_filename'),
+        ("apis_ontology", "0036_source_pdf_filename"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="event",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='institution',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="institution",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='person',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="person",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='label',
-            field=models.CharField(blank=True, default='', max_length=4096),
+            model_name="place",
+            name="label",
+            field=models.CharField(blank=True, default="", max_length=4096),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="place",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='versionevent',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="versionevent",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='versioninstitution',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="versioninstitution",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='versionperson',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="versionperson",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='versionplace',
-            name='label',
-            field=models.CharField(blank=True, default='', max_length=4096),
+            model_name="versionplace",
+            name="label",
+            field=models.CharField(blank=True, default="", max_length=4096),
         ),
         migrations.AlterField(
-            model_name='versionplace',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="versionplace",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='versionwork',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="versionwork",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
         migrations.AlterField(
-            model_name='work',
-            name='notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Notes'),
+            model_name="work",
+            name="notes",
+            field=models.TextField(blank=True, null=True, verbose_name="Notes"),
         ),
     ]

@@ -4,25 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0023_alter_dedomination_options_person_profession_father_and_more'),
+        (
+            "apis_ontology",
+            "0023_alter_dedomination_options_person_profession_father_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='place',
-            name='label',
-            field=models.CharField(blank=True, default=''),
+            model_name="place",
+            name="label",
+            field=models.CharField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='latitude',
+            model_name="place",
+            name="latitude",
             field=models.FloatField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='longitude',
+            model_name="place",
+            name="longitude",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

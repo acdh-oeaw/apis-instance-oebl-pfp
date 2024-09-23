@@ -4,21 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0004_remove_person_profession_profession_and_more'),
+        ("apis_ontology", "0004_remove_person_profession_profession_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Source',
+            name="Source",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('orig_filename', models.CharField(blank=True, max_length=255)),
-                ('indexed', models.BooleanField(default=False)),
-                ('pubinfo', models.CharField(blank=True, max_length=400)),
-                ('author', models.CharField(blank=True, max_length=255)),
-                ('orig_id', models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("orig_filename", models.CharField(blank=True, max_length=255)),
+                ("indexed", models.BooleanField(default=False)),
+                ("pubinfo", models.CharField(blank=True, max_length=400)),
+                ("author", models.CharField(blank=True, max_length=255)),
+                ("orig_id", models.PositiveIntegerField(blank=True, null=True)),
             ],
         ),
     ]

@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0027_person_adelspraedikat_and_more'),
+        ("apis_ontology", "0027_person_adelspraedikat_and_more"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Text',
+            name="Text",
         ),
     ]

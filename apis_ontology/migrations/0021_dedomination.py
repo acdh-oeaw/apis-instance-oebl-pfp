@@ -5,22 +5,31 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_metainfo', '0012_remove_rootobject_deprecated_name'),
-        ('apis_ontology', '0020_alter_text_kind'),
+        ("apis_metainfo", "0012_remove_rootobject_deprecated_name"),
+        ("apis_ontology", "0020_alter_text_kind"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Dedomination',
+            name="Dedomination",
             fields=[
-                ('rootobject_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='apis_metainfo.rootobject')),
-                ('name', models.CharField()),
+                (
+                    "rootobject_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="apis_metainfo.rootobject",
+                    ),
+                ),
+                ("name", models.CharField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('apis_metainfo.rootobject',),
+            bases=("apis_metainfo.rootobject",),
         ),
     ]

@@ -5,11 +5,8 @@ from django.contrib.postgres.operations import TrigramExtension
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0012_professioncategory_alter_profession_options_and_more'),
+        ("apis_ontology", "0012_professioncategory_alter_profession_options_and_more"),
     ]
 
-    operations = [
-        TrigramExtension()
-    ]
+    operations = [TrigramExtension()]

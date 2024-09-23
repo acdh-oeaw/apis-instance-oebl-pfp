@@ -4,120 +4,130 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0026_remove_event_published_remove_event_review_and_more'),
+        ("apis_ontology", "0026_remove_event_published_remove_event_review_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='person',
-            name='adelspraedikat',
+            model_name="person",
+            name="adelspraedikat",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='ausbildung_studium_studienreise',
-            field=models.TextField(blank=True, verbose_name='Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben'),
+            model_name="person",
+            name="ausbildung_studium_studienreise",
+            field=models.TextField(
+                blank=True,
+                verbose_name="Ausbildung / Studium / Studienreisen und diesbezügliche Ortsangaben",
+            ),
         ),
         migrations.AddField(
-            model_name='person',
-            name='berufe',
+            model_name="person",
+            name="berufe",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='berufstaetigkeit_lebenstationen',
-            field=models.TextField(blank=True, verbose_name='Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte'),
+            model_name="person",
+            name="berufstaetigkeit_lebenstationen",
+            field=models.TextField(
+                blank=True,
+                verbose_name="Berufstätigkeit / Lebensstationen und geographische Lebensmittelpunkte",
+            ),
         ),
         migrations.AddField(
-            model_name='person',
-            name='geburtsdatum',
+            model_name="person",
+            name="geburtsdatum",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='geburtsort',
+            model_name="person",
+            name="geburtsort",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='literatur',
+            model_name="person",
+            name="literatur",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='mitgliedschaften_orden_auszeichnungen',
-            field=models.TextField(blank=True, verbose_name='Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben'),
+            model_name="person",
+            name="mitgliedschaften_orden_auszeichnungen",
+            field=models.TextField(
+                blank=True,
+                verbose_name="Mitgliedschaften, Orden, Auszeichnungen und diesbezügliche Ortsangaben",
+            ),
         ),
         migrations.AddField(
-            model_name='person',
-            name='nachrecherche',
+            model_name="person",
+            name="nachrecherche",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='name_text',
-            field=models.TextField(blank=True, verbose_name='Name'),
+            model_name="person",
+            name="name_text",
+            field=models.TextField(blank=True, verbose_name="Name"),
         ),
         migrations.AddField(
-            model_name='person',
-            name='oebl_haupttext',
-            field=models.TextField(blank=True, verbose_name='ÖBL Haupttext'),
+            model_name="person",
+            name="oebl_haupttext",
+            field=models.TextField(blank=True, verbose_name="ÖBL Haupttext"),
         ),
         migrations.AddField(
-            model_name='person',
-            name='oebl_kurzinfo',
-            field=models.TextField(blank=True, verbose_name='ÖBL Kurzinfo'),
+            model_name="person",
+            name="oebl_kurzinfo",
+            field=models.TextField(blank=True, verbose_name="ÖBL Kurzinfo"),
         ),
         migrations.AddField(
-            model_name='person',
-            name='oebl_werkverzeichnis',
-            field=models.TextField(blank=True, verbose_name='ÖBL Werkverzeichnis'),
+            model_name="person",
+            name="oebl_werkverzeichnis",
+            field=models.TextField(blank=True, verbose_name="ÖBL Werkverzeichnis"),
         ),
         migrations.AddField(
-            model_name='person',
-            name='online_edition_haupttext',
-            field=models.TextField(blank=True, verbose_name='Online Edition Haupttext'),
+            model_name="person",
+            name="online_edition_haupttext",
+            field=models.TextField(blank=True, verbose_name="Online Edition Haupttext"),
         ),
         migrations.AddField(
-            model_name='person',
-            name='pseudonyme',
+            model_name="person",
+            name="pseudonyme",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='religionen',
+            model_name="person",
+            name="religionen",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='soziale_herkunft',
+            model_name="person",
+            name="soziale_herkunft",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='sterbedatum',
+            model_name="person",
+            name="sterbedatum",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='sterbeort',
+            model_name="person",
+            name="sterbeort",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='uebersiedlung_emigration',
-            field=models.TextField(blank=True, verbose_name='Übersiedlung, Emigration, Remigration'),
+            model_name="person",
+            name="uebersiedlung_emigration",
+            field=models.TextField(
+                blank=True, verbose_name="Übersiedlung, Emigration, Remigration"
+            ),
         ),
         migrations.AddField(
-            model_name='person',
-            name='verwandtschaft',
+            model_name="person",
+            name="verwandtschaft",
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='person',
-            name='weitere_namensformen',
+            model_name="person",
+            name="weitere_namensformen",
             field=models.TextField(blank=True),
         ),
     ]

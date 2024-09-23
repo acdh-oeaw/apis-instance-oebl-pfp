@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_metainfo', '0012_remove_rootobject_deprecated_name'),
-        ('apis_ontology', '0024_alter_place_label_alter_place_latitude_and_more'),
+        ("apis_metainfo", "0012_remove_rootobject_deprecated_name"),
+        ("apis_ontology", "0024_alter_place_label_alter_place_latitude_and_more"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Dedomination',
-            new_name='Denomination',
+            old_name="Dedomination",
+            new_name="Denomination",
         ),
     ]
