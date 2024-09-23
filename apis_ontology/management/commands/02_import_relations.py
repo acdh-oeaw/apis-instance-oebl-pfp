@@ -118,7 +118,7 @@ def import_relations():
         if username:
             user_cache[username], _ = User.objects.get_or_create(username=username)
 
-    l = len(relations) # noqa: E741
+    l = len(relations)  # noqa: E741
     p = 0
 
     for id, relation in relations.items():
