@@ -14,12 +14,32 @@ WHERE {
 }
 """
 [[attributes]]
+# name
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?surname
+WHERE {
+  ?subject gndo:preferredNameEntityForThePerson/gndo:nameAddition ?name .
+  BIND(?name AS ?surname)
+}
+"""
+[[attributes]]
 # first_name
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
 SELECT ?forename
 WHERE {
   ?subject gndo:preferredNameEntityForThePerson/gndo:forename ?first_name .
+  BIND(?first_name as ?forename)
+}
+"""
+[[attributes]]
+# first_name
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?forename
+WHERE {
+  ?subject gndo:preferredNameEntityForThePerson/gndo:personalName ?first_name .
   BIND(?first_name as ?forename)
 }
 """
