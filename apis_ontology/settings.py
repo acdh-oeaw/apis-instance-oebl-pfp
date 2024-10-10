@@ -43,6 +43,9 @@ LOGGING = {
     },
 }
 
+OTEL_INSTRUMENTATION_ENABLED = True
+OTEL_PYTHON_DJANGO_INSTRUMENT = True
+
 LOG_LIST_NOSTAFF_EXCLUDE_APP_LABELS = ["reversion", "admin", "sessions", "auth"]
 
 LANGUAGE_CODE = "de"
