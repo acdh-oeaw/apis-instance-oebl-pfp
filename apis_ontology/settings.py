@@ -14,8 +14,6 @@ INSTALLED_APPS += ["auditlog"]
 
 ROOT_URLCONF = "apis_ontology.urls"
 
-PROJECT_DEFAULT_MD = {}
-
 CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 
 
