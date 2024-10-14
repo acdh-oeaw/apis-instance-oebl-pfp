@@ -25,6 +25,12 @@ MIDDLEWARE += [  # noqa: F405
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
+REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [  # noqa: F405
+    "rest_framework.renderers.JSONRenderer",
+    "rest_framework.renderers.BrowsableAPIRenderer",
+    "apis_ontology.renderer.CidocTTLRenderer",
+    "apis_ontology.renderer.CidocXMLRenderer",
+]
 # this is a workaround to disable pagintation in the relations
 # listing on the entities pages
 APIS_ENTITIES = {
