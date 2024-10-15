@@ -19,8 +19,28 @@ class CIDOCCRMRenderer(renderers.BaseRenderer):
         g.add((person_uri, RDF.type, crm.E21_Person))
 
         # Add properties
-        if "name" in data:
-            g.add((person_uri, crm.P1_is_identified_by, Literal(data["name"])))
+        appellation_uri = URIRef(ex[f"appellation_{data['id']}"])
+        g.add((appellation_uri, RDF.type, crm.E41_Appellation))
+        g.add((person_uri, crm.P1_is_identified_by, appellation_uri))
+        g.add(
+            (
+                appellation_uri,
+                RDFS.label,
+                Literal(f"{data['forename']} {data['surname']}"),
+            )
+        )
+
+        if "forename" in data:
+            forename_uri = URIRef(ex[f"forename_{data['id']}"])
+            g.add((forename_uri, RDF.type, crm.E41_Appellation))
+            g.add((appellation_uri, crm.P106_is_composed_of, forename_uri))
+            g.add((forename_uri, RDFS.label, Literal(data["forename"])))
+
+        if "surname" in data:
+            surname_uri = URIRef(ex[f"surname_{data['id']}"])
+            g.add((surname_uri, RDF.type, crm.E41_Appellation))
+            g.add((appellation_uri, crm.P106_is_composed_of, surname_uri))
+            g.add((surname_uri, RDFS.label, Literal(data["surname"])))
 
         if "birth_date" in data:
             birth_event = URIRef(ex[f"birth_{data['id']}"])
