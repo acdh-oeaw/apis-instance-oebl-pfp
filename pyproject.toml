@@ -10,7 +10,7 @@ packages = [{include = "apis_ontology"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 psycopg2 = "^2.9"
-apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.27.0"}
+apis-core = {git = "https://github.com/acdh-oeaw/apis-core-rdf", rev = "v0.28.0"}
 apis-highlighter-ng = "^0.4.0"
 apis-acdhch-default-settings = "1.4.0"
 django-auditlog = "^3.0.0"
