@@ -1,6 +1,7 @@
 import django_tables2 as tables
 from apis_core.apis_entities.tables import AbstractEntityTable
 from .models import Person
+from apis_core.relations.tables import RelationsListTable
 
 
 class BiographienLinkColumn(tables.TemplateColumn):
@@ -46,3 +47,11 @@ class PersonTable(AbstractEntityTable):
         if record.end_date:
             return record.end_date.year
         return "-"
+
+
+class OEBLBaseEntityOEBLBaseEntityRelationsTable(RelationsListTable):
+    start = tables.Column(accessor="start_date_written", order_by="start_date")
+    end = tables.Column(accessor="end_date_written", order_by="end_date")
+
+    class Meta(RelationsListTable.Meta):
+        sequence = ["start", "end"] + list(RelationsListTable.Meta.sequence)
