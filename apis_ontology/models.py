@@ -1245,3 +1245,18 @@ class StandInKontaktMit(
     @classmethod
     def reverse_name(self) -> str:
         return "stand in Kontakt mit [PIO]"
+
+
+class ArbeiteteZusammenMit(
+    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+):
+    subj_model = Person
+    obj_model = Person
+
+    @classmethod
+    def name(self) -> str:
+        return "arbeitete zusammmen mit [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "arbeitete zusammmen mit [PIO]"
