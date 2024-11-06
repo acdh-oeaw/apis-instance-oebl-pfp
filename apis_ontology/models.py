@@ -300,6 +300,17 @@ class Denomination(AbstractEntity):
         verbose_name_plural = _("Denominations")
 
 
+class Nobility(AbstractEntity):
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Adelstitel")
+        verbose_name_plural = _("Adelstitel")
+
+
 auditlog.register(Source, serialize_data=True)
 auditlog.register(Title, serialize_data=True)
 auditlog.register(ProfessionCategory, serialize_data=True)
@@ -1260,3 +1271,33 @@ class ArbeiteteZusammenMit(
     @classmethod
     def reverse_name(self) -> str:
         return "arbeitete zusammmen mit [PIO]"
+
+
+class WurdeErhobenIn(
+    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+):
+    subj_model = Person
+    obj_model = Nobility
+
+    @classmethod
+    def name(self) -> str:
+        return "wurde erhoben in [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "war erhobener Adelstitel von [PIO]"
+
+
+class WarGeburtstitelVon(
+    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+):
+    subj_model = Person
+    obj_model = Nobility
+
+    @classmethod
+    def name(self) -> str:
+        return "führte von Geburt an [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "war Geburtstitel von [PIO]"
