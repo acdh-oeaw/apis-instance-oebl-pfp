@@ -289,7 +289,7 @@ class Work(
         verbose_name_plural = _("Works")
 
 
-class Denomination(AbstractEntity):
+class Denomination(AbstractEntity, OEBLBaseEntity):
     name = models.CharField()
 
     def __str__(self):
@@ -300,7 +300,7 @@ class Denomination(AbstractEntity):
         verbose_name_plural = _("Denominations")
 
 
-class Nobility(AbstractEntity):
+class Nobility(AbstractEntity, OEBLBaseEntity):
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
 
     def __str__(self):
