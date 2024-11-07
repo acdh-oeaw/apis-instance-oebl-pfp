@@ -52,6 +52,20 @@ class PersonTable(AbstractEntityTable):
 class OEBLBaseEntityOEBLBaseEntityRelationsTable(RelationsListTable):
     start = tables.Column(accessor="start_date_written", order_by="start_date")
     end = tables.Column(accessor="end_date_written", order_by="end_date")
+    notes = tables.Column()
 
     class Meta(RelationsListTable.Meta):
-        sequence = ["start", "end"] + list(RelationsListTable.Meta.sequence)
+        sequence = (
+            ["start", "end"]
+            + list(RelationsListTable.Meta.sequence)[:-3]
+            + ["notes"]
+            + list(RelationsListTable.Meta.sequence)[-3:]
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.columns["notes"].column.attrs = {
+            "td": {
+                "style": "max-width:30vw; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;"
+            }
+        }
