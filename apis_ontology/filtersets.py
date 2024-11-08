@@ -29,7 +29,9 @@ def remove_quotes(token):
 
 
 def trigram_search_filter_person(queryset, name, value):
-    return trigram_search_filter(queryset, ["surname", "forename"], value)
+    return trigram_search_filter(
+        queryset, ["surname__unaccent", "forename__unaccent"], value
+    )
 
 
 def trigram_search_filter_institution(queryset, name, value):
@@ -51,7 +53,7 @@ def trigram_search_filter(queryset, fields, value):
     trig_vector = Greatest(*trig_vector_list, None)
     return (
         queryset.annotate(similarity=trig_vector)
-        .filter(similarity__gt=0.4)
+        .filter(similarity__gt=0.5)
         .order_by("-similarity")
     )
 
@@ -75,10 +77,16 @@ class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
             models.CharField: {
                 "filter_class": django_filters.CharFilter,
                 "extra": lambda f: {
-                    "lookup_expr": "icontains",
+                    "lookup_expr": "unaccent__icontains",
                 },
             },
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for filter in self.filters.values():
+            if hasattr(filter, "label") and filter.label and "unaccent" in filter.label:
+                filter.label = filter.label.replace("unaccent ", "")
 
 
 class PersonFilterSet(LegacyStuffMixinFilterSet):
