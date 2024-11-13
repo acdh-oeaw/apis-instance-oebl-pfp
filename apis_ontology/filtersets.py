@@ -3,6 +3,7 @@ import django_filters
 from django.contrib.postgres.search import TrigramWordSimilarity
 from django.db.models.functions import Greatest
 from django.db import models
+import unicodedata
 
 from apis_core.apis_entities.filtersets import AbstractEntityFilterSet
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
@@ -21,6 +22,12 @@ PATTERN = re.compile(r"""((?:[^ "']|"[^"]*"|'[^']*')+)""")
 
 def remove_quotes(token):
     return token.strip('"')
+
+
+def remove_accents(input_str):
+    nfkd_form = unicodedata.normalize("NFKD", input_str)
+    only_ascii = nfkd_form.encode("ASCII", "ignore")
+    return only_ascii.decode()
 
 
 ################
@@ -49,7 +56,7 @@ def trigram_search_filter(queryset, fields, value):
     trig_vector_list = []
     for token in tokens:
         for field in fields:
-            trig_vector_list.append(TrigramWordSimilarity(token, field))
+            trig_vector_list.append(TrigramWordSimilarity(remove_accents(token), field))
     trig_vector = Greatest(*trig_vector_list, None)
     return (
         queryset.annotate(similarity=trig_vector)
