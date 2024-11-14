@@ -9,5 +9,5 @@ on:
 
 jobs:
   deploy:
-    uses: acdh-oeaw/prosnet-workflows/.github/workflows/deploy-apis-instance.yml@v0.4.5
+    uses: acdh-oeaw/prosnet-workflows/.github/workflows/deploy-apis-instance.yml@v0.4.6
     secrets: inherit
