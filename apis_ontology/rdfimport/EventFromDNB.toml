@@ -14,6 +14,16 @@ WHERE {
 }
 """
 [[attributes]]
+# name
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?name
+WHERE {
+  ?subject a gndo:ConferenceOrEvent ;
+           gndo:preferredNameForTheConferenceOrEvent ?name .
+}
+"""
+[[attributes]]
 # start_date_written
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
@@ -21,6 +31,16 @@ SELECT ?start_date_written
 WHERE {
   ?subject a gndo:HistoricSingleEventOrEra ;
            gndo:dateOfProduction ?start_date_written .
+}
+"""
+[[attributes]]
+# start_date_written
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?start_date_written
+WHERE {
+  ?subject a gndo:ConferenceOrEvent ;
+           gndo:dateOfConferenceOrEvent ?start_date_written .
 }
 """
 [[attributes]]
