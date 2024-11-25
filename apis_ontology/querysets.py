@@ -34,6 +34,8 @@ def InstitutionAutocompleteQueryset(model, query):
     # calculate a rank based on the difference in length
     # if the query is *not* contained in the result, we
     # use the trigram similarity score
+    if query.startswith("http"):
+        return model.objects.none()
     insitutions = (
         model.objects.annotate(
             icontains_rank=Case(
