@@ -1,0 +1,35 @@
+#################################################
+# Create an Event from GND                      #
+#################################################
+superclass = "apis_ontology.models.Event"
+regex = "https://d-nb.info.*"
+[[attributes]]
+# name
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?name
+WHERE {
+  ?subject a gndo:HistoricSingleEventOrEra ;
+           gndo:preferredNameForTheSubjectHeading ?name .
+}
+"""
+[[attributes]]
+# start_date_written
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?start_date_written
+WHERE {
+  ?subject a gndo:HistoricSingleEventOrEra ;
+           gndo:dateOfProduction ?start_date_written .
+}
+"""
+[[attributes]]
+# related_place
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?related_place
+WHERE {
+  ?subject a gndo:HistoricSingleEventOrEra ;
+           gndo:place ?related_place .
+}
+"""

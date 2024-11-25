@@ -1301,3 +1301,16 @@ class WarGeburtstitelVon(
     @classmethod
     def reverse_name(self) -> str:
         return "war Geburtstitel von [PIO]"
+
+
+class FandStattIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+    subj_model = Event
+    obj_model = Place
+
+    @classmethod
+    def name(self) -> str:
+        return "fand statt in [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "war Ort von [PIO]"
