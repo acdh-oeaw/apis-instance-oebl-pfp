@@ -76,8 +76,17 @@ WHERE {
 # place_of_birth
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?place_of_birth
+SELECT ?place_of_birth__Place__WurdeGeborenIn
 WHERE {
-  ?subject gndo:placeOfBirth ?place_of_birth
+  ?subject gndo:placeOfBirth ?place_of_birth__Place__WurdeGeborenIn
+}
+"""
+[[attributes]]
+# place_of_death
+sparql = """
+PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
+SELECT ?place_of_death__Place__StarbIn
+WHERE {
+  ?subject gndo:placeOfDeath ?place_of_death__Place__StarbIn
 }
 """

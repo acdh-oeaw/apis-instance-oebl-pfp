@@ -47,9 +47,9 @@ WHERE {
 # related_place
 sparql = """
 PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?related_place
+SELECT ?relatedPlace__Place__FandStattIn
 WHERE {
   ?subject a gndo:HistoricSingleEventOrEra ;
-           gndo:place ?related_place .
+           gndo:place ?relatedPlace__Place__FandStattIn .
 }
 """
