@@ -1,6 +1,24 @@
 from rest_framework.renderers import serializers
 from rdflib import Graph, Literal, URIRef, Namespace
 from rdflib.namespace import RDF, RDFS, XSD
+from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
+from apis_core.relations.utils import relation_content_types
+
+# Dynamically create and add serializer classes to this module
+for ct in relation_content_types():
+    cls = ct.model_class()
+    if cls.__name__ == "Relation":
+        continue
+    serializer_class = type(
+        f"{cls.__name__}Serializer",
+        (GenericHyperlinkedModelSerializer,),
+        {
+            "__module__": __name__,
+            "Meta": type("Meta", (), {"model": cls, "fields": "__all__"}),
+        },
+    )
+    # Add the new serializer class to the module globals
+    globals()[f"{cls.__name__}Serializer"] = serializer_class
 
 
 class PersonCidocSerializer(serializers.BaseSerializer):
