@@ -11,7 +11,7 @@ INSTALLED_APPS += [  # noqa: F405
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS.insert(0, "apis_core.relations")
-INSTALLED_APPS += ["auditlog"]
+INSTALLED_APPS += ["auditlog", "apis_acdhch_django_auditlog"]
 
 ROOT_URLCONF = "apis_ontology.urls"
 
