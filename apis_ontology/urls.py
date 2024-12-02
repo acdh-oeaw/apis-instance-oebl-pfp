@@ -5,8 +5,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from apis_core.apis_entities.api_views import GetEntityGeneric
 
-from apis_ontology.views import UserAuditLog
-
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -20,5 +18,5 @@ urlpatterns = [
 
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += [
-    path("auditlog", UserAuditLog.as_view()),
+    path("", include("apis_acdhch_django_auditlog.urls")),
 ]
