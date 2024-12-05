@@ -46,15 +46,14 @@ class PersonCidocSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         g = Graph()
         instance = normalize_empty_attributes(instance)
+        base_uri = getattr(
+            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
+        )
 
         # Define namespaces
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        oebl_person = Namespace(
-            f"{getattr(settings, 'APIS_BASE_URI')}apis_ontology.person/"
-        )
-        oebl_appellation = Namespace(
-            f"{getattr(settings, 'APIS_BASE_URI')}appellation/"
-        )
+        oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
+        oebl_appellation = Namespace(f"{base_uri}appellation/")
         oebl_attr = Namespace(f"{getattr(settings, 'APIS_BASE_URI')}attributes/")
 
         g.namespace_manager.bind("crm", crm, replace=True)
@@ -150,18 +149,15 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
         g = Graph()
+        base_uri = getattr(
+            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
+        )
 
         # Define namespaces
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        oebl_person = Namespace(
-            f"{getattr(settings, 'APIS_BASE_URI')}apis_ontology.person/"
-        )
-        oebl_inst = Namespace(
-            f"{getattr(settings, 'APIS_BASE_URI')}apis_ontology.institution/"
-        )
-        oebl_appellation = Namespace(
-            f"{getattr(settings, 'APIS_BASE_URI')}appellation/"
-        )
+        oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
+        oebl_inst = Namespace(f"{base_uri}apis_ontology.institution/")
+        oebl_appellation = Namespace(f"{base_uri}appellation/")
         oebl_attr = Namespace(f"{getattr(settings, 'APIS_BASE_URI')}attributes/")
 
         g.namespace_manager.bind("crm", crm, replace=True)
