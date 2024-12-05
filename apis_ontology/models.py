@@ -101,6 +101,9 @@ class Profession(GenericModel, models.Model):
 class Parentprofession(GenericModel, models.Model):
     label = models.CharField()
 
+    def __str__(self):
+        return self.label
+
 
 class Event(
     LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity, OEBLBaseEntity
