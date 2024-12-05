@@ -42,3 +42,5 @@ APIS_ENTITIES = {
     "Work": {"relations_per_page": 1000},
     "Denomination": {"relations_per_page": 1000},
 }
+
+DEFAULT_HIGHLIGTHER_PROJECT = 28
