@@ -12,6 +12,7 @@ INSTALLED_APPS.insert(0, "apis_core.relations")
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["auditlog", "apis_acdhch_django_auditlog"]
+INSTALLED_APPS.remove("apis_core.apis_relations")
 
 ROOT_URLCONF = "apis_ontology.urls"
 
