@@ -11,7 +11,7 @@ from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
 from apis_core.apis_entities.abc import E53_Place
 from apis_core.history.models import VersionMixin
-from apis_core.utils.fields import NewlineSeparatedListField
+from django_json_editor_field.fields import JSONEditorField
 
 from auditlog.registry import auditlog
 
@@ -171,9 +171,62 @@ class Person(
     )
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
-    alternative_names = NewlineSeparatedListField(
-        blank=True, verbose_name=_("Alternative Names")
-    )
+    schema = {
+        "title": "Alternative Names",
+        "type": "array",
+        "format": "table",
+        "items": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "pattern": "^.+$",
+                    "options": {
+                        "inputAttributes": {
+                            "required": True,
+                        },
+                    },
+                },
+                "art": {"type": "string", "enum": ["", "Ehename", "Pseudonym"]},
+                "start": {
+                    "type": "string",
+                    "pattern": "^$|^\d\d\d\d$",
+                    "options": {
+                        "inputAttributes": {
+                            "placeholder": "YYYY",
+                        },
+                        "containerAttributes": {
+                            "class": "yearinput",
+                        },
+                    },
+                },
+                "end": {
+                    "type": "string",
+                    "pattern": "^$|^\d\d\d\d$",
+                    "options": {
+                        "inputAttributes": {
+                            "placeholder": "YYYY",
+                        },
+                        "containerAttributes": {
+                            "class": "yearinput",
+                        },
+                    },
+                },
+            },
+        },
+    }
+    options = {
+        "theme": "bootstrap4",
+        "disable_collapse": True,
+        "disable_edit_json": True,
+        "disable_properties": True,
+        "disable_array_reorder": True,
+        "disable_array_delete_last_row": True,
+        "disable_array_delete_all_rows": True,
+        "prompt_before_delete": False,
+    }
+
+    alternative_names = JSONEditorField(schema=schema, options=options)
 
     # texts
     # "ÖBL Haupttext"
