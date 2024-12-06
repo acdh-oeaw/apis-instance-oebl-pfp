@@ -5,7 +5,10 @@ from django.db.models.functions import Greatest
 from django.db import models
 import unicodedata
 
-from apis_core.apis_entities.filtersets import AbstractEntityFilterSet
+from apis_core.apis_entities.filtersets import (
+    AbstractEntityFilterSet,
+    ABSTRACT_ENTITY_FILTERS_EXCLUDE,
+)
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 from django.contrib.contenttypes.models import ContentType
 
@@ -18,6 +21,8 @@ PATTERN = re.compile(r"""((?:[^ "']|"[^"]*"|'[^']*')+)""")
 #########
 # helpers
 #########
+
+ABSTRACT_ENTITY_FILTERS_EXCLUDE += ["alternative_names"]
 
 
 def remove_quotes(token):
