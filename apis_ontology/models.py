@@ -172,19 +172,18 @@ class Person(
     )
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
-    alternative_names = NewlineSeparatedListField(
-        blank=True, verbose_name=_("Alternative Names")
-    )
     schema = {
         "title": "Alternative Names",
         "type": "array",
         "format": "table",
+        "required": ["name"],
         "items": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
                 },
+                "art": {"type": "string", "enum": ["", "Ehename", "Pseudonym"]},
                 "start": {
                     "type": "string",
                     "format": "date",
@@ -197,7 +196,7 @@ class Person(
         },
     }
 
-    alternative_names_new = JSONEditorField(schema=schema, null=True)
+    alternative_names = JSONEditorField(schema=schema, null=True)
 
     # texts
     # "ÖBL Haupttext"
