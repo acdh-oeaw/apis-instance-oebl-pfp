@@ -12,6 +12,7 @@ from apis_core.generic.abc import GenericModel
 from apis_core.apis_entities.abc import E53_Place
 from apis_core.history.models import VersionMixin
 from apis_core.utils.fields import NewlineSeparatedListField
+from django_json_editor_field.fields import JSONEditorField
 
 from auditlog.registry import auditlog
 
@@ -171,9 +172,31 @@ class Person(
     )
     references = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
-    alternative_names = NewlineSeparatedListField(
-        blank=True, verbose_name=_("Alternative Names")
-    )
+    schema = {
+        "title": "Alternative Names",
+        "type": "array",
+        "format": "table",
+        "required": ["name"],
+        "items": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                },
+                "art": {"type": "string", "enum": ["", "Ehename", "Pseudonym"]},
+                "start": {
+                    "type": "string",
+                    "format": "date",
+                },
+                "end": {
+                    "type": "string",
+                    "format": "date",
+                },
+            },
+        },
+    }
+
+    alternative_names = JSONEditorField(schema=schema, null=True)
 
     # texts
     # "ÖBL Haupttext"
