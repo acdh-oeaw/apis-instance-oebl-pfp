@@ -176,27 +176,48 @@ class Person(
         "title": "Alternative Names",
         "type": "array",
         "format": "table",
-        "required": ["name"],
         "items": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
+                    "pattern": "^.+$",
+                    "options": {
+                        "inputAttributes": {
+                            "required": True,
+                        },
+                    },
                 },
                 "art": {"type": "string", "enum": ["", "Ehename", "Pseudonym"]},
                 "start": {
                     "type": "string",
-                    "format": "date",
+                    "pattern": "^$|^\d\d\d\d$",
+                    "options": {
+                        "inputAttributes": {
+                            "placeholder": "YYYY",
+                        },
+                        "containerAttributes": {
+                            "class": "yearinput",
+                        }
+                    },
                 },
                 "end": {
                     "type": "string",
-                    "format": "date",
+                    "pattern": "^$|^\d\d\d\d$",
+                    "options": {
+                        "inputAttributes": {
+                            "placeholder": "YYYY",
+                        },
+                        "containerAttributes": {
+                            "class": "yearinput",
+                        }
+                    },
                 },
             },
         },
     }
 
-    alternative_names = JSONEditorField(schema=schema, null=True)
+    alternative_names = JSONEditorField(schema=schema)
 
     # texts
     # "ÖBL Haupttext"
