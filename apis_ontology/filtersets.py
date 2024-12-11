@@ -101,6 +101,10 @@ class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
                 filter.label = filter.label.replace("unaccent ", "")
 
 
+class VersionPersonFilterSet(LegacyStuffMixinFilterSet):
+    pass
+
+
 class PersonFilterSet(LegacyStuffMixinFilterSet):
     collection = django_filters.ModelMultipleChoiceFilter(
         queryset=SkosCollection.objects.all().order_by("name"),
