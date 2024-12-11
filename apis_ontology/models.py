@@ -187,7 +187,18 @@ class Person(
                         },
                     },
                 },
-                "art": {"type": "string", "enum": ["", "Ehename", "Pseudonym"]},
+                "art": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "Ehename",
+                        "Pseudonym",
+                        "Ordensname",
+                        "Künstlername",
+                        "Mädchenname",
+                        "Schreibvariante",
+                    ],
+                },
                 "start": {
                     "type": "string",
                     "pattern": "^$|^\d\d\d\d$",
