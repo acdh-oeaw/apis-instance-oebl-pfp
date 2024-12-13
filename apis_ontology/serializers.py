@@ -1,6 +1,6 @@
 from rest_framework.renderers import serializers
 from rdflib import Graph, Literal, URIRef, Namespace
-from rdflib.namespace import RDF, RDFS, XSD
+from rdflib.namespace import RDF, RDFS, XSD, OWL, GEO
 from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import Person, Institution
@@ -42,6 +42,66 @@ for ct in relation_content_types():
     globals()[f"{cls.__name__}Serializer"] = serializer_class
 
 
+class PlaceCidocSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        g = Graph()
+        instance = normalize_empty_attributes(instance)
+        base_uri = getattr(
+            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
+        )
+
+        # Define namespaces
+        crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
+        oebl_place = Namespace(f"{base_uri}apis_ontology.place/")
+        oebl_appellation = Namespace(f"{base_uri}appellation/")
+        oebl_attr = Namespace(f"{base_uri}attributes/")
+
+        g.namespace_manager.bind("crm", crm, replace=True)
+        g.namespace_manager.bind("oebl-place", oebl_place, replace=True)
+        g.namespace_manager.bind("oebl-appellation", oebl_appellation, replace=True)
+        g.namespace_manager.bind("oebl-attr", oebl_attr, replace=True)
+        g.namespace_manager.bind("owl", OWL, replace=True)
+        g.namespace_manager.bind("geo", GEO, replace=True)
+
+        # Create the Person instance
+        place_uri = URIRef(oebl_place[str(instance.id)])
+        g.add((place_uri, RDF.type, crm.E53_Place))
+
+        # Add sameAs links
+        for uri in instance.uri_set.all():
+            uri_ref = URIRef(uri.uri)
+            g.add((place_uri, OWL.sameAs, uri_ref))
+
+        # Add properties
+        appellation_uri = URIRef(oebl_appellation[str(instance.id)])
+        g.add((appellation_uri, RDF.type, crm.E33_E41_Linguistic_Appellation))
+        g.add((place_uri, crm.P1_is_identified_by, appellation_uri))
+        g.add(
+            (
+                appellation_uri,
+                RDFS.label,
+                Literal(f"{instance.label}"),
+            )
+        )
+        if instance.latitude is not None and instance.longitude is not None:
+            node_spaceprimitive = oebl_attr[f"spaceprimitive.{instance.id}"]
+            g.add((place_uri, crm.P168_place_is_defined_by, node_spaceprimitive))
+            g.add((node_spaceprimitive, RDF.type, crm.E94_Space_Primitive))
+            g.add(
+                (
+                    node_spaceprimitive,
+                    crm.P168_place_is_defined_by,
+                    Literal(
+                        (
+                            f"Point ( {'+' if instance.longitude > 0 else ''}{instance.longitude} {'+' if instance.latitude > 0 else ''}{instance.latitude} )"
+                        ),
+                        datatype=GEO.wktLiteral,
+                    ),
+                )
+            )
+        return g
+
+
 class PersonCidocSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         g = Graph()
@@ -54,16 +114,22 @@ class PersonCidocSerializer(serializers.BaseSerializer):
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
         oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
         oebl_appellation = Namespace(f"{base_uri}appellation/")
-        oebl_attr = Namespace(f"{getattr(settings, 'APIS_BASE_URI')}attributes/")
+        oebl_attr = Namespace(f"{base_uri}attributes/")
 
         g.namespace_manager.bind("crm", crm, replace=True)
         g.namespace_manager.bind("oebl-person", oebl_person, replace=True)
         g.namespace_manager.bind("oebl-appellation", oebl_appellation, replace=True)
         g.namespace_manager.bind("oebl-attr", oebl_attr, replace=True)
+        g.namespace_manager.bind("owl", OWL, replace=True)
 
         # Create the Person instance
         person_uri = URIRef(oebl_person[str(instance.id)])
         g.add((person_uri, RDF.type, crm.E21_Person))
+
+        # Add sameAs links
+        for uri in instance.uri_set.all():
+            uri_ref = URIRef(uri.uri)
+            g.add((person_uri, OWL.sameAs, uri_ref))
 
         # Add properties
         appellation_uri = URIRef(oebl_appellation[str(instance.id)])
@@ -158,7 +224,7 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
         oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
         oebl_inst = Namespace(f"{base_uri}apis_ontology.institution/")
         oebl_appellation = Namespace(f"{base_uri}appellation/")
-        oebl_attr = Namespace(f"{getattr(settings, 'APIS_BASE_URI')}attributes/")
+        oebl_attr = Namespace(f"{base_uri}attributes/")
 
         g.namespace_manager.bind("crm", crm, replace=True)
         g.namespace_manager.bind("oebl-person", oebl_person, replace=True)
