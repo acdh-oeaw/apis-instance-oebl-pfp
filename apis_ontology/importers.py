@@ -18,10 +18,14 @@ class BaseEntityImporter(GenericModelImporter):
             if sa.count() == 1:
                 return sa.first().root_object
             elif sa.count() > 1:
-                raise IntegrityError(
-                    f"Multiple objects found for sameAs URIs {data['sames']}. "
-                    f"This indicates a data integrity problem as these URIs should be unique."
-                )
+                root_set = set([s.root_object for s in sa])
+                if len(root_set) > 1:
+                    raise IntegrityError(
+                        f"Multiple objects found for sameAs URIs {data['sames']}. "
+                        f"This indicates a data integrity problem as these URIs should be unique."
+                    )
+                else:
+                    return sa.first().root_object
         modelfields = [field.name for field in self.model._meta.fields]
         data_croped = {key: data[key] for key in data if key in modelfields}
         subj = self.model.objects.create(**data_croped)
@@ -39,10 +43,10 @@ class BaseEntityImporter(GenericModelImporter):
                 if key in data:
                     related_obj = create_object_from_uri(data[key], RelatedModel)
                     RelationType.objects.create(subj=subj, obj=related_obj)
-        except:  # noqa: E722
+        except Exception as e:  # noqa: E722
             subj.delete()
             raise ImproperlyConfigured(
-                f"Error in creating related Objects for {self.model.__class__.__name__}"
+                f"Error in creating related Objects for {self.model}: {e}"
             )
 
         return subj
