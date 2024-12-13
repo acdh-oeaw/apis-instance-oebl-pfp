@@ -24,3 +24,13 @@ WHERE {
   BIND(COALESCE(?label_de, ?label_en, ?label) AS ?name)
 }
 """
+[[attributes]]
+# sameAs
+sparql = '''
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
+WHERE {
+  ?subject wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244 ?sameas_pre
+}
+GROUP BY ?subject
+'''

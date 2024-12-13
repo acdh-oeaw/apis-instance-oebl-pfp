@@ -53,3 +53,13 @@ WHERE {
            gndo:place ?relatedPlace__Place__FandStattIn .
 }
 """
+[[attributes]]
+# sameAs
+sparql = '''
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
+WHERE {
+  ?subject owl:sameAs ?sameas_pre
+}
+GROUP BY ?subject
+'''

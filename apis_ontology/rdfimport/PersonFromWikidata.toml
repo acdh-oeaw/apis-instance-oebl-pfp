@@ -4,6 +4,18 @@
 ##############################################
 superclass = "apis_ontology.models.Person"
 regex = "http://www.wikidata.org.*"
+sameas = """
+PREFIX wdtn: <http://www.wikidata.org/prop/direct-normalized/> 
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?sameas ?parl_url
+WHERE {
+?subject wdtn:P227 ?sameas
+OPTIONAL {
+?subject wdt:P2280 ?parl_nr .
+BIND(concat("https://www.parlament.gv.at/WWER/PAD_", str(?parl_nr)) AS ?parl_url)
+}
+}
+"""
 [[attributes]]
 # name
 sparql = """
@@ -50,3 +62,13 @@ WHERE {
   BIND(CONCAT(STR(YEAR(?death)),"-",STR(MONTH(?death)),"-",STR(DAY(?death))) AS ?end_date_written)
 }
 """
+[[attributes]]
+# sameAs
+sparql = '''
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
+WHERE {
+  ?subject wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244 ?sameas_pre
+}
+GROUP BY ?subject
+'''
