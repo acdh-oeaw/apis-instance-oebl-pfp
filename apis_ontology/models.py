@@ -237,7 +237,7 @@ class Person(
         "prompt_before_delete": False,
     }
 
-    alternative_names = JSONEditorField(schema=schema, options=options)
+    alternative_names = JSONEditorField(schema=schema, options=options, null=True)
 
     # texts
     # "ÖBL Haupttext"
