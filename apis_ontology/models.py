@@ -6,14 +6,26 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apis_core.apis_entities.models import AbstractEntity
-from apis_core.core.models import LegacyDateMixin
 from apis_core.utils.helpers import create_object_from_uri
 from apis_core.generic.abc import GenericModel
 from apis_core.apis_entities.abc import E53_Place
 from apis_core.history.models import VersionMixin
 from django_json_editor_field.fields import JSONEditorField
+from django_interval.fields import FuzzyDateParserField
 
 from auditlog.registry import auditlog
+
+
+class LegacyDateMixin(models.Model):
+    start = FuzzyDateParserField(
+        max_length=255, blank=True, null=True, verbose_name=_("Start")
+    )
+    end = FuzzyDateParserField(
+        max_length=255, blank=True, null=True, verbose_name=_("End")
+    )
+
+    class Meta:
+        abstract = True
 
 
 class OEBLBaseEntity:
