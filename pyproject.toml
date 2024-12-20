@@ -16,6 +16,7 @@ apis-acdhch-default-settings = "2.2.2"
 django-auditlog = "^3.0.0"
 apis-acdhch-django-auditlog = "^0.2.0"
 django-json-editor-field = "^0.4.0"
+django-interval = "^0.3.2"
 apis-bibsonomy = "^0.13.1"
 
 [tool.poetry.group.dev.dependencies]
