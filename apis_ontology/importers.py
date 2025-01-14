@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import IntegrityError
 from apis_core.generic.importers import GenericModelImporter
@@ -31,7 +32,10 @@ class BaseEntityImporter(GenericModelImporter):
         subj = self.model.objects.create(**data_croped)
         if "sameas" in data:
             for uri in data["sameas"]:
-                Uri.objects.create(uri=uri, root_object_id=subj.id)
+                content_type = ContentType.objects.get_for_model(subj)
+                Uri.objects.create(
+                    uri=uri, content_type=content_type, object_id=subj.id
+                )
         related_keys = [
             (x, x.split("__")[1], x.split("__")[2]) for x in data.keys() if "__" in x
         ]
