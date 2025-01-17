@@ -5,6 +5,7 @@ from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import Person, Institution
 from django.conf import settings
+from apis_core.apis_metainfo.models import Uri
 
 
 def normalize_empty_attributes(instance):
@@ -42,42 +43,72 @@ for ct in relation_content_types():
     globals()[f"{cls.__name__}Serializer"] = serializer_class
 
 
-class PlaceCidocSerializer(serializers.BaseSerializer):
+class Namespaces:
+    """Container class for RDF namespaces"""
+
+    def __init__(self, base_uri):
+        self.crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
+        self.place = Namespace(f"{base_uri}apis_ontology.place/")
+        self.appellation = Namespace(f"{base_uri}appellation/")
+        self.inst = Namespace(f"{base_uri}apis_ontology.institution/")
+        self.attr = Namespace(f"{base_uri}attributes/")
+        self.person = Namespace(f"{base_uri}apis_ontology.person/")
+
+    def bind_to_graph(self, g):
+        """Bind all namespaces to the given graph"""
+        g.namespace_manager.bind("crm", self.crm, replace=True)
+        g.namespace_manager.bind("oebl-place", self.place, replace=True)
+        g.namespace_manager.bind("oebl-appellation", self.appellation, replace=True)
+        g.namespace_manager.bind("oebl-attr", self.attr, replace=True)
+        g.namespace_manager.bind("oebl-person", self.person, replace=True)
+        g.namespace_manager.bind("oebl-inst", self.inst, replace=True)
+        g.namespace_manager.bind("owl", OWL, replace=True)
+        g.namespace_manager.bind("geo", GEO, replace=True)
+
+
+class BaseRDFSerializer(serializers.BaseSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.g = None
+        self.ns = None
+
     def to_representation(self, instance):
         g = Graph()
-        instance = normalize_empty_attributes(instance)
         base_uri = getattr(
             settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
         )
         if not base_uri.endswith("/"):
             base_uri += "/"
 
-        # Define namespaces
-        crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        oebl_place = Namespace(f"{base_uri}apis_ontology.place/")
-        oebl_appellation = Namespace(f"{base_uri}appellation/")
-        oebl_attr = Namespace(f"{base_uri}attributes/")
+        # Create namespaces instance
+        ns = Namespaces(base_uri)
+        ns.bind_to_graph(g)
 
-        g.namespace_manager.bind("crm", crm, replace=True)
-        g.namespace_manager.bind("oebl-place", oebl_place, replace=True)
-        g.namespace_manager.bind("oebl-appellation", oebl_appellation, replace=True)
-        g.namespace_manager.bind("oebl-attr", oebl_attr, replace=True)
-        g.namespace_manager.bind("owl", OWL, replace=True)
-        g.namespace_manager.bind("geo", GEO, replace=True)
+        return g, ns
+
+    def create_sameas(self, g, instance, instance_uri):
+        for uri in Uri.objects.filter(object_id=instance.pk):
+            uri_ref = URIRef(uri.uri)
+            g.add((instance_uri, OWL.sameAs, uri_ref))
+        return g
+
+
+class PlaceCidocSerializer(BaseRDFSerializer):
+    def to_representation(self, instance):
+        instance = normalize_empty_attributes(instance)
+        g, ns = super().to_representation(instance)
 
         # Create the Person instance
-        place_uri = URIRef(oebl_place[str(instance.id)])
-        g.add((place_uri, RDF.type, crm.E53_Place))
+        place_uri = URIRef(ns.place[str(instance.id)])
+        g.add((place_uri, RDF.type, ns.crm.E53_Place))
 
+        g = self.create_sameas(g, instance, place_uri)
         # Add sameAs links
-        for uri in instance.uri_set.all():
-            uri_ref = URIRef(uri.uri)
-            g.add((place_uri, OWL.sameAs, uri_ref))
 
         # Add properties
-        appellation_uri = URIRef(oebl_appellation[str(instance.id)])
-        g.add((appellation_uri, RDF.type, crm.E33_E41_Linguistic_Appellation))
-        g.add((place_uri, crm.P1_is_identified_by, appellation_uri))
+        appellation_uri = URIRef(ns.appellation[str(instance.id)])
+        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
+        g.add((place_uri, ns.crm.P1_is_identified_by, appellation_uri))
         g.add(
             (
                 appellation_uri,
@@ -86,13 +117,13 @@ class PlaceCidocSerializer(serializers.BaseSerializer):
             )
         )
         if instance.latitude is not None and instance.longitude is not None:
-            node_spaceprimitive = oebl_attr[f"spaceprimitive.{instance.id}"]
-            g.add((place_uri, crm.P168_place_is_defined_by, node_spaceprimitive))
-            g.add((node_spaceprimitive, RDF.type, crm.E94_Space_Primitive))
+            node_spaceprimitive = ns.attr[f"spaceprimitive.{instance.id}"]
+            g.add((place_uri, ns.crm.P168_place_is_defined_by, node_spaceprimitive))
+            g.add((node_spaceprimitive, RDF.type, ns.crm.E94_Space_Primitive))
             g.add(
                 (
                     node_spaceprimitive,
-                    crm.P168_place_is_defined_by,
+                    ns.crm.P168_place_is_defined_by,
                     Literal(
                         (
                             f"Point ( {'+' if instance.longitude > 0 else ''}{instance.longitude} {'+' if instance.latitude > 0 else ''}{instance.latitude} )"
@@ -104,41 +135,47 @@ class PlaceCidocSerializer(serializers.BaseSerializer):
         return g
 
 
-class PersonCidocSerializer(serializers.BaseSerializer):
+class InstitutionCidocSerializer(BaseRDFSerializer):
     def to_representation(self, instance):
-        g = Graph()
         instance = normalize_empty_attributes(instance)
-        base_uri = getattr(
-            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
-        )
-        if not base_uri.endswith("/"):
-            base_uri += "/"
-
-        # Define namespaces
-        crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
-        oebl_appellation = Namespace(f"{base_uri}appellation/")
-        oebl_attr = Namespace(f"{base_uri}attributes/")
-
-        g.namespace_manager.bind("crm", crm, replace=True)
-        g.namespace_manager.bind("oebl-person", oebl_person, replace=True)
-        g.namespace_manager.bind("oebl-appellation", oebl_appellation, replace=True)
-        g.namespace_manager.bind("oebl-attr", oebl_attr, replace=True)
-        g.namespace_manager.bind("owl", OWL, replace=True)
+        g, ns = super().to_representation(instance)
 
         # Create the Person instance
-        person_uri = URIRef(oebl_person[str(instance.id)])
-        g.add((person_uri, RDF.type, crm.E21_Person))
+        inst_uri = URIRef(ns.inst[str(instance.id)])
+        g.add((inst_uri, RDF.type, ns.crm.E74_Group))
 
+        g = self.create_sameas(g, instance, inst_uri)
         # Add sameAs links
-        for uri in instance.uri_set.all():
-            uri_ref = URIRef(uri.uri)
-            g.add((person_uri, OWL.sameAs, uri_ref))
 
         # Add properties
-        appellation_uri = URIRef(oebl_appellation[str(instance.id)])
-        g.add((appellation_uri, RDF.type, crm.E33_E41_Linguistic_Appellation))
-        g.add((person_uri, crm.P1_is_identified_by, appellation_uri))
+        appellation_uri = URIRef(ns.appellation[str(instance.id)])
+        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
+        g.add((inst_uri, ns.crm.P1_is_identified_by, appellation_uri))
+        g.add(
+            (
+                appellation_uri,
+                RDFS.label,
+                Literal(f"{instance.name}"),
+            )
+        )
+        return g
+
+
+class PersonCidocSerializer(BaseRDFSerializer):
+    def to_representation(self, instance):
+        instance = normalize_empty_attributes(instance)
+        g, ns = super().to_representation(instance)
+
+        person_uri = URIRef(ns.person[str(instance.id)])
+        g.add((person_uri, RDF.type, ns.crm.E21_Person))
+
+        g = self.create_sameas(g, instance, person_uri)
+        # Add sameAs links
+
+        # Add properties
+        appellation_uri = URIRef(ns.appellation[str(instance.id)])
+        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
+        g.add((person_uri, ns.crm.P1_is_identified_by, appellation_uri))
         g.add(
             (
                 appellation_uri,
@@ -148,28 +185,28 @@ class PersonCidocSerializer(serializers.BaseSerializer):
         )
 
         if hasattr(instance, "forename"):
-            forename_uri = URIRef(oebl_appellation[f"forename_{instance.id}"])
-            g.add((forename_uri, RDF.type, crm.E33_E41_Linguistic_Appellation))
-            g.add((appellation_uri, crm.P106_is_composed_of, forename_uri))
+            forename_uri = URIRef(ns.appellation[f"forename_{instance.id}"])
+            g.add((forename_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
+            g.add((appellation_uri, ns.crm.P106_is_composed_of, forename_uri))
             g.add((forename_uri, RDFS.label, Literal(instance.forename)))
 
         if hasattr(instance, "surname"):
-            surname_uri = URIRef(oebl_appellation[f"surname_{instance.id}"])
-            g.add((surname_uri, RDF.type, crm.E33_E41_Linguistic_Appellation))
-            g.add((appellation_uri, crm.P106_is_composed_of, surname_uri))
+            surname_uri = URIRef(ns.appellation[f"surname_{instance.id}"])
+            g.add((surname_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
+            g.add((appellation_uri, ns.crm.P106_is_composed_of, surname_uri))
             g.add((surname_uri, RDFS.label, Literal(instance.surname)))
 
         if instance.start_date_written is not None:
-            birth_event = URIRef(oebl_attr[f"birth_{instance.id}"])
-            birth_time_span = URIRef(oebl_attr[f"birth_time-span_{instance.id}"])
-            g.add((birth_event, RDF.type, crm.E67_Birth))
-            g.add((birth_event, crm.P98_brought_into_life, person_uri))
-            g.add((birth_event, crm["P4_has_time-span"], birth_time_span))
-            g.add((birth_time_span, RDF.type, crm["E52_Time-Span"]))
+            birth_event = URIRef(ns.attr[f"birth_{instance.id}"])
+            birth_time_span = URIRef(ns.attr[f"birth_time-span_{instance.id}"])
+            g.add((birth_event, RDF.type, ns.crm.E67_Birth))
+            g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
+            g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
+            g.add((birth_time_span, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (
                     birth_time_span,
-                    crm.P82a_begin_of_the_begin,
+                    ns.crm.P82a_begin_of_the_begin,
                     Literal(instance.start_date, datatype=XSD.date)
                     if instance.start_date is not None
                     else Literal(instance.start_date_written),
@@ -178,7 +215,7 @@ class PersonCidocSerializer(serializers.BaseSerializer):
             g.add(
                 (
                     birth_time_span,
-                    crm.P82b_end_of_the_end,
+                    ns.crm.P82b_end_of_the_end,
                     Literal(instance.start_date, datatype=XSD.date)
                     if instance.start_date is not None
                     else Literal(instance.start_date_written),
@@ -186,16 +223,16 @@ class PersonCidocSerializer(serializers.BaseSerializer):
             )
 
         if instance.end_date_written is not None:
-            death_event = URIRef(oebl_attr[f"death_{instance.id}"])
-            death_time_span = URIRef(oebl_attr[f"death_time-span_{instance.id}"])
-            g.add((death_event, RDF.type, crm.E69_Death))
-            g.add((death_event, crm.P100_was_death_of, person_uri))
-            g.add((death_event, crm["P4_has_time-span"], death_time_span))
-            g.add((death_time_span, RDF.type, crm["E52_Time-Span"]))
+            death_event = URIRef(ns.attr[f"death_{instance.id}"])
+            death_time_span = URIRef(ns.attr[f"death_time-span_{instance.id}"])
+            g.add((death_event, RDF.type, ns.crm.E69_Death))
+            g.add((death_event, ns.crm.P100_was_death_of, person_uri))
+            g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
+            g.add((death_time_span, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (
                     death_time_span,
-                    crm.P82a_begin_of_the_begin,
+                    ns.crm.P82a_begin_of_the_begin,
                     Literal(instance.end_date, datatype=XSD.date)
                     if instance.end_date is not None
                     else Literal(instance.end_date_written),
@@ -204,7 +241,7 @@ class PersonCidocSerializer(serializers.BaseSerializer):
             g.add(
                 (
                     death_time_span,
-                    crm.P82b_end_of_the_end,
+                    ns.crm.P82b_end_of_the_end,
                     Literal(instance.end_date, datatype=XSD.date)
                     if instance.end_date is not None
                     else Literal(instance.end_date_written),
@@ -215,64 +252,47 @@ class PersonCidocSerializer(serializers.BaseSerializer):
         return g
 
 
-class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
+class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
-        g = Graph()
-        base_uri = getattr(
-            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
-        )
-        if not base_uri.endswith("/"):
-            base_uri += "/"
+        g, ns = super().to_representation(instance)
 
-        # Define namespaces
-        crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        oebl_person = Namespace(f"{base_uri}apis_ontology.person/")
-        oebl_inst = Namespace(f"{base_uri}apis_ontology.institution/")
-        oebl_appellation = Namespace(f"{base_uri}appellation/")
-        oebl_attr = Namespace(f"{base_uri}attributes/")
-
-        g.namespace_manager.bind("crm", crm, replace=True)
-        g.namespace_manager.bind("oebl-person", oebl_person, replace=True)
-        g.namespace_manager.bind("oebl-inst", oebl_inst, replace=True)
-        g.namespace_manager.bind("oebl-appellation", oebl_appellation, replace=True)
-        g.namespace_manager.bind("oebl-attr", oebl_attr, replace=True)
         person_id = (
             instance.obj_oject_id
             if instance.obj_content_type.model == "person"
             else instance.subj_object_id
         )
         # Create the Person instance
-        person_uri = URIRef(oebl_person[str(person_id)])
+        person_uri = URIRef(ns.person[str(person_id)])
         g.add(
-            (person_uri, RDF.type, crm.E21_Person)
+            (person_uri, RDF.type, ns.crm.E21_Person)
         )  # maybe remove that as also in detail view of person
         inst_id = (
             instance.subj_object_id
             if instance.subj_object_id != person_id
             else instance.obj_object_id
         )
-        inst_uri = URIRef(oebl_inst[str(inst_id)])
-        g.add((inst_uri, RDF.type, crm.E74_Group))
-        joining_uri = URIRef(oebl_attr[f"joining_ev_{instance.id}"])
-        pc_joining_uri = URIRef(oebl_attr[f"pc_joining_ev_{instance.id}"])
-        memb_type_uri = URIRef(oebl_attr[f"kind_member_{instance.id}"])
-        g.add((person_uri, crm.P143i_was_joined_by, joining_uri))
-        g.add((joining_uri, crm.P01i_is_domain_of, pc_joining_uri))
-        g.add((pc_joining_uri, crm.P02_has_range, inst_uri))
-        g.add((pc_joining_uri, crm.P144_1_kind_of_member, memb_type_uri))
+        inst_uri = URIRef(ns.inst[str(inst_id)])
+        g.add((inst_uri, RDF.type, ns.crm.E74_Group))
+        joining_uri = URIRef(ns.attr[f"joining_ev_{instance.id}"])
+        pc_joining_uri = URIRef(ns.attr[f"pc_joining_ev_{instance.id}"])
+        memb_type_uri = URIRef(ns.attr[f"kind_member_{instance.id}"])
+        g.add((person_uri, ns.crm.P143i_was_joined_by, joining_uri))
+        g.add((joining_uri, ns.crm.P01i_is_domain_of, pc_joining_uri))
+        g.add((pc_joining_uri, ns.crm.P02_has_range, inst_uri))
+        g.add((pc_joining_uri, ns.crm.P144_1_kind_of_member, memb_type_uri))
         g.add((memb_type_uri, RDFS.label, Literal(instance.name())))
         if instance.start_date_written is not None:
             joining_time_span_uri = URIRef(
-                oebl_attr[f"joining_ev_time_span_{instance.id}"]
+                ns.attr[f"joining_ev_time_span_{instance.id}"]
             )
 
-            g.add((joining_uri, crm["P4_has_time-span"], joining_time_span_uri))
-            g.add((joining_time_span_uri, RDF.type, crm["E52_Time-Span"]))
+            g.add((joining_uri, ns.crm["P4_has_time-span"], joining_time_span_uri))
+            g.add((joining_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (
                     joining_time_span_uri,
-                    crm.P82a_begin_of_the_begin,
+                    ns.crm.P82a_begin_of_the_begin,
                     Literal(instance.start_date, datatype=XSD.date)
                     if instance.start_date is not None
                     else Literal(instance.start_date_written),
@@ -281,7 +301,7 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
             g.add(
                 (
                     joining_time_span_uri,
-                    crm.P82b_end_of_the_end,
+                    ns.crm.P82b_end_of_the_end,
                     Literal(instance.start_date, datatype=XSD.date)
                     if instance.start_date is not None
                     else Literal(instance.start_date_written),
@@ -289,16 +309,16 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
             )
         if instance.end_date_written is not None:
             leaving_time_span_uri = URIRef(
-                oebl_attr[f"leaving_ev_time_span_{instance.id}"]
+                ns.attr[f"leaving_ev_time_span_{instance.id}"]
             )
-            leaving_uri = URIRef(oebl_attr[f"leaving_ev_{instance.id}"])
-            g.add((leaving_uri, RDF.type, crm.E86_Leaving))
-            g.add((leaving_uri, crm["P4_has_time-span"], leaving_time_span_uri))
-            g.add((leaving_time_span_uri, RDF.type, crm["E52_Time-Span"]))
+            leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
+            g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
+            g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
+            g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (
                     leaving_time_span_uri,
-                    crm.P82a_begin_of_the_begin,
+                    ns.crm.P82a_begin_of_the_begin,
                     Literal(instance.end_date, datatype=XSD.date)
                     if instance.end_date is not None
                     else Literal(instance.end_date_written),
@@ -307,7 +327,7 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
             g.add(
                 (
                     leaving_time_span_uri,
-                    crm.P82b_end_of_the_end,
+                    ns.crm.P82b_end_of_the_end,
                     Literal(instance.end_date, datatype=XSD.date)
                     if instance.end_date is not None
                     else Literal(instance.end_date_written),
