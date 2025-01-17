@@ -49,6 +49,8 @@ class PlaceCidocSerializer(serializers.BaseSerializer):
         base_uri = getattr(
             settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
         )
+        if not base_uri.endswith("/"):
+            base_uri += "/"
 
         # Define namespaces
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
@@ -109,6 +111,8 @@ class PersonCidocSerializer(serializers.BaseSerializer):
         base_uri = getattr(
             settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
         )
+        if not base_uri.endswith("/"):
+            base_uri += "/"
 
         # Define namespaces
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
@@ -218,6 +222,8 @@ class PersonInstitutionCidocBaseSerializer(serializers.BaseSerializer):
         base_uri = getattr(
             settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
         )
+        if not base_uri.endswith("/"):
+            base_uri += "/"
 
         # Define namespaces
         crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
