@@ -101,6 +101,7 @@ class PlaceCidocSerializer(BaseRDFSerializer):
         # Create the Person instance
         place_uri = URIRef(ns.place[str(instance.id)])
         g.add((place_uri, RDF.type, ns.crm.E53_Place))
+        g.add((place_uri, RDFS.label, Literal(str(instance))))
 
         g = self.create_sameas(g, instance, place_uri)
         # Add sameAs links
@@ -117,12 +118,9 @@ class PlaceCidocSerializer(BaseRDFSerializer):
             )
         )
         if instance.latitude is not None and instance.longitude is not None:
-            node_spaceprimitive = ns.attr[f"spaceprimitive.{instance.id}"]
-            g.add((place_uri, ns.crm.P168_place_is_defined_by, node_spaceprimitive))
-            g.add((node_spaceprimitive, RDF.type, ns.crm.E94_Space_Primitive))
             g.add(
                 (
-                    node_spaceprimitive,
+                    place_uri,
                     ns.crm.P168_place_is_defined_by,
                     Literal(
                         (
@@ -143,6 +141,7 @@ class InstitutionCidocSerializer(BaseRDFSerializer):
         # Create the Person instance
         inst_uri = URIRef(ns.inst[str(instance.id)])
         g.add((inst_uri, RDF.type, ns.crm.E74_Group))
+        g.add((inst_uri, RDFS.label, Literal(str(instance))))
 
         g = self.create_sameas(g, instance, inst_uri)
         # Add sameAs links
@@ -168,6 +167,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
 
         person_uri = URIRef(ns.person[str(instance.id)])
         g.add((person_uri, RDF.type, ns.crm.E21_Person))
+        g.add((person_uri, RDFS.label, Literal(str(instance))))
 
         g = self.create_sameas(g, instance, person_uri)
         # Add sameAs links
@@ -200,6 +200,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             birth_event = URIRef(ns.attr[f"birth_{instance.id}"])
             birth_time_span = URIRef(ns.attr[f"birth_time-span_{instance.id}"])
             g.add((birth_event, RDF.type, ns.crm.E67_Birth))
+            g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
             g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
             g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
             g.add((birth_time_span, RDF.type, ns.crm["E52_Time-Span"]))
@@ -224,6 +225,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
 
         if instance.end_date_written is not None:
             death_event = URIRef(ns.attr[f"death_{instance.id}"])
+            g.add((death_event, RDFS.label, Literal(f"Tod von {str(instance)}")))
             death_time_span = URIRef(ns.attr[f"death_time-span_{instance.id}"])
             g.add((death_event, RDF.type, ns.crm.E69_Death))
             g.add((death_event, ns.crm.P100_was_death_of, person_uri))
@@ -275,6 +277,8 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
         inst_uri = URIRef(ns.inst[str(inst_id)])
         g.add((inst_uri, RDF.type, ns.crm.E74_Group))
         joining_uri = URIRef(ns.attr[f"joining_ev_{instance.id}"])
+        g.add((joining_uri, RDF.type, ns.crm.E85_Joining))
+        g.add((joining_uri, RDFS.label, Literal(f"{str(instance)} gestartet")))
         pc_joining_uri = URIRef(ns.attr[f"pc_joining_ev_{instance.id}"])
         memb_type_uri = URIRef(ns.attr[f"kind_member_{instance.id}"])
         g.add((person_uri, ns.crm.P143i_was_joined_by, joining_uri))
@@ -314,6 +318,7 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
             leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
             g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
+            g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
             g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (
