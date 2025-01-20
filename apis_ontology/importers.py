@@ -17,16 +17,16 @@ class BaseEntityImporter(GenericModelImporter):
             data["sameas"] = data["sameas"].split("|")
             sa = Uri.objects.filter(uri__in=data["sameas"])
             if sa.count() == 1:
-                return sa.first().root_object
+                return sa.first().content_object
             elif sa.count() > 1:
-                root_set = set([s.root_object for s in sa])
+                root_set = set([s.content_object for s in sa])
                 if len(root_set) > 1:
                     raise IntegrityError(
                         f"Multiple objects found for sameAs URIs {data['sames']}. "
                         f"This indicates a data integrity problem as these URIs should be unique."
                     )
                 else:
-                    return sa.first().root_object
+                    return sa.first().content_object
         modelfields = [field.name for field in self.model._meta.fields]
         data_croped = {key: data[key] for key in data if key in modelfields}
         subj = self.model.objects.create(**data_croped)
