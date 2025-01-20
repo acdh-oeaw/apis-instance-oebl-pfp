@@ -119,7 +119,7 @@ class Event(
     _default_search_fields = ["name", "notes", "kind"]
 
     def __str__(self):
-        return self.name
+        return self.name if self.name and self.name.strip() else "unbekannt"
 
     class Meta:
         verbose_name = _("Event")
@@ -139,7 +139,7 @@ class Institution(
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
-        return self.name
+        return self.name if self.name and self.name.strip() else "unbekannt"
 
     class Meta:
         verbose_name = _("Institution")
@@ -317,7 +317,27 @@ class Person(
     )
 
     def __str__(self):
-        return f"{self.forename} {self.surname}"
+        # Check if both proper names exist
+        if self.forename and self.surname:
+            return f"{self.forename} {self.surname}"
+
+        if self.alternative_names:
+            try:
+                alt_names = self.alternative_names
+                if alt_names and isinstance(alt_names, list) and len(alt_names) > 0:
+                    # Take first alternative name that has a name property
+                    for alt_name in alt_names:
+                        if isinstance(alt_name, dict) and alt_name.get("name"):
+                            return alt_name["name"]
+            except AttributeError:
+                pass
+
+        # If no alternative name found, use whatever proper name exists
+        if self.forename or self.surname:
+            return self.forename or self.surname
+
+        # If no names found at all
+        return "unbekannt"
 
     @property
     def biographien_urls(self):
@@ -347,7 +367,7 @@ class Place(
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     def __str__(self):
-        return self.label
+        return self.label if self.label and self.label.strip() else "unbekannt"
 
     class Meta:
         verbose_name = _("Place")
@@ -364,7 +384,7 @@ class Work(
     _default_search_fields = ["name", "notes", "kind"]
 
     def __str__(self):
-        return self.name
+        return self.name if self.name and self.name.strip() else "unbekannt"
 
     class Meta:
         verbose_name = _("Work")
