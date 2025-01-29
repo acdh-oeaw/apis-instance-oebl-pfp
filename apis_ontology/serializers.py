@@ -86,10 +86,86 @@ class BaseRDFSerializer(serializers.BaseSerializer):
 
         return g, ns
 
-    def create_sameas(self, g, instance, instance_uri):
+    def create_sameas(self, g, ns, instance, instance_uri):
+        # add the ID as APIS Identifier
+        apis_id = URIRef(ns.attr[f"apis-identifier/{instance.pk}"])
+        g.add((apis_id, RDF.type, ns.crm["E42_Identifier"]))
+        g.add((apis_id, RDFS.label, Literal(instance.pk)))
+        # APIS internal identifier type
+        apis_id_type = URIRef(ns.attr["apis-identifier/type"])
+        g.add((apis_id, ns.crm["P2_has_type"], apis_id_type))
+        triple = (apis_id_type, RDF.type, ns.crm["E55_Type"])
+        if triple not in g:
+            g.add(triple)
+            g.add((apis_id_type, RDFS.label, Literal("APIS internal identifier")))
+
+        # GND identifier type
+        gnd_id_type = URIRef(ns.attr["gnd-identifier/type"])
+        triple = (gnd_id_type, RDF.type, ns.crm["E55_Type"])
+        if triple not in g:
+            g.add(triple)
+            g.add((gnd_id_type, RDFS.label, Literal("GND ID")))
+
+        # Wikidata identifier type
+        wikidata_id_type = URIRef(ns.attr["wikidata-identifier/type"])
+        triple = (wikidata_id_type, RDF.type, ns.crm["E55_Type"])
+        if triple not in g:
+            g.add(triple)
+            g.add((wikidata_id_type, RDFS.label, Literal("Wikidata ID")))
+
+        # GeoNames identifier type
+        geonames_id_type = URIRef(ns.attr["geonames-identifier/type"])
+        triple = (geonames_id_type, RDF.type, ns.crm["E55_Type"])
+        if triple not in g:
+            g.add(triple)
+            g.add((geonames_id_type, RDFS.label, Literal("GeoNames ID")))
         for uri in Uri.objects.filter(object_id=instance.pk):
             uri_ref = URIRef(uri.uri)
             g.add((instance_uri, OWL.sameAs, uri_ref))
+
+            # Extract and store identifiers for specific authority sources
+            import re
+
+            # GND: matches patterns like 118540238 or 4074195-3
+            if "d-nb.info" in uri.uri:
+                gnd_match = re.search(r"(?:\/gnd\/)(\d+(?:-\d+)?X?)", uri.uri)
+                if gnd_match:
+                    gnd_id = gnd_match.group(1)
+                    gnd_id_uri = URIRef(ns.attr[f"gnd-identifier/{instance.pk}"])
+                    g.add((gnd_id_uri, RDF.type, ns.crm["E42_Identifier"]))
+                    g.add((gnd_id_uri, RDFS.label, Literal(gnd_id)))
+                    g.add((gnd_id_uri, ns.crm["P2_has_type"], gnd_id_type))
+                    g.add((instance_uri, ns.crm["P1_is_identified_by"], gnd_id_uri))
+
+            # Wikidata: matches Q followed by numbers
+            elif "wikidata.org" in uri.uri:
+                wikidata_match = re.search(r"[/:]Q(\d+)", uri.uri)
+                if wikidata_match:
+                    wikidata_id = f"Q{wikidata_match.group(1)}"
+                    wikidata_id_uri = URIRef(
+                        ns.attr[f"wikidata-identifier/{instance.pk}"]
+                    )
+                    g.add((wikidata_id_uri, RDF.type, ns.crm["E42_Identifier"]))
+                    g.add((wikidata_id_uri, RDFS.label, Literal(wikidata_id)))
+                    g.add((wikidata_id_uri, ns.crm["P2_has_type"], wikidata_id_type))
+                    g.add(
+                        (instance_uri, ns.crm["P1_is_identified_by"], wikidata_id_uri)
+                    )
+
+            # GeoNames: matches numeric IDs
+            elif "geonames.org" in uri.uri:
+                geonames_match = re.search(r"\/(\d+)(?:\/|$)", uri.uri)
+                if geonames_match:
+                    geonames_id = geonames_match.group(1)
+                    geonames_id_uri = URIRef(
+                        ns.attr[f"geonames-identifier/{instance.pk}"]
+                    )
+                    g.add((geonames_id_uri, RDF.type, ns.crm["E42_Identifier"]))
+                    g.add((geonames_id_uri, RDFS.label, Literal(geonames_id)))
+                    g.add((geonames_id_uri, ns.crm["P2_has_type"], geonames_id_type))
+                    g.add(
+                        (instance_uri, ns.crm["P1_is_identified_by"], geonames_id_uri)
+                    )
         return g
 
 
@@ -103,7 +179,7 @@ class PlaceCidocSerializer(BaseRDFSerializer):
         g.add((place_uri, RDF.type, ns.crm.E53_Place))
         g.add((place_uri, RDFS.label, Literal(str(instance))))
 
-        g = self.create_sameas(g, instance, place_uri)
+        g = self.create_sameas(g, ns, instance, place_uri)
         # Add sameAs links
 
         # Add properties
@@ -284,6 +360,7 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
         g.add((person_uri, ns.crm.P143i_was_joined_by, joining_uri))
         g.add((joining_uri, ns.crm.P01i_is_domain_of, pc_joining_uri))
         g.add((pc_joining_uri, ns.crm.P02_has_range, inst_uri))
+        g.add((pc_joining_uri, RDF.type, ns.crm["PC144_joined_with"]))
         g.add((pc_joining_uri, ns.crm.P144_1_kind_of_member, memb_type_uri))
         g.add((memb_type_uri, RDFS.label, Literal(instance.name())))
         if instance.start_date_written is not None:
@@ -293,6 +370,13 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
 
             g.add((joining_uri, ns.crm["P4_has_time-span"], joining_time_span_uri))
             g.add((joining_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
+            g.add(
+                (
+                    joining_time_span_uri,
+                    RDFS.label,
+                    Literal(instance.start_date_written),
+                )
+            )
             g.add(
                 (
                     joining_time_span_uri,
@@ -317,9 +401,14 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
             )
             leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
             g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
+            g.add((person_uri, ns.crm["P145i_left_by"], leaving_uri))
+            g.add((leaving_uri, ns.crm["P146_separated_from"], inst_uri))
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
             g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
             g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
+            g.add(
+                (leaving_time_span_uri, RDFS.label, Literal(instance.end_date_written))
+            )
             g.add(
                 (
                     leaving_time_span_uri,
