@@ -6,6 +6,7 @@ from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import Person, Institution
 from django.conf import settings
 from apis_core.apis_metainfo.models import Uri
+import re
 
 
 def normalize_empty_attributes(instance):
@@ -124,7 +125,6 @@ class BaseRDFSerializer(serializers.BaseSerializer):
             g.add((instance_uri, OWL.sameAs, uri_ref))
 
             # Extract and store identifiers for specific authority sources
-            import re
 
             # GND: matches patterns like 118540238 or 4074195-3
             if "d-nb.info" in uri.uri:
@@ -219,7 +219,7 @@ class InstitutionCidocSerializer(BaseRDFSerializer):
         g.add((inst_uri, RDF.type, ns.crm.E74_Group))
         g.add((inst_uri, RDFS.label, Literal(str(instance))))
 
-        g = self.create_sameas(g, instance, inst_uri)
+        g = self.create_sameas(g, ns, instance, inst_uri)
         # Add sameAs links
 
         # Add properties
@@ -245,8 +245,8 @@ class PersonCidocSerializer(BaseRDFSerializer):
         g.add((person_uri, RDF.type, ns.crm.E21_Person))
         g.add((person_uri, RDFS.label, Literal(str(instance))))
 
-        g = self.create_sameas(g, instance, person_uri)
         # Add sameAs links
+        g = self.create_sameas(g, ns, instance, person_uri)
 
         # Add properties
         appellation_uri = URIRef(ns.appellation[str(instance.id)])
