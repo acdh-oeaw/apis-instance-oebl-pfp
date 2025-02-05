@@ -10,7 +10,7 @@ packages = [{include = "apis_ontology"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 psycopg2 = "^2.9"
-apis-core-rdf = "0.36.1"
+apis-core-rdf = "0.37.1"
 apis-highlighter-ng = "^0.5.0"
 apis-acdhch-default-settings = "2.0.0"
 django-auditlog = "^3.0.0"
