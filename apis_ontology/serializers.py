@@ -1,9 +1,16 @@
+from django.db.models.fields import return_None
 from rest_framework.renderers import serializers
 from rdflib import Graph, Literal, URIRef, Namespace
 from rdflib.namespace import RDF, RDFS, XSD, OWL, GEO
 from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
 from apis_core.relations.utils import relation_content_types
-from apis_ontology.models import Person, Institution
+from apis_ontology.models import (
+    Person,
+    Institution,
+    PersonPlaceLegacyRelation,
+    StarbIn,
+    WurdeGeborenIn,
+)
 from django.conf import settings
 from apis_core.apis_metainfo.models import Uri
 import re
@@ -174,7 +181,6 @@ class PlaceCidocSerializer(BaseRDFSerializer):
         instance = normalize_empty_attributes(instance)
         g, ns = super().to_representation(instance)
 
-        # Create the Person instance
         place_uri = URIRef(ns.place[str(instance.id)])
         g.add((place_uri, RDF.type, ns.crm.E53_Place))
         g.add((place_uri, RDFS.label, Literal(str(instance))))
@@ -234,6 +240,84 @@ class InstitutionCidocSerializer(BaseRDFSerializer):
             )
         )
         return g
+
+
+def add_life_event_place(g, ns, instance, person_uri, event_type, event_uri=None):
+    """Add place information for life events (birth or death).
+
+    Args:
+        g: RDF graph
+        ns: Namespace object
+        instance: Person model instance
+        person_uri: URI of the person
+        event_type: 'birth' or 'death'
+        event_uri: Optional pre-existing event URI
+
+    Returns:
+        Modified RDF graph
+    """
+    EVENT_TYPES = {
+        "birth": {
+            "legacy_label": "geboren in",
+            "model": WurdeGeborenIn,
+            "crm_type": "E67_Birth",
+            "label_template": "Geburt von {}",
+            "crm_relation": "P98_brought_into_life",
+        },
+        "death": {
+            "legacy_label": "gestorben in",
+            "model": StarbIn,
+            "crm_type": "E69_Death",
+            "label_template": "Tod von {}",
+            "crm_relation": "P100_was_death_of",
+        },
+    }
+
+    if event_type not in EVENT_TYPES:
+        raise ValueError(f"event_type must be one of {list(EVENT_TYPES.keys())}")
+
+    event_config = EVENT_TYPES[event_type]
+
+    def get_place_relation(instance, event_config):
+        """Get the place relation for a life event."""
+        # Try legacy relation first
+        legacy_rel = PersonPlaceLegacyRelation.objects.filter(
+            subj_object_id=instance.pk,
+            legacy_relation_vocab_label=event_config["legacy_label"],
+        ).first()
+
+        if legacy_rel:
+            return legacy_rel
+
+        # Try new relation model if exists and no legacy relation found
+        if event_config["model"]:
+            new_rel = (
+                event_config["model"].objects.filter(subj_object_id=instance.pk).first()
+            )
+            return new_rel
+
+        return None
+
+    rel = get_place_relation(instance, event_config)
+    if not rel:
+        return g
+
+    if event_uri is None:
+        event_uri = URIRef(ns.attr[f"{event_type}_{instance.id}"])
+        g.add((event_uri, RDF.type, ns.crm[event_config["crm_type"]]))
+        g.add(
+            (
+                event_uri,
+                RDFS.label,
+                Literal(event_config["label_template"].format(str(instance))),
+            )
+        )
+        g.add((event_uri, ns.crm[event_config["crm_relation"]], person_uri))
+
+    place_uri = URIRef(ns.place[str(rel.obj_object_id)])
+    g.add((event_uri, ns.crm.P7_took_place_at, place_uri))
+
+    return g
 
 
 class PersonCidocSerializer(BaseRDFSerializer):
@@ -327,6 +411,14 @@ class PersonCidocSerializer(BaseRDFSerializer):
                     else Literal(instance.end_date_written),
                 )
             )
+        birth_event_param = birth_event if "birth_event" in locals() else None
+        death_event_param = death_event if "death_event" in locals() else None
+        g = add_life_event_place(
+            g, ns, instance, person_uri, "birth", birth_event_param
+        )
+        g = add_life_event_place(
+            g, ns, instance, person_uri, "death", death_event_param
+        )
 
         # Serialize the graph to RDF/XML
         return g
