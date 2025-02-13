@@ -280,6 +280,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
             g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
             g.add((birth_time_span, RDF.type, ns.crm["E52_Time-Span"]))
+            g.add((birth_time_span, RDFS.label, Literal(instance.start_date_written)))
             g.add(
                 (
                     birth_time_span,
@@ -307,6 +308,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((death_event, ns.crm.P100_was_death_of, person_uri))
             g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
             g.add((death_time_span, RDF.type, ns.crm["E52_Time-Span"]))
+            g.add((death_time_span, RDFS.label, Literal(instance.end_date_written)))
             g.add(
                 (
                     death_time_span,
