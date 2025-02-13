@@ -1,3 +1,4 @@
+import os
 from apis_acdhch_default_settings.settings import *  # noqa: F403
 
 DEBUG = True
@@ -13,6 +14,7 @@ INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["auditlog", "apis_acdhch_django_auditlog"]
 INSTALLED_APPS += ["django_json_editor_field"]
+INSTALLED_APPS += ["apis_bibsonomy"]
 
 ROOT_URLCONF = "apis_ontology.urls"
 
@@ -44,3 +46,13 @@ APIS_ENTITIES = {
 }
 
 DEFAULT_HIGHLIGTHER_PROJECT = 28
+
+APIS_BIBSONOMY = [
+    {
+        "type": "zotero",
+        "url": "https://api.zotero.org",
+        "user": os.environ.get("APIS_BIBSONOMY_USER"),
+        "API key": os.environ.get("APIS_BIBSONOMY_PASSWORD"),
+        "group": "5867571",
+    }
+]
