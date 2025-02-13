@@ -1,4 +1,3 @@
-from django.db.models.fields import return_None
 from rest_framework.renderers import serializers
 from rdflib import Graph, Literal, URIRef, Namespace
 from rdflib.namespace import RDF, RDFS, XSD, OWL, GEO
@@ -457,6 +456,12 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
         g.add((pc_joining_uri, RDF.type, ns.crm["PC144_joined_with"]))
         g.add((pc_joining_uri, ns.crm.P144_1_kind_of_member, memb_type_uri))
         g.add((memb_type_uri, RDFS.label, Literal(instance.name())))
+        g.add((memb_type_uri, RDF.type, ns.crm.E55_Type))
+        leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
+        g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
+        g.add((person_uri, ns.crm["P145i_left_by"], leaving_uri))
+        g.add((leaving_uri, ns.crm["P146_separated_from"], inst_uri))
+        g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
         if instance.start_date_written is not None:
             joining_time_span_uri = URIRef(
                 ns.attr[f"joining_ev_time_span_{instance.id}"]
@@ -493,12 +498,7 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
             leaving_time_span_uri = URIRef(
                 ns.attr[f"leaving_ev_time_span_{instance.id}"]
             )
-            leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
-            g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
-            g.add((person_uri, ns.crm["P145i_left_by"], leaving_uri))
-            g.add((leaving_uri, ns.crm["P146_separated_from"], inst_uri))
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
-            g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
             g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
             g.add(
                 (leaving_time_span_uri, RDFS.label, Literal(instance.end_date_written))
