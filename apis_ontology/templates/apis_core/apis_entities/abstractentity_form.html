@@ -1,5 +1,10 @@
 {% extends "apis_core/apis_entities/abstractentity_form.html" %}
 {% load apis_highlighter %}
+{% load bibsonomy_templatetags %}
+
+{% block object-actions %}
+{% link_to_reference_on obj=object modal=True %}
+{% endblock object-actions %}
 
 {% block col-one %}
 
