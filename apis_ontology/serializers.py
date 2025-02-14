@@ -105,7 +105,7 @@ class BaseRDFSerializer(serializers.BaseSerializer):
         if triple not in g:
             g.add(triple)
             g.add((apis_id_type, RDFS.label, Literal("APIS internal identifier")))
-        g.add((instance, ns.crm.P1_is_identified_by, apis_id))
+        g.add((instance_uri, ns.crm.P1_is_identified_by, apis_id))
 
         for uri in Uri.objects.filter(object_id=instance.pk):
             uri_ref = URIRef(uri.uri)
