@@ -105,27 +105,8 @@ class BaseRDFSerializer(serializers.BaseSerializer):
         if triple not in g:
             g.add(triple)
             g.add((apis_id_type, RDFS.label, Literal("APIS internal identifier")))
+        g.add((instance, ns.crm.P1_is_identified_by, apis_id))
 
-        # GND identifier type
-        gnd_id_type = URIRef(ns.attr["gnd-identifier/type"])
-        triple = (gnd_id_type, RDF.type, ns.crm["E55_Type"])
-        if triple not in g:
-            g.add(triple)
-            g.add((gnd_id_type, RDFS.label, Literal("GND ID")))
-
-        # Wikidata identifier type
-        wikidata_id_type = URIRef(ns.attr["wikidata-identifier/type"])
-        triple = (wikidata_id_type, RDF.type, ns.crm["E55_Type"])
-        if triple not in g:
-            g.add(triple)
-            g.add((wikidata_id_type, RDFS.label, Literal("Wikidata ID")))
-
-        # GeoNames identifier type
-        geonames_id_type = URIRef(ns.attr["geonames-identifier/type"])
-        triple = (geonames_id_type, RDF.type, ns.crm["E55_Type"])
-        if triple not in g:
-            g.add(triple)
-            g.add((geonames_id_type, RDFS.label, Literal("GeoNames ID")))
         for uri in Uri.objects.filter(object_id=instance.pk):
             uri_ref = URIRef(uri.uri)
             g.add((instance_uri, OWL.sameAs, uri_ref))
@@ -135,6 +116,12 @@ class BaseRDFSerializer(serializers.BaseSerializer):
             # GND: matches patterns like 118540238 or 4074195-3
             if "d-nb.info" in uri.uri:
                 gnd_match = re.search(r"(?:\/gnd\/)(\d+(?:-\d+)?X?)", uri.uri)
+                # GND identifier type
+                gnd_id_type = URIRef(ns.attr["gnd-identifier/type"])
+                triple = (gnd_id_type, RDF.type, ns.crm["E55_Type"])
+                if triple not in g:
+                    g.add(triple)
+                    g.add((gnd_id_type, RDFS.label, Literal("GND ID")))
                 if gnd_match:
                     gnd_id = gnd_match.group(1)
                     gnd_id_uri = URIRef(ns.attr[f"gnd-identifier/{instance.pk}"])
@@ -146,6 +133,12 @@ class BaseRDFSerializer(serializers.BaseSerializer):
             # Wikidata: matches Q followed by numbers
             elif "wikidata.org" in uri.uri:
                 wikidata_match = re.search(r"[/:]Q(\d+)", uri.uri)
+                # Wikidata identifier type
+                wikidata_id_type = URIRef(ns.attr["wikidata-identifier/type"])
+                triple = (wikidata_id_type, RDF.type, ns.crm["E55_Type"])
+                if triple not in g:
+                    g.add(triple)
+                    g.add((wikidata_id_type, RDFS.label, Literal("Wikidata ID")))
                 if wikidata_match:
                     wikidata_id = f"Q{wikidata_match.group(1)}"
                     wikidata_id_uri = URIRef(
@@ -161,6 +154,12 @@ class BaseRDFSerializer(serializers.BaseSerializer):
             # GeoNames: matches numeric IDs
             elif "geonames.org" in uri.uri:
                 geonames_match = re.search(r"\/(\d+)(?:\/|$)", uri.uri)
+                # GeoNames identifier type
+                geonames_id_type = URIRef(ns.attr["geonames-identifier/type"])
+                triple = (geonames_id_type, RDF.type, ns.crm["E55_Type"])
+                if triple not in g:
+                    g.add(triple)
+                    g.add((geonames_id_type, RDFS.label, Literal("GeoNames ID")))
                 if geonames_match:
                     geonames_id = geonames_match.group(1)
                     geonames_id_uri = URIRef(
