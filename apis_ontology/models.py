@@ -105,6 +105,10 @@ class Profession(GenericModel, models.Model):
 class Parentprofession(GenericModel, models.Model):
     label = models.CharField()
 
+    class Meta:
+        verbose_name = _("Parent Profession")
+        verbose_name_plural = _("Parent Professions")
+
     def __str__(self):
         return self.label
 
