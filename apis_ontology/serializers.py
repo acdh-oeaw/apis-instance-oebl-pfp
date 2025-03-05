@@ -354,7 +354,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((appellation_uri, ns.crm.P106_is_composed_of, surname_uri))
             g.add((surname_uri, RDFS.label, Literal(instance.surname)))
 
-        if instance.start_date_written is not None:
+        if instance.start is not None:
             birth_event = URIRef(ns.attr[f"birth_{instance.id}"])
             birth_time_span = URIRef(ns.attr[f"birth_time-span_{instance.id}"])
             g.add((birth_event, RDF.type, ns.crm.E67_Birth))
@@ -362,27 +362,27 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
             g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
             g.add((birth_time_span, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add((birth_time_span, RDFS.label, Literal(instance.start_date_written)))
-            g.add(
-                (
-                    birth_time_span,
-                    ns.crm.P82a_begin_of_the_begin,
-                    Literal(instance.start_date, datatype=XSD.date)
-                    if instance.start_date is not None
-                    else Literal(instance.start_date_written),
+            g.add((birth_time_span, RDFS.label, Literal(instance.start)))
+            if (
+                instance.start_date_from is not None
+                and instance.start_date_to is not None
+            ):
+                g.add(
+                    (
+                        birth_time_span,
+                        ns.crm.P82a_begin_of_the_begin,
+                        Literal(instance.start_date_from, datatype=XSD.date),
+                    )
                 )
-            )
-            g.add(
-                (
-                    birth_time_span,
-                    ns.crm.P82b_end_of_the_end,
-                    Literal(instance.start_date, datatype=XSD.date)
-                    if instance.start_date is not None
-                    else Literal(instance.start_date_written),
+                g.add(
+                    (
+                        birth_time_span,
+                        ns.crm.P82b_end_of_the_end,
+                        Literal(instance.start_date_to, datatype=XSD.date),
+                    )
                 )
-            )
 
-        if instance.end_date_written is not None:
+        if instance.end is not None:
             death_event = URIRef(ns.attr[f"death_{instance.id}"])
             g.add((death_event, RDFS.label, Literal(f"Tod von {str(instance)}")))
             death_time_span = URIRef(ns.attr[f"death_time-span_{instance.id}"])
@@ -390,25 +390,22 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((death_event, ns.crm.P100_was_death_of, person_uri))
             g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
             g.add((death_time_span, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add((death_time_span, RDFS.label, Literal(instance.end_date_written)))
-            g.add(
-                (
-                    death_time_span,
-                    ns.crm.P82a_begin_of_the_begin,
-                    Literal(instance.end_date, datatype=XSD.date)
-                    if instance.end_date is not None
-                    else Literal(instance.end_date_written),
+            g.add((death_time_span, RDFS.label, Literal(instance.end)))
+            if instance.end_date_from is not None and instance.end_date_to is not None:
+                g.add(
+                    (
+                        death_time_span,
+                        ns.crm.P82a_begin_of_the_begin,
+                        Literal(instance.end_date_from, datatype=XSD.date),
+                    )
                 )
-            )
-            g.add(
-                (
-                    death_time_span,
-                    ns.crm.P82b_end_of_the_end,
-                    Literal(instance.end_date, datatype=XSD.date)
-                    if instance.end_date is not None
-                    else Literal(instance.end_date_written),
+                g.add(
+                    (
+                        death_time_span,
+                        ns.crm.P82b_end_of_the_end,
+                        Literal(instance.end_date_to, datatype=XSD.date),
+                    )
                 )
-            )
         birth_event_param = birth_event if "birth_event" in locals() else None
         death_event_param = death_event if "death_event" in locals() else None
         g = add_life_event_place(
@@ -461,7 +458,7 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
         g.add((person_uri, ns.crm["P145i_left_by"], leaving_uri))
         g.add((leaving_uri, ns.crm["P146_separated_from"], inst_uri))
         g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
-        if instance.start_date_written is not None:
+        if instance.start is not None:
             joining_time_span_uri = URIRef(
                 ns.attr[f"joining_ev_time_span_{instance.id}"]
             )
@@ -472,54 +469,49 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
                 (
                     joining_time_span_uri,
                     RDFS.label,
-                    Literal(instance.start_date_written),
+                    Literal(instance.start),
                 )
             )
-            g.add(
-                (
-                    joining_time_span_uri,
-                    ns.crm.P82a_begin_of_the_begin,
-                    Literal(instance.start_date, datatype=XSD.date)
-                    if instance.start_date is not None
-                    else Literal(instance.start_date_written),
+            if (
+                instance.start_date_from is not None
+                and instance.start_date_to is not None
+            ):
+                g.add(
+                    (
+                        joining_time_span_uri,
+                        ns.crm.P82a_begin_of_the_begin,
+                        Literal(instance.start_date_from, datatype=XSD.date),
+                    )
                 )
-            )
-            g.add(
-                (
-                    joining_time_span_uri,
-                    ns.crm.P82b_end_of_the_end,
-                    Literal(instance.start_date, datatype=XSD.date)
-                    if instance.start_date is not None
-                    else Literal(instance.start_date_written),
+                g.add(
+                    (
+                        joining_time_span_uri,
+                        ns.crm.P82b_end_of_the_end,
+                        Literal(instance.start_date_to, datatype=XSD.date),
+                    )
                 )
-            )
-        if instance.end_date_written is not None:
+        if instance.end is not None:
             leaving_time_span_uri = URIRef(
                 ns.attr[f"leaving_ev_time_span_{instance.id}"]
             )
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
             g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add(
-                (leaving_time_span_uri, RDFS.label, Literal(instance.end_date_written))
-            )
-            g.add(
-                (
-                    leaving_time_span_uri,
-                    ns.crm.P82a_begin_of_the_begin,
-                    Literal(instance.end_date, datatype=XSD.date)
-                    if instance.end_date is not None
-                    else Literal(instance.end_date_written),
+            g.add((leaving_time_span_uri, RDFS.label, Literal(instance.end)))
+            if instance.end_date_from is not None and instance.end_date_to is not None:
+                g.add(
+                    (
+                        leaving_time_span_uri,
+                        ns.crm.P82a_begin_of_the_begin,
+                        Literal(instance.end_date_from, datatype=XSD.date),
+                    )
                 )
-            )
-            g.add(
-                (
-                    leaving_time_span_uri,
-                    ns.crm.P82b_end_of_the_end,
-                    Literal(instance.end_date, datatype=XSD.date)
-                    if instance.end_date is not None
-                    else Literal(instance.end_date_written),
+                g.add(
+                    (
+                        leaving_time_span_uri,
+                        ns.crm.P82b_end_of_the_end,
+                        Literal(instance.end_date_to, datatype=XSD.date),
+                    )
                 )
-            )
         return g
 
 
