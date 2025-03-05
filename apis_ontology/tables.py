@@ -26,7 +26,7 @@ class BibsonomyColumn(CustomTemplateColumn):
 class PersonTable(AbstractEntityTable):
     class Meta:
         model = Person
-        fields = ["surname", "forename", "start_date", "end_date"]
+        fields = ["surname", "forename", "start", "end"]
         exclude = ["desc"]
         row_attrs = {"title": lambda record: record.oebl_kurzinfo}
 
@@ -39,24 +39,16 @@ class PersonTable(AbstractEntityTable):
         empty_values=[],
     )
     biographien_link = BiographienLinkColumn()
+    start = tables.Column(order_by="start_date_sort")
+    end = tables.Column(order_by="end_date_sort")
 
     def render_surname(self, record):
         return record.surname or "No name"
 
-    def render_start_date(self, record):
-        if record.start_date:
-            return record.start_date.year
-        return "-"
-
-    def render_end_date(self, record):
-        if record.end_date:
-            return record.end_date.year
-        return "-"
-
 
 class OEBLBaseEntityOEBLBaseEntityRelationsTable(RelationsListTable):
-    start = tables.Column(accessor="start_date_written", order_by="start_date")
-    end = tables.Column(accessor="end_date_written", order_by="end_date")
+    start = tables.Column(accessor="start", order_by="start_date_sort")
+    end = tables.Column(accessor="end", order_by="end_date_sort")
     notes = tables.Column()
     bibsonomy = BibsonomyColumn()
 
