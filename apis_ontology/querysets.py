@@ -13,7 +13,7 @@ from apis_core.utils.autocomplete import (
     LobidAutocompleteAdapter,
 )
 
-from .models import Person
+from .models import Institution, Person, Place
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,18 @@ def PersonListViewQueryset(*args):
     return Person.objects.all().order_by(
         Collate("surname", DB_COLLATION), Collate("forename", DB_COLLATION)
     )
+
+
+def InstitutionViewSetQueryset(*args):
+    return Institution.objects.all().distinct()
+
+
+def PersonViewSetQueryset(*args):
+    return Person.objects.all().distinct()
+
+
+def PlaceViewSetQueryset(*args):
+    return Place.objects.all().distinct()
 
 
 def InstitutionAutocompleteQueryset(model, query):
