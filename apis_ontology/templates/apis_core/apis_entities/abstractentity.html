@@ -8,8 +8,8 @@
 
 {% block card-header-content %}
 {{ block.super }}
-<div class="row justify-content-center align-items-center">
-  <span class="kurzinfo mr-2">
+<div class="text-center">
+  <span class="kurzinfo">
     {{ object.oebl_kurzinfo }}
     {% if object.sources.all %}
     <i>
@@ -18,10 +18,7 @@
       {% endfor %}
     </i>
     {% endif %}
+    {% collection_object_collection_by_id object 64 65 %}
   </span>
-{% collection_content_objects object "64,65" as collection_content_objects %}
-{% for cco in collection_content_objects %}
-{% collection_object_parent object cco %}
-{% endfor %}
 </div>
 {% endblock card-header-content %}
