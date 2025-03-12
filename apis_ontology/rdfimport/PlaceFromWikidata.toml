@@ -2,17 +2,14 @@
 ####################################################
 # Create an E53_Place from a wikidata RDF endpoint #
 ####################################################
-superclass = "apis_ontology.models.Place"
-regex = "http://www.wikidata.org.*"
-[[attributes]]
-# label
-sparql = """
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-PREFIX schema: <http://schema.org/>
-SELECT ?label
+[[filters]]
+"wikibase:directClaim" = "wdt:P625" 
+
+[attributes]
+label = '''
+SELECT (COALESCE(?label_de, ?label_en, ?official_label, ?label) AS ?label)
 WHERE {
-  ?something schema:about ?subject .
-  ?subject rdfs:label ?label .
+  ?subject a wikibase:Item .
   OPTIONAL { ?subject wdt:P1448/rdfs:label ?official_label }
   OPTIONAL{
   	?subject rdfs:label ?label_de .
@@ -22,22 +19,19 @@ WHERE {
   	?subject rdfs:label ?label_en .
 	FILTER(lang(?label_en) = "en")
   }
-  BIND(COALESCE(?label_de, ?label_en, ?official_label, ?label) AS ?label)
+  OPTIONAL{
+  	?subject rdfs:label ?label .
+  }
 }
-"""
-[[attributes]]
-# longitude
-sparql = '''
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+'''
+longitude = '''
 SELECT ?longitude
 WHERE {
   ?subject wdt:P625 ?geo1 .
   BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+).*$", "$1") as ?longitude)
   }
-'''
-[[attributes]]
-# latitude
-sparql = '''
+''' 
+latitude = '''
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 SELECT ?latitude
 WHERE {
@@ -45,13 +39,5 @@ WHERE {
   BIND(REPLACE(str(?geo1), "Point\\((\\d+\\.\\d+) (\\d+\\.\\d+).*$", "$2") as ?latitude)
   }
 '''
-[[attributes]]
-# sameAs
-sparql = '''
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
-WHERE {
-  ?subject wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244 ?sameas_pre
-}
-GROUP BY ?subject
-'''
+same_as = "wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244"
+

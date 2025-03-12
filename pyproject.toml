@@ -10,7 +10,7 @@ packages = [{include = "apis_ontology"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 psycopg2 = "^2.9"
-apis-core-rdf = "0.38.0"
+apis-core-rdf = "0.41.1"
 apis-highlighter-ng = "^0.5.0"
 apis-acdhch-default-settings = "2.2.2"
 django-auditlog = "^3.0.0"
@@ -19,8 +19,25 @@ django-json-editor-field = "^0.4.0"
 django-interval = "^0.3.2"
 apis-bibsonomy = "^0.13.1"
 
+[tool.poetry.group.dev]
+optional = true
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.8.0"
+djlint = "^1.31.1"
+ruff = ">=0.5.0,<0.12.0"
+deptry = ">=0.12,<0.24"
+
+[tool.djlint]
+indent=2
+profile="django"
+extension="html"
+blank_line_before_tag="block"
+blank_line_after_tag="endblock"
+format_js=false
+
+[tool.ruff]
+lint.select = ["E4", "E7", "E9", "F", "I"]
+lint.ignore = ["E501", "F403"]
+lint.isort.known-first-party = ["apis_core"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

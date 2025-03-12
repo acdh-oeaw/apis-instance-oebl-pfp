@@ -2,35 +2,30 @@
 # Create an `apis_ontology.Institution` #
 # from a wikidata RDF endpoint          #
 #########################################
-superclass = "apis_ontology.models.Institution"
-regex = "http://www.wikidata.org.*"
-[[attributes]]
-# name
-sparql = """
-PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-PREFIX schema: <http://schema.org/>
-SELECT ?name
+
+[[filters]]
+"wikibase:directClaim" = "wdt:P910" 
+
+[attributes]
+name = '''
+SELECT (COALESCE(?label_de, ?label_en, ?label) AS ?name)
 WHERE {
-  ?something schema:about ?institution .
+?subject a wikibase:Item .
   OPTIONAL{
-  	?institution rdfs:label ?label_de .
+  	?subject rdfs:label ?label_de .
 	FILTER(lang(?label_de) = "de")
   }
   OPTIONAL{
-  	?institution rdfs:label ?label_en .
+  	?subject rdfs:label ?label_en .
 	FILTER(lang(?label_en) = "en")
   }
-  ?institution rdfs:label ?label .
-  BIND(COALESCE(?label_de, ?label_en, ?label) AS ?name)
-}
-"""
-[[attributes]]
-# sameAs
-sparql = '''
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
-WHERE {
-  ?subject wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244 ?sameas_pre
-}
-GROUP BY ?subject
+  OPTIONAL {
+  ?subject rdfs:label ?label .}
+  }
 '''
+start = "wdt:P571"
+end = "wdt:P576"
+same_as = "wdtn:P227|wdtn:P1566|wdtn:P214|wdtn:P244"
+
+#[relations] TODO: add again once https://github.com/acdh-oeaw/apis-core-rdf/issues/1716 is resolved
+#"apis_ontology.gelegenin" = { curies = "wdt:P159", obj = "apis_ontology.place"}
