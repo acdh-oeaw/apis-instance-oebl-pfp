@@ -1,75 +1,62 @@
-from django.apps import apps
+import logging
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
-from django.db.utils import IntegrityError
 from apis_core.generic.importers import GenericModelImporter
-from apis_core.utils.helpers import create_object_from_uri
-from apis_core.apis_metainfo.models import Uri
 
 
-class BaseEntityImporter(GenericModelImporter):
-    """Importer for all OEBL entities. Allows to define related objects directly in the RDF variable names.
-    Use `?something__RELATED_OBEJCT_CLASS__RELATION_CLASS` in your variables to auto create relations."""
-
-    def create_instance(self):
-        data = self.get_data(drop_unknown_fields=False)
-        if "sameas" in data:
-            data["sameas"] = data["sameas"].split("|")
-            sa = Uri.objects.filter(uri__in=data["sameas"])
-            if sa.count() == 1:
-                return sa.first().content_object
-            elif sa.count() > 1:
-                root_set = set([s.content_object for s in sa])
-                if len(root_set) > 1:
-                    raise IntegrityError(
-                        f"Multiple objects found for sameAs URIs {data['sames']}. "
-                        f"This indicates a data integrity problem as these URIs should be unique."
-                    )
-                else:
-                    return sa.first().content_object
-        modelfields = [field.name for field in self.model._meta.fields]
-        data_croped = {key: data[key] for key in data if key in modelfields}
-        subj = self.model.objects.create(**data_croped)
-        if "sameas" in data:
-            for uri in data["sameas"]:
-                content_type = ContentType.objects.get_for_model(subj)
-                Uri.objects.create(
-                    uri=uri, content_type=content_type, object_id=subj.id
-                )
-        related_keys = [
-            (x, x.split("__")[1], x.split("__")[2]) for x in data.keys() if "__" in x
-        ]
-        try:
-            for rk in related_keys:
-                key, obj, rel = rk
-                RelatedModel = apps.get_model("apis_ontology", obj)
-                RelationType = apps.get_model("apis_ontology", rel)
-                if key in data:
-                    related_obj = create_object_from_uri(data[key], RelatedModel)
-                    RelationType.objects.create(subj=subj, obj=related_obj)
-        except Exception as e:  # noqa: E722
-            subj.delete()
-            raise ImproperlyConfigured(
-                f"Error in creating related Objects for {self.model}: {e}"
-            )
-
-        return subj
+logger = logging.getLogger(__name__)
 
 
-class EventImporter(BaseEntityImporter):
-    pass
-
-
-class PersonImporter(BaseEntityImporter):
+class OEBLBaseEntityImporter(GenericModelImporter):
     def mangle_data(self, data):
-        if "profession" in data:
-            del data["profession"]
+        m2m_tuples = []
+        for key, value in data.items():
+            if key.endswith("_m2m"):
+                k2, obj_model, _ = key.split("_")
+                m2m_tuples.append((k2, obj_model, value, key))
+            if key in ["start", "end"] and "T" in "".join(value):
+                data[key] = [x.split("T")[0] for x in value]
+            if key in ["latitude", "longitude"]:
+                data[key] = [float(x.replace("+", "").strip()) for x in value]
+            if key == "alternative_names":
+                data[key] = [{"name": x, "art": "alternativer Name"} for x in value]
+        for key in m2m_tuples:
+            del data[key[3]]
+        self._m2m_tuples = m2m_tuples
         return data
 
+    def create_instance(self):
+        instance = super().create_instance()
+        for m2m in self._m2m_tuples:
+            for inst in m2m[2]:
+                if inst.startswith("http"):
+                    try:
+                        rel_ent = OEBLBaseEntityImporter(
+                            inst,
+                            ContentType.objects.get(
+                                app_label="apis_ontology", model=m2m[1]
+                            ).model_class(),
+                        ).create_instance()
+                        getattr(instance, m2m[0]).add(rel_ent)
+                    except Exception as e:
+                        logger.debug(
+                            f"import of m2m didnt work: {e}. Tried to import {inst}"
+                        )
+                else:
+                    pass
+        return instance
 
-class InstitutionImporter(BaseEntityImporter):
+
+class PlaceImporter(OEBLBaseEntityImporter):
     pass
 
 
-class PlaceImporter(BaseEntityImporter):
+class PersonImporter(OEBLBaseEntityImporter):
+    pass
+
+
+class InstitutionImporter(OEBLBaseEntityImporter):
+    pass
+
+
+class EventImporter(OEBLBaseEntityImporter):
     pass

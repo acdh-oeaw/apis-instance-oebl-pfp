@@ -1,9 +1,12 @@
+from os import supports_bytes_environ
+from typing import Self
 from apis_core.relations.models import Relation
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from pathlib import Path
 
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.utils.helpers import create_object_from_uri
@@ -113,6 +116,17 @@ class Profession(GenericModel, models.Model):
     def __str__(self):
         return self.name or f"No name ({self.id})"
 
+    @classmethod
+    def create_from_string(cls, string: str) -> Self:
+        return cls.objects.get_or_create(name=string)[0]
+
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/ProfessionFromDNB.toml",
+            Path(__file__).parent / "rdfimport/ProfessionFromWikidata.toml",
+        ]
+
 
 class Parentprofession(GenericModel, models.Model):
     label = models.CharField()
@@ -134,6 +148,12 @@ class Event(
 
     _default_search_fields = ["name", "notes", "kind"]
 
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/EventFromDNB.toml",
+        ]
+
     def __str__(self):
         return self.name if self.name and self.name.strip() else "unbekannt"
 
@@ -153,6 +173,13 @@ class Institution(
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/InstitutionFromDNB.toml",
+            Path(__file__).parent / "rdfimport/InstitutionFromWikidata.toml",
+        ]
 
     def __str__(self):
         return self.name if self.name and self.name.strip() else "unbekannt"
@@ -227,6 +254,7 @@ class Person(
                         "Künstlername",
                         "Mädchenname",
                         "Schreibvariante",
+                        "alternativer Name",
                     ],
                 },
                 "start": {
@@ -332,6 +360,13 @@ class Person(
         blank=True, verbose_name="ÖBL Werkverzeichnis"
     )
 
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/PersonFromDNB.toml",
+            Path(__file__).parent / "rdfimport/PersonFromWikidata.toml",
+        ]
+
     def __str__(self):
         # Check if both proper names exist
         if self.forename and self.surname:
@@ -381,6 +416,14 @@ class Place(
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/PlaceFromGeoNames.toml",
+            Path(__file__).parent / "rdfimport/PlaceFromDNB.toml",
+            Path(__file__).parent / "rdfimport/PlaceFromWikidata.toml",
+        ]
 
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
@@ -1433,3 +1476,16 @@ class FandStattIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDat
     @classmethod
     def reverse_name(self) -> str:
         return "war Ort von [PIO]"
+
+
+class GelegenIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+    subj_model = Institution
+    obj_model = Place
+
+    @classmethod
+    def name(self) -> str:
+        return "ist gelegen in [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "ist/war Ort von [PIO]"

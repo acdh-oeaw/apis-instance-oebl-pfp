@@ -1,28 +1,14 @@
 #####################################################
 # Create an E53_Place from a d-nb.info RDF endpoint #
 # the second regex is for testing
-regex = "https://d-nb.info.*|/.*wien.rdf"
-superclass = "apis_ontology.models.Place"
-sameas = """
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT ?sameas
-WHERE {
-?subject owl:sameAs ?sameas
-}
-"""
-[[attributes]]
-# label
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?label
-WHERE {
-  ?subject gndo:preferredNameForThePlaceOrGeographicName ?label
-}
-"""
-[[attributes]]
-# longitude
-sparql = '''
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+[[filters]]
+"rdf:type" = "gndo:TerritorialCorporateBodyOrAdministrativeUnit"
+
+[attributes]
+label = "gndo:preferredNameForThePlaceOrGeographicName"
+same_as = "owl:sameAs"
+longitude = '''
 SELECT ?longitude
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
@@ -30,24 +16,11 @@ WHERE {
   BIND(REPLACE(str(?point), "Point \\( \\+?(-?\\d+.\\d+).*", "$1") as ?longitude)
   }
 '''
-[[attributes]]
-# latitude
-sparql = '''
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+latitude = '''
 SELECT ?latitude
 WHERE {
   ?subject geo:hasGeometry ?geo1 .
   ?geo1 geo:asWKT ?point .
   BIND(REPLACE(str(?point), "^Point\\s*\\(\\s*[+-]?\\d+\\.\\d+\\s+([+-]?\\d+\\.\\d+)\\s*\\)$", "$1") as ?latitude)
   }
-'''
-[[attributes]]
-# sameAs
-sparql = '''
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
-WHERE {
-  ?subject owl:sameAs ?sameas_pre
-}
-GROUP BY ?subject
 '''

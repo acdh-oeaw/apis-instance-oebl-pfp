@@ -1,42 +1,15 @@
 #####################################################
 # Create an E74_Group from a d-nb.info RDF endpoint #
 #####################################################
-superclass = "apis_ontology.models.Institution"
-regex = "https://d-nb.info.*"
-[[attributes]]
-# name
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?name
-WHERE {
-  ?subject gndo:preferredNameForTheCorporateBody ?name
-}
-"""
-[[attributes]]
-# start_date_written
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?start_date_written
-WHERE {
-  ?subject gndo:dateOfEstablishment ?start_date_written
-}
-"""
-[[attributes]]
-# end_date_written
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?end_date_written
-WHERE {
-  ?subject gndo:dateOfTermination ?end_date_written
-}
-"""
-[[attributes]]
-# sameAs
-sparql = '''
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
-WHERE {
-  ?subject owl:sameAs ?sameas_pre
-}
-GROUP BY ?subject
-'''
+
+[[filters]]
+"rdf:type" = "gndo:CorporateBody"
+
+[attributes]
+name = "gndo:preferredNameForTheCorporateBody"
+start = "gndo:dateOfEstablishment" 
+end = "gndo:dateOfTermination"
+same_as = "owl:sameAs"
+
+[relations]
+"apis_ontology.gelegenin" = { curies = "gndo:placeOfBusiness", obj = "apis_ontology.place"}

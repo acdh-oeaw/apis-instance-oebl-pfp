@@ -1,65 +1,18 @@
 #################################################
 # Create an Event from GND                      #
 #################################################
-superclass = "apis_ontology.models.Event"
-regex = "https://d-nb.info.*"
-[[attributes]]
-# name
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?name
-WHERE {
-  ?subject a gndo:HistoricSingleEventOrEra ;
-           gndo:preferredNameForTheSubjectHeading ?name .
-}
-"""
-[[attributes]]
-# name
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?name
-WHERE {
-  ?subject a gndo:ConferenceOrEvent ;
-           gndo:preferredNameForTheConferenceOrEvent ?name .
-}
-"""
-[[attributes]]
-# start_date_written
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?start_date_written
-WHERE {
-  ?subject a gndo:HistoricSingleEventOrEra ;
-           gndo:dateOfProduction ?start_date_written .
-}
-"""
-[[attributes]]
-# start_date_written
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?start_date_written
-WHERE {
-  ?subject a gndo:ConferenceOrEvent ;
-           gndo:dateOfConferenceOrEvent ?start_date_written .
-}
-"""
-[[attributes]]
-# related_place
-sparql = """
-PREFIX gndo: <https://d-nb.info/standards/elementset/gnd#>
-SELECT ?relatedPlace__Place__FandStattIn
-WHERE {
-  ?subject a gndo:HistoricSingleEventOrEra ;
-           gndo:place ?relatedPlace__Place__FandStattIn .
-}
-"""
-[[attributes]]
-# sameAs
-sparql = '''
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT (GROUP_CONCAT(?sameas_pre; separator='|') as ?sameas)
-WHERE {
-  ?subject owl:sameAs ?sameas_pre
-}
-GROUP BY ?subject
-'''
+
+[[filters]]
+"rdf:type" = "gndo:ConferenceOrEvent"
+[[filters]]
+"rdf:type" = "gndo:HistoricSingleEventOrEra"
+
+[attributes]
+name = ["gndo:preferredNameForTheConferenceOrEvent", "gndo:preferredNameForTheSubjectHeading"]
+start = ["gndo:dateOfEstablishment", "gndo:dateOfProduction", "gndo:dateOfConferenceOrEvent"]
+end = "gndo:dateOfTermination"
+same_as = "owl:sameAs"
+
+
+[relations]
+"apis_ontology.fandstattin" = {curies = "gndo:place|gndo:placeOfConferenceOrEvent", obj = "apis_ontology.place"}
