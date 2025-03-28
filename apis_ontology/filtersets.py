@@ -8,10 +8,11 @@ from django.db import models
 from django.db.models.functions import Greatest
 
 from apis_core.apis_entities.filtersets import (
-    ABSTRACT_ENTITY_FILTERS_EXCLUDE,
     AbstractEntityFilterSet,
 )
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
+from django_interval.fields import FuzzyDateParserField
+from django_interval.filters import DateIntervalRangeFilter
 
 PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
@@ -22,8 +23,6 @@ PATTERN = re.compile(r"""((?:[^ "']|"[^"]*"|'[^']*')+)""")
 #########
 # helpers
 #########
-
-ABSTRACT_ENTITY_FILTERS_EXCLUDE += ["alternative_names"]
 
 
 def remove_quotes(token):
@@ -86,6 +85,14 @@ def collection_method(queryset, name, value):
 ###################
 class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
     class Meta(AbstractEntityFilterSet.Meta):
+        exclude = [
+            "end_date_to",
+            "end_date_from",
+            "end_date_sort",
+            "start_date_to",
+            "start_date_from",
+            "start_date_sort",
+        ]
         filter_overrides = {
             models.CharField: {
                 "filter_class": django_filters.CharFilter,
@@ -93,6 +100,7 @@ class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
                     "lookup_expr": "unaccent__icontains",
                 },
             },
+            FuzzyDateParserField: {"filter_class": DateIntervalRangeFilter},
         }
 
     def __init__(self, *args, **kwargs):
