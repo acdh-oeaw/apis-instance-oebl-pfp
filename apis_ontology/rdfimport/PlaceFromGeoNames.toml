@@ -1,0 +1,31 @@
+[[filters]]
+"rdf:type" = "gn:Feature"
+
+[attributes]
+label = '''
+SELECT (COALESCE(?official_label_de, ?alt_label_de, ?official_label_en, ?alt_label_en, ?official_label) AS ?label)
+WHERE {
+?something foaf:primaryTopic  ?subject .
+  OPTIONAL { ?subject gn:officialName ?official_label_de
+	FILTER(lang(?official_label_de) = "de")
+
+  }
+  OPTIONAL { ?subject gn:alternateName ?alt_label_de
+	FILTER(lang(?alt_label_de) = "de")
+
+  }
+  OPTIONAL { ?subject gn:officialName ?official_label_en
+	FILTER(lang(?official_label_en) = "en")
+
+  }
+  OPTIONAL { ?subject gn:alternateName ?alt_label_en
+	FILTER(lang(?alt_label_de) = "en")
+
+  }
+  OPTIONAL { ?subject gn:name ?official_label
+  }
+}
+'''
+latitude = "wgs84_pos:lat"
+longitude = "wgs84_pos:long"
+same_as = ["rdfs:seeAlso", "gn:wikipediaArticle"]

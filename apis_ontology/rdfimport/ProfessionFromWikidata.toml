@@ -1,0 +1,19 @@
+[[filters]]
+"wdt:P31" = "wd:Q28640"
+
+[attributes]
+name = '''
+SELECT (COALESCE(?label_de, ?label_en, ?label) as ?label) 
+	WHERE {
+		?subject rdfs:label ?label 
+		OPTIONAL{
+			?subject rdfs:label ?label_de
+			FILTER(LANG(?label_de) = "de")
+			}
+		OPTIONAL{
+			?subject rdfs:label ?label_en
+			FILTER(LANG(?label_en) = "en")
+}
+}
+'''
+same_as = "wdt:P227"
