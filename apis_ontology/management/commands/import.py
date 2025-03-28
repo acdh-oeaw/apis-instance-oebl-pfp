@@ -1,30 +1,30 @@
 import csv
+import datetime
 import json
-import re
-import requests
 import os
 import pathlib
-import datetime
+import re
 from collections import defaultdict
 
-from django.core.management.base import BaseCommand
-from django.contrib.contenttypes.models import ContentType
+import requests
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand
 
+from apis_core.apis_metainfo.models import Uri
+from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
+from apis_highlighter.models import AnnotationProject
 from apis_ontology.models import (
     Event,
     Institution,
     Person,
     Place,
-    Work,
-    Title,
     Profession,
-    Source,
     ProfessionCategory,
+    Source,
+    Title,
+    Work,
 )
-from apis_core.apis_metainfo.models import Uri
-from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
-from apis_highlighter.models import AnnotationProject
 
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 

@@ -1,4 +1,5 @@
 import os
+
 from apis_acdhch_default_settings.settings import *  # noqa: F403
 
 DEBUG = True

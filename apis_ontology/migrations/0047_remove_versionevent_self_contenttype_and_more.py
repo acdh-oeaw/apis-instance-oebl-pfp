@@ -4,40 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('apis_ontology', '0046_merge_20250226_1209'),
+        ("apis_ontology", "0046_merge_20250226_1209"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='versionevent',
-            name='self_contenttype',
+            model_name="versionevent",
+            name="self_contenttype",
         ),
         migrations.RemoveField(
-            model_name='versioninstitution',
-            name='self_contenttype',
+            model_name="versioninstitution",
+            name="self_contenttype",
         ),
         migrations.RemoveField(
-            model_name='versionperson',
-            name='self_contenttype',
+            model_name="versionperson",
+            name="self_contenttype",
         ),
         migrations.RemoveField(
-            model_name='versionplace',
-            name='self_contenttype',
+            model_name="versionplace",
+            name="self_contenttype",
         ),
         migrations.RemoveField(
-            model_name='versionwork',
-            name='self_contenttype',
+            model_name="versionwork",
+            name="self_contenttype",
         ),
         migrations.AddField(
-            model_name='place',
-            name='feature_code',
-            field=models.CharField(blank=True, default='', help_text='<a href="https://www.geonames.org/export/codes.html">Geonames Feature Code List</a>', max_length=16),
+            model_name="place",
+            name="feature_code",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text='<a href="https://www.geonames.org/export/codes.html">Geonames Feature Code List</a>',
+                max_length=16,
+            ),
         ),
         migrations.AddField(
-            model_name='versionplace',
-            name='feature_code',
-            field=models.CharField(blank=True, default='', help_text='<a href="https://www.geonames.org/export/codes.html">Geonames Feature Code List</a>', max_length=16),
+            model_name="versionplace",
+            name="feature_code",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text='<a href="https://www.geonames.org/export/codes.html">Geonames Feature Code List</a>',
+                max_length=16,
+            ),
         ),
     ]

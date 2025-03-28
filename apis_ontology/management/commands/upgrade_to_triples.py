@@ -1,7 +1,8 @@
 import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models.query import QuerySet
-from django.conf import settings
 
 from apis_core.apis_relations.models import Property, Triple
 

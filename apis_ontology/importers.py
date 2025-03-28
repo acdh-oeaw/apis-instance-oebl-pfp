@@ -1,7 +1,8 @@
 import logging
-from django.contrib.contenttypes.models import ContentType
-from apis_core.generic.importers import GenericModelImporter
 
+from django.contrib.contenttypes.models import ContentType
+
+from apis_core.generic.importers import GenericModelImporter
 
 logger = logging.getLogger(__name__)
 

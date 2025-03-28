@@ -1,8 +1,9 @@
-from apis_ontology.models import Person
-from crispy_forms.layout import Layout, HTML, Column, Row
-from apis_core.generic.forms import GenericModelForm
 from crispy_forms.bootstrap import PrependedText
+from crispy_forms.layout import HTML, Column, Layout, Row
+
+from apis_core.generic.forms import GenericModelForm
 from apis_core.generic.forms.widgets import NewlineSeparatedListWidget
+from apis_ontology.models import Person
 
 
 class PersonForm(GenericModelForm):

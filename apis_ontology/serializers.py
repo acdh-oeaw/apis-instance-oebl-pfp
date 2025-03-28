@@ -1,18 +1,20 @@
+import re
+
+from django.conf import settings
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import GEO, OWL, RDF, RDFS, XSD
 from rest_framework.renderers import serializers
-from rdflib import Graph, Literal, URIRef, Namespace
-from rdflib.namespace import RDF, RDFS, XSD, OWL, GEO
+
+from apis_core.apis_metainfo.models import Uri
 from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import (
-    Person,
     Institution,
+    Person,
     PersonPlaceLegacyRelation,
     StarbIn,
     WurdeGeborenIn,
 )
-from django.conf import settings
-from apis_core.apis_metainfo.models import Uri
-import re
 
 
 def normalize_empty_attributes(instance):

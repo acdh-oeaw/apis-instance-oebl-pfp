@@ -1,15 +1,16 @@
 from django.test import TestCase
+
 from apis_core.apis_metainfo.models import Uri
 from apis_ontology.importers import OEBLBaseEntityImporter as imp
 from apis_ontology.models import (
+    Event,
     FandStattIn,
     GelegenIn,
+    Institution,
     Person,
     Place,
-    Institution,
-    Event,
-    WurdeGeborenIn,
     StarbIn,
+    WurdeGeborenIn,
 )
 
 
