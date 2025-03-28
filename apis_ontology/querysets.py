@@ -1,16 +1,15 @@
 import logging
 import os
-from django.db.models.functions import Collate
+
 from django.conf import settings
-from django.db.models import Value
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models import Case, When, FloatField
-from django.db.models.functions import Greatest, Length
+from django.db.models import Case, FloatField, Value, When
+from django.db.models.functions import Collate, Greatest, Length
 
 from apis_core.utils.autocomplete import (
     ExternalAutocomplete,
-    TypeSenseAutocompleteAdapter,
     LobidAutocompleteAdapter,
+    TypeSenseAutocompleteAdapter,
 )
 
 from .models import Institution, Person, Place

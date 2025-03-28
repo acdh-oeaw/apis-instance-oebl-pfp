@@ -1,8 +1,10 @@
 import django_tables2 as tables
+
 from apis_core.apis_entities.tables import AbstractEntityTable
-from .models import Person
-from apis_core.relations.tables import RelationsListTable
 from apis_core.generic.tables import CustomTemplateColumn
+from apis_core.relations.tables import RelationsListTable
+
+from .models import Person
 
 
 class BiographienLinkColumn(tables.TemplateColumn):

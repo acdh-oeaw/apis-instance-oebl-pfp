@@ -1,14 +1,16 @@
-import os
 import datetime
 import json
+import os
 import pathlib
+
 import requests
-from django.core.management.base import BaseCommand
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from apis_core.apis_relations.models import Property, TempTriple
-from apis_core.apis_metainfo.models import RootObject
+from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand
 from simple_history.utils import get_history_model_for_model
+
+from apis_core.apis_metainfo.models import RootObject
+from apis_core.apis_relations.models import Property, TempTriple
 
 SRC = "https://apis.acdh.oeaw.ac.at/apis/api"
 TOKEN = os.environ.get("TOKEN")

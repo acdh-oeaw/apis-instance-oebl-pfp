@@ -1,5 +1,5 @@
-from rest_framework import renderers
 from rdflib import Graph
+from rest_framework import renderers
 
 
 class BaseRdfRenderer(renderers.BaseRenderer):

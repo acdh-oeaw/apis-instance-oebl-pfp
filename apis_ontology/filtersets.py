@@ -1,16 +1,17 @@
 import re
-import django_filters
-from django.contrib.postgres.search import TrigramWordSimilarity
-from django.db.models.functions import Greatest
-from django.db import models
 import unicodedata
 
+import django_filters
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import TrigramWordSimilarity
+from django.db import models
+from django.db.models.functions import Greatest
+
 from apis_core.apis_entities.filtersets import (
-    AbstractEntityFilterSet,
     ABSTRACT_ENTITY_FILTERS_EXCLUDE,
+    AbstractEntityFilterSet,
 )
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
-from django.contrib.contenttypes.models import ContentType
 
 PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
