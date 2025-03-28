@@ -48,7 +48,7 @@ class PersonTable(AbstractEntityTable):
         return record.surname or "No name"
 
 
-class OEBLBaseEntityOEBLBaseEntityRelationsTable(RelationsListTable):
+class OEBLBaseEntityRelationsTable(RelationsListTable):
     start = tables.Column(accessor="start", order_by="start_date_sort")
     end = tables.Column(accessor="end", order_by="end_date_sort")
     notes = tables.Column()
