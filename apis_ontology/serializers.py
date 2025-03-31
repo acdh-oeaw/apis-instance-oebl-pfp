@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 from django.conf import settings
 from rdflib import Graph, Literal, Namespace, URIRef
@@ -33,6 +34,68 @@ def normalize_empty_attributes(instance):
         if isinstance(value, str) and not value:
             setattr(instance, field.name, None)
     return instance
+
+
+def add_time_spans(
+    g: Graph, ts_node: URIRef, instance: Any, ns: Any, field: str
+) -> Graph:
+    """Add time span information to an RDF graph.
+
+    This function adds time span triples to the given RDF graph based on date fields
+    from the provided instance. It handles cases where direct date fields are missing
+    but a sort date is available.
+
+    Args:
+        g: The RDF graph to add triples to
+        ts_node: The time span node URI reference
+        instance: The model instance containing date fields
+        ns: Namespace manager for instance
+        field: Field prefix for date fields (e.g., 'start' or 'end')
+
+    Returns:
+        The modified RDF graph
+    """
+    # Get date values with safe defaults
+    date_from = getattr(instance, f"{field}_date_from", None)
+    date_to = getattr(instance, f"{field}_date_to", None)
+    date_sort = getattr(instance, f"{field}_date_sort", None)
+
+    # Use sort date as fallback if both from/to dates are missing
+    if (date_from is None and date_to is None) and date_sort is not None:
+        date_from = date_sort
+        date_to = date_sort
+
+    # Only add time span information if we have both dates
+    if date_from is not None and date_to is not None:
+        # Add begin and end date triples
+        g.add(
+            (
+                ts_node,
+                ns.crm.P82a_begin_of_the_begin,
+                Literal(date_from, datatype=XSD.date),
+            )
+        )
+        g.add(
+            (
+                ts_node,
+                ns.crm.P82b_end_of_the_end,
+                Literal(date_to, datatype=XSD.date),
+            )
+        )
+
+        # Add label and type triples
+        try:
+            # Try to get the field value for the label
+            field_value = getattr(instance, field, str(field))
+            g.add((ts_node, RDFS.label, Literal(field_value)))
+        except (AttributeError, TypeError):
+            # Fallback to using the field name if attribute doesn't exist
+            g.add((ts_node, RDFS.label, Literal(f"{field} time span")))
+
+        # Add the time span type
+        g.add((ts_node, RDF.type, ns.crm["E52_Time-Span"]))
+
+    return g
 
 
 # Dynamically create and add serializer classes to this module
@@ -363,26 +426,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
             g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
             g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
-            g.add((birth_time_span, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add((birth_time_span, RDFS.label, Literal(instance.start)))
-            if (
-                instance.start_date_from is not None
-                and instance.start_date_to is not None
-            ):
-                g.add(
-                    (
-                        birth_time_span,
-                        ns.crm.P82a_begin_of_the_begin,
-                        Literal(instance.start_date_from, datatype=XSD.date),
-                    )
-                )
-                g.add(
-                    (
-                        birth_time_span,
-                        ns.crm.P82b_end_of_the_end,
-                        Literal(instance.start_date_to, datatype=XSD.date),
-                    )
-                )
+            g = add_time_spans(g, birth_time_span, instance, ns, "start")
 
         if instance.end is not None:
             death_event = URIRef(ns.attr[f"death_{instance.id}"])
@@ -391,23 +435,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((death_event, RDF.type, ns.crm.E69_Death))
             g.add((death_event, ns.crm.P100_was_death_of, person_uri))
             g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
-            g.add((death_time_span, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add((death_time_span, RDFS.label, Literal(instance.end)))
-            if instance.end_date_from is not None and instance.end_date_to is not None:
-                g.add(
-                    (
-                        death_time_span,
-                        ns.crm.P82a_begin_of_the_begin,
-                        Literal(instance.end_date_from, datatype=XSD.date),
-                    )
-                )
-                g.add(
-                    (
-                        death_time_span,
-                        ns.crm.P82b_end_of_the_end,
-                        Literal(instance.end_date_to, datatype=XSD.date),
-                    )
-                )
+            g = add_time_spans(g, death_time_span, instance, ns, "end")
         birth_event_param = birth_event if "birth_event" in locals() else None
         death_event_param = death_event if "death_event" in locals() else None
         g = add_life_event_place(
@@ -466,54 +494,13 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
             )
 
             g.add((joining_uri, ns.crm["P4_has_time-span"], joining_time_span_uri))
-            g.add((joining_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add(
-                (
-                    joining_time_span_uri,
-                    RDFS.label,
-                    Literal(instance.start),
-                )
-            )
-            if (
-                instance.start_date_from is not None
-                and instance.start_date_to is not None
-            ):
-                g.add(
-                    (
-                        joining_time_span_uri,
-                        ns.crm.P82a_begin_of_the_begin,
-                        Literal(instance.start_date_from, datatype=XSD.date),
-                    )
-                )
-                g.add(
-                    (
-                        joining_time_span_uri,
-                        ns.crm.P82b_end_of_the_end,
-                        Literal(instance.start_date_to, datatype=XSD.date),
-                    )
-                )
+            g = add_time_spans(g, joining_time_span_uri, instance, ns, "start")
         if instance.end is not None:
             leaving_time_span_uri = URIRef(
                 ns.attr[f"leaving_ev_time_span_{instance.id}"]
             )
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
-            g.add((leaving_time_span_uri, RDF.type, ns.crm["E52_Time-Span"]))
-            g.add((leaving_time_span_uri, RDFS.label, Literal(instance.end)))
-            if instance.end_date_from is not None and instance.end_date_to is not None:
-                g.add(
-                    (
-                        leaving_time_span_uri,
-                        ns.crm.P82a_begin_of_the_begin,
-                        Literal(instance.end_date_from, datatype=XSD.date),
-                    )
-                )
-                g.add(
-                    (
-                        leaving_time_span_uri,
-                        ns.crm.P82b_end_of_the_end,
-                        Literal(instance.end_date_to, datatype=XSD.date),
-                    )
-                )
+            g = add_time_spans(g, leaving_time_span_uri, instance, ns, "end")
         return g
 
 
