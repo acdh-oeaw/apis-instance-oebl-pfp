@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2024 Birger Schacht <birger.schacht@oeaw.ac.at>
+# SPDX-License-Identifier: MIT
+name: Run ruff
+
+on:
+  - push
+
+jobs:
+  ruff-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run ruff format
+        run: uv run --only-dev ruff format --check
+
+  ruff-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run ruff check
+        run: uv run --only-dev ruff check
