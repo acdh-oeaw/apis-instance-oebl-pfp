@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django_interval.fields import FuzzyDateParserField
 from django_json_editor_field.fields import JSONEditorField
 
 from apis_core.apis_entities.abc import E53_Place
@@ -15,7 +16,6 @@ from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
 from apis_core.utils.helpers import create_object_from_uri
-from django_interval.fields import FuzzyDateParserField
 
 
 class LegacyDateMixin(models.Model):
