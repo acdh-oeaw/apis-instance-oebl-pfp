@@ -6,13 +6,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.search import TrigramWordSimilarity
 from django.db import models
 from django.db.models.functions import Greatest
+from django_interval.fields import FuzzyDateParserField
+from django_interval.filters import DateIntervalRangeFilter
 
 from apis_core.apis_entities.filtersets import (
     AbstractEntityFilterSet,
 )
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
-from django_interval.fields import FuzzyDateParserField
-from django_interval.filters import DateIntervalRangeFilter
 
 PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."

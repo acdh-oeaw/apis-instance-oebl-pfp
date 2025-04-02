@@ -2,11 +2,11 @@ import csv
 import json
 import pathlib
 
+from apis_highlighter.models import Annotation, AnnotationProject
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
 from apis_core.apis_relations.models import TempTriple
-from apis_highlighter.models import Annotation, AnnotationProject
 from apis_ontology.models import Person
 
 user_mapping = {

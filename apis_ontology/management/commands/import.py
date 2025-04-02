@@ -7,13 +7,13 @@ import re
 from collections import defaultdict
 
 import requests
+from apis_highlighter.models import AnnotationProject
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 from apis_core.apis_metainfo.models import Uri
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
-from apis_highlighter.models import AnnotationProject
 from apis_ontology.models import (
     Event,
     Institution,

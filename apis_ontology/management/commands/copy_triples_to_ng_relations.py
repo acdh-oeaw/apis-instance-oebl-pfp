@@ -3,12 +3,12 @@ from functools import cache
 from typing import Literal
 
 import requests
+from apis_highlighter.models import Annotation, AnnotationProject
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 import apis_ontology.models as ontology_models
 from apis_core.apis_relations.models import TempTriple
-from apis_highlighter.models import Annotation, AnnotationProject
 
 logging.basicConfig(
     filename="relation_creation.log",
