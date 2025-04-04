@@ -36,9 +36,7 @@ def normalize_empty_attributes(instance):
     return instance
 
 
-def add_time_spans(
-    g: Graph, ts_node: URIRef, instance: Any, ns: Any, field: str
-) -> Graph:
+def add_time_spans(g: Graph, ts_node: URIRef, instance: Any, field: str) -> Graph:
     """Add time span information to an RDF graph.
 
     This function adds time span triples to the given RDF graph based on date fields
@@ -65,20 +63,22 @@ def add_time_spans(
         date_from = date_sort
         date_to = date_sort
 
+    crm_namespace = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
+    g.namespace_manager.bind("crm", crm_namespace, replace=True)
     # Only add time span information if we have both dates
     if date_from is not None and date_to is not None:
         # Add begin and end date triples
         g.add(
             (
                 ts_node,
-                ns.crm.P82a_begin_of_the_begin,
+                crm_namespace.P82a_begin_of_the_begin,
                 Literal(date_from, datatype=XSD.date),
             )
         )
         g.add(
             (
                 ts_node,
-                ns.crm.P82b_end_of_the_end,
+                crm_namespace.P82b_end_of_the_end,
                 Literal(date_to, datatype=XSD.date),
             )
         )
@@ -93,7 +93,7 @@ def add_time_spans(
             g.add((ts_node, RDFS.label, Literal(f"{field} time span")))
 
         # Add the time span type
-        g.add((ts_node, RDF.type, ns.crm["E52_Time-Span"]))
+        g.add((ts_node, RDF.type, crm_namespace["E52_Time-Span"]))
 
     return g
 
@@ -426,7 +426,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
             g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
             g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
-            g = add_time_spans(g, birth_time_span, instance, ns, "start")
+            g = add_time_spans(g, birth_time_span, instance, "start")
 
         if instance.end is not None:
             death_event = URIRef(ns.attr[f"death_{instance.id}"])
@@ -435,7 +435,7 @@ class PersonCidocSerializer(BaseRDFSerializer):
             g.add((death_event, RDF.type, ns.crm.E69_Death))
             g.add((death_event, ns.crm.P100_was_death_of, person_uri))
             g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
-            g = add_time_spans(g, death_time_span, instance, ns, "end")
+            g = add_time_spans(g, death_time_span, instance, "end")
         birth_event_param = birth_event if "birth_event" in locals() else None
         death_event_param = death_event if "death_event" in locals() else None
         g = add_life_event_place(
@@ -494,13 +494,13 @@ class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
             )
 
             g.add((joining_uri, ns.crm["P4_has_time-span"], joining_time_span_uri))
-            g = add_time_spans(g, joining_time_span_uri, instance, ns, "start")
+            g = add_time_spans(g, joining_time_span_uri, instance, "start")
         if instance.end is not None:
             leaving_time_span_uri = URIRef(
                 ns.attr[f"leaving_ev_time_span_{instance.id}"]
             )
             g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
-            g = add_time_spans(g, leaving_time_span_uri, instance, ns, "end")
+            g = add_time_spans(g, leaving_time_span_uri, instance, "end")
         return g
 
 
