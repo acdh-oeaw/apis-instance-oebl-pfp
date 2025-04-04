@@ -57,3 +57,5 @@ APIS_BIBSONOMY = [
         "group": "5867571",
     }
 ]
+
+APIS_RDF_NAMESPACE_PREFIX = "oebl"
