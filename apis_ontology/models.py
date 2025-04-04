@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django_interval.fields import FuzzyDateParserField
 from django_json_editor_field.fields import JSONEditorField
 
-from apis_core.apis_entities.abc import E53_Place
+from apis_core.apis_entities.abc import E21_Person, E53_Place
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
@@ -189,6 +189,7 @@ class Institution(
 
 
 class Person(
+    E21_Person,
     VersionMixin,
     LegacyStuffMixin,
     LegacyDateMixin,
@@ -196,6 +197,8 @@ class Person(
     OEBLBaseEntity,
     RDFExport,
 ):
+    date_of_birth = None
+    date_of_death = None
     GENDER_CHOICES = (
         ("female", "female"),
         ("male", "male"),
