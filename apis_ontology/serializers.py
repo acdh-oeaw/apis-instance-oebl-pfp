@@ -6,8 +6,10 @@ from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import GEO, OWL, RDF, RDFS, XSD
 from rest_framework.renderers import serializers
 
+from apis_core.apis_entities.serializers import E21_PersonCidocSerializer
 from apis_core.apis_metainfo.models import Uri
 from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
+from apis_core.generic.utils.rdf_namespace import ATTRIBUTES, CRM
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import (
     Institution,
@@ -383,69 +385,82 @@ def add_life_event_place(g, ns, instance, person_uri, event_type, event_uri=None
     return g
 
 
-class PersonCidocSerializer(BaseRDFSerializer):
+class PersonCidocSerializer(E21_PersonCidocSerializer):
+    def add_life_event_place(self, g, instance, event_type, event_uri):
+        if event_type not in ["birth", "death"]:
+            raise ValueError("event_type must be one of birth or death")
+
+        rel = None
+        if event_type == "birth":
+            crm_type = "E67_Birth"
+            label_template = "Tod von {}"
+            crm_relation = "P98_brought_into_life"
+            leg_rel = PersonPlaceLegacyRelation.objects.filter(
+                subj_object_id=instance.pk, legacy_relation_vocab_label="geboren in"
+            ).first()
+            new_rel = WurdeGeborenIn.objects.filter(subj_object_id=instance.pk).first()
+            rel = leg_rel or new_rel
+        if event_type == "death":
+            crm_type = "E69_Death"
+            label_template = "Geburt von {}"
+            crm_relation = "P100_was_death_of"
+            leg_rel = PersonPlaceLegacyRelation.objects.filter(
+                subj_object_id=instance.pk, legacy_relation_vocab_label="gestorben in"
+            ).first()
+            new_rel = StarbIn.objects.filter(subj_object_id=instance.pk).first()
+            rel = leg_rel or new_rel
+
+        if not rel:
+            return g
+
+        if event_uri is None:
+            event_uri = URIRef(ATTRIBUTES[f"{event_type}_{instance.id}"])
+            g.add((event_uri, RDF.type, CRM[crm_type]))
+            g.add(
+                (
+                    event_uri,
+                    RDFS.label,
+                    Literal(label_template.format(str(instance))),
+                )
+            )
+            g.add((event_uri, CRM[crm_relation], self.instance_uri))
+
+        place_ns = Namespace(self.base_uri + rel.obj.get_listview_url())
+        g.namespace_manager.bind(rel.obj.get_namespace_prefix(), place_ns)
+        place_uri = URIRef(place_ns[str(rel.obj.id)])
+        g.add((event_uri, CRM.P7_took_place_at, place_uri))
+
+        return g
+
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
-        g, ns = super().to_representation(instance)
+        g = super().to_representation(instance)
 
-        person_uri = URIRef(ns.person[str(instance.id)])
-        g.add((person_uri, RDF.type, ns.crm.E21_Person))
-        g.add((person_uri, RDFS.label, Literal(str(instance))))
-
-        # Add sameAs links
-        g = self.create_sameas(g, ns, instance, person_uri)
-
-        # Add properties
-        appellation_uri = URIRef(ns.appellation[str(instance.id)])
-        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
-        g.add((person_uri, ns.crm.P1_is_identified_by, appellation_uri))
-        g.add(
-            (
-                appellation_uri,
-                RDFS.label,
-                Literal(f"{instance.forename} {instance.surname}"),
-            )
-        )
-
-        if hasattr(instance, "forename"):
-            forename_uri = URIRef(ns.appellation[f"forename_{instance.id}"])
-            g.add((forename_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
-            g.add((appellation_uri, ns.crm.P106_is_composed_of, forename_uri))
-            g.add((forename_uri, RDFS.label, Literal(instance.forename)))
-
-        if hasattr(instance, "surname"):
-            surname_uri = URIRef(ns.appellation[f"surname_{instance.id}"])
-            g.add((surname_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
-            g.add((appellation_uri, ns.crm.P106_is_composed_of, surname_uri))
-            g.add((surname_uri, RDFS.label, Literal(instance.surname)))
-
+        birth_event = None
         if instance.start is not None:
-            birth_event = URIRef(ns.attr[f"birth_{instance.id}"])
-            birth_time_span = URIRef(ns.attr[f"birth_time-span_{instance.id}"])
-            g.add((birth_event, RDF.type, ns.crm.E67_Birth))
+            birth_event = URIRef(ATTRIBUTES[f"birth_{instance.id}"])
+            birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
+            g.add((birth_event, RDF.type, CRM.E67_Birth))
             g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
-            g.add((birth_event, ns.crm.P98_brought_into_life, person_uri))
-            g.add((birth_event, ns.crm["P4_has_time-span"], birth_time_span))
+            g.add((birth_event, CRM.P98_brought_into_life, self.instance_uri))
+            g.add((birth_event, CRM["P4_has_time-span"], birth_time_span))
+
+            birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
             g = add_time_spans(g, birth_time_span, instance, "start")
+        g = self.add_life_event_place(g, instance, "birth", birth_event)
 
+        death_event = None
         if instance.end is not None:
-            death_event = URIRef(ns.attr[f"death_{instance.id}"])
+            death_event = URIRef(ATTRIBUTES[f"death_{instance.id}"])
             g.add((death_event, RDFS.label, Literal(f"Tod von {str(instance)}")))
-            death_time_span = URIRef(ns.attr[f"death_time-span_{instance.id}"])
-            g.add((death_event, RDF.type, ns.crm.E69_Death))
-            g.add((death_event, ns.crm.P100_was_death_of, person_uri))
-            g.add((death_event, ns.crm["P4_has_time-span"], death_time_span))
-            g = add_time_spans(g, death_time_span, instance, "end")
-        birth_event_param = birth_event if "birth_event" in locals() else None
-        death_event_param = death_event if "death_event" in locals() else None
-        g = add_life_event_place(
-            g, ns, instance, person_uri, "birth", birth_event_param
-        )
-        g = add_life_event_place(
-            g, ns, instance, person_uri, "death", death_event_param
-        )
+            death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
+            g.add((death_event, RDF.type, CRM.E69_Death))
+            g.add((death_event, CRM.P100_was_death_of, self.instance_uri))
+            g.add((death_event, CRM["P4_has_time-span"], death_time_span))
 
-        # Serialize the graph to RDF/XML
+            death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
+            g = add_time_spans(g, death_time_span, instance, "end")
+        g = self.add_life_event_place(g, instance, "death", death_event)
         return g
 
 
