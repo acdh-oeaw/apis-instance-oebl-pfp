@@ -169,7 +169,7 @@ class Institution(
     RDFExport,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    label = models.CharField(max_length=255, verbose_name="Name", blank=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     @classmethod
@@ -180,7 +180,7 @@ class Institution(
         ]
 
     def __str__(self):
-        return self.name if self.name and self.name.strip() else "unbekannt"
+        return self.label if self.label and self.label.strip() else "unbekannt"
 
     class Meta:
         verbose_name = _("Institution")
