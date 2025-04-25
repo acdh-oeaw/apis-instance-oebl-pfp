@@ -35,6 +35,11 @@ class OEBLBaseEntity:
 
 
 class RDFExport:
+    """
+    Empty base class for adding the tag `rdfexport` to some of the
+    models in the OpenAPI specification
+    """
+
     pass
 
 
