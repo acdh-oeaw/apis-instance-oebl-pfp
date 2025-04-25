@@ -8,7 +8,6 @@ from rest_framework.renderers import serializers
 
 from apis_core.apis_entities.serializers import E21_PersonCidocSerializer
 from apis_core.apis_metainfo.models import Uri
-from apis_core.generic.serializers import GenericHyperlinkedModelSerializer
 from apis_core.generic.utils.rdf_namespace import ATTRIBUTES, CRM
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import (
@@ -98,23 +97,6 @@ def add_time_spans(g: Graph, ts_node: URIRef, instance: Any, field: str) -> Grap
         g.add((ts_node, RDF.type, crm_namespace["E52_Time-Span"]))
 
     return g
-
-
-# Dynamically create and add serializer classes to this module
-for ct in relation_content_types():
-    cls = ct.model_class()
-    if cls.__name__ == "Relation":
-        continue
-    serializer_class = type(
-        f"{cls.__name__}Serializer",
-        (GenericHyperlinkedModelSerializer,),
-        {
-            "__module__": __name__,
-            "Meta": type("Meta", (), {"model": cls, "fields": "__all__"}),
-        },
-    )
-    # Add the new serializer class to the module globals
-    globals()[f"{cls.__name__}Serializer"] = serializer_class
 
 
 class Namespaces:
