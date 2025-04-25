@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django_interval.fields import FuzzyDateParserField
 from django_json_editor_field.fields import JSONEditorField
 
-from apis_core.apis_entities.abc import E21_Person, E53_Place
+from apis_core.apis_entities.abc import E21_Person, E53_Place, E74_Group
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
@@ -162,6 +162,7 @@ class Event(
 
 
 class Institution(
+    E74_Group,
     VersionMixin,
     LegacyStuffMixin,
     LegacyDateMixin,
@@ -170,7 +171,6 @@ class Institution(
     RDFExport,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
-    label = models.CharField(max_length=255, verbose_name="Name", blank=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
     @classmethod
