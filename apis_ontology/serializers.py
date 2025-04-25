@@ -329,7 +329,7 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
             )
             g.add((event_uri, CRM[crm_relation], self.instance_uri))
 
-        place_ns = Namespace(self.base_uri + rel.obj.get_listview_url())
+        place_ns = Namespace(rel.obj.get_namespace_uri())
         g.namespace_manager.bind(rel.obj.get_namespace_prefix(), place_ns)
         place_uri = URIRef(place_ns[str(rel.obj.id)])
         g.add((event_uri, CRM.P7_took_place_at, place_uri))
