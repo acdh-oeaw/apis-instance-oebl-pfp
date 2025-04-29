@@ -15,7 +15,6 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
-from apis_core.utils.helpers import create_object_from_uri
 
 
 class LegacyDateMixin(models.Model):
@@ -48,11 +47,6 @@ class LegacyStuffMixin(models.Model):
 
     class Meta:
         abstract = True
-
-    @classmethod
-    def get_or_create_uri(cls, uri):
-        print(f"using custom get_or_create_uri with {uri}")
-        return create_object_from_uri(uri, cls) or cls.objects.get(pk=uri)
 
     @property
     def uri(self):
