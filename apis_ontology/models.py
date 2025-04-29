@@ -531,13 +531,18 @@ class TempTripleLegacyAttributes(models.Model):
         return self.legacy_relation_vocab_label_reverse
 
 
+class OeblRelation(Relation):
+    class Meta:
+        abstract = True
+        ordering = ['pk']
+
 ################################################
 # auto generated relation classes from properties
 ################################################
 
 
 class HatReligionszugehoerigkeit(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 164936"""
 
@@ -556,7 +561,7 @@ class HatReligionszugehoerigkeit(
 
 
 class PersonEventLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -577,7 +582,7 @@ class PersonEventLegacyRelation(
 
 
 class PersonInstitutionLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -599,7 +604,7 @@ class PersonInstitutionLegacyRelation(
 
 
 class PersonPersonLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -620,7 +625,7 @@ class PersonPersonLegacyRelation(
 
 
 class InstitutionInstitutionLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -641,7 +646,7 @@ class InstitutionInstitutionLegacyRelation(
 
 
 class PersonPlaceLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -662,7 +667,7 @@ class PersonPlaceLegacyRelation(
 
 
 class PersonWorkLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -683,7 +688,7 @@ class PersonWorkLegacyRelation(
 
 
 class PlacePlaceLegacyRelation(
-    Relation,
+    OeblRelation,
     VersionMixin,
     TempTripleGenericAttributes,
     TempTripleLegacyAttributes,
@@ -704,7 +709,7 @@ class PlacePlaceLegacyRelation(
 
 
 class WarGeschwisterVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167024"""
 
@@ -723,7 +728,7 @@ class WarGeschwisterVon(
 
 
 class WarSchwagerschwaegerinVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167025"""
 
@@ -742,7 +747,7 @@ class WarSchwagerschwaegerinVon(
 
 
 class WarSchwiegersohnschwiegertochterVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167026"""
 
@@ -761,7 +766,7 @@ class WarSchwiegersohnschwiegertochterVon(
 
 
 class WarVerwandtMit(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167027"""
 
@@ -780,7 +785,7 @@ class WarVerwandtMit(
 
 
 class HatteAlsTrauzeugenzeugin(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167029"""
 
@@ -799,7 +804,7 @@ class HatteAlsTrauzeugenzeugin(
 
 
 class WarPatenkindVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167031"""
 
@@ -818,7 +823,7 @@ class WarPatenkindVon(
 
 
 class DissertierteBeiunter(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167032"""
 
@@ -837,7 +842,7 @@ class DissertierteBeiunter(
 
 
 class WurdeGeborenIn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167036"""
 
@@ -855,7 +860,7 @@ class WurdeGeborenIn(
         return "war Geburtsort von [PIO]"
 
 
-class StarbIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+class StarbIn(OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
     """automatically generated class from property with id 167037"""
 
     _legacy_property_id = 167037
@@ -873,7 +878,7 @@ class StarbIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMix
 
 
 class ErhieltAusbildungIn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167038"""
 
@@ -892,7 +897,7 @@ class ErhieltAusbildungIn(
 
 
 class WirkteforschtehieltSichAufIn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167039"""
 
@@ -911,7 +916,7 @@ class WirkteforschtehieltSichAufIn(
 
 
 class StudiertelernteAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167041"""
 
@@ -930,7 +935,7 @@ class StudiertelernteAn(
 
 
 class HabilitierteSichAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167042"""
 
@@ -949,7 +954,7 @@ class HabilitierteSichAn(
 
 
 class WarAssistentinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167043"""
 
@@ -968,7 +973,7 @@ class WarAssistentinAn(
 
 
 class WarPrivatdozentinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167044"""
 
@@ -987,7 +992,7 @@ class WarPrivatdozentinAn(
 
 
 class WarOTitoProfessorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167045"""
 
@@ -1006,7 +1011,7 @@ class WarOTitoProfessorinAn(
 
 
 class WarAoTitaoProfessorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167046"""
 
@@ -1025,7 +1030,7 @@ class WarAoTitaoProfessorinAn(
 
 
 class WarHonorarprofessorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167048"""
 
@@ -1044,7 +1049,7 @@ class WarHonorarprofessorinAn(
 
 
 class WarEhrendoktorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167049"""
 
@@ -1063,7 +1068,7 @@ class WarEhrendoktorinAn(
 
 
 class WarTaetigFuerwirkteAnbei(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167050"""
 
@@ -1082,7 +1087,7 @@ class WarTaetigFuerwirkteAnbei(
 
 
 class WarMitgruenderinVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167051"""
 
@@ -1101,7 +1106,7 @@ class WarMitgruenderinVon(
 
 
 class HatteLeitungsfunktionAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167053"""
 
@@ -1120,7 +1125,7 @@ class HatteLeitungsfunktionAn(
 
 
 class WarMitgliedVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167052"""
 
@@ -1139,7 +1144,7 @@ class WarMitgliedVon(
 
 
 class WarGrossvatermutterVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167183"""
 
@@ -1158,7 +1163,7 @@ class WarGrossvatermutterVon(
 
 
 class WarRektorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167196"""
 
@@ -1177,7 +1182,7 @@ class WarRektorinAn(
 
 
 class WarDekaninAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167195"""
 
@@ -1196,7 +1201,7 @@ class WarDekaninAn(
 
 
 class PromovierteAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167184"""
 
@@ -1215,7 +1220,7 @@ class PromovierteAn(
 
 
 class KaempfteInbei(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 167405"""
 
@@ -1234,7 +1239,7 @@ class KaempfteInbei(
 
 
 class WarProfessorinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167419"""
 
@@ -1253,7 +1258,7 @@ class WarProfessorinAn(
 
 
 class GraduierteAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 167799"""
 
@@ -1272,7 +1277,7 @@ class GraduierteAn(
 
 
 class MitbiographiertUnter(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168104"""
 
@@ -1291,7 +1296,7 @@ class MitbiographiertUnter(
 
 
 class WarHonorardozentinAn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin, RDFExport
 ):
     """automatically generated class from property with id 168310"""
 
@@ -1310,7 +1315,7 @@ class WarHonorardozentinAn(
 
 
 class HatteLeitungsfunktionBei(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168434"""
 
@@ -1328,7 +1333,7 @@ class HatteLeitungsfunktionBei(
         return "wurde geleitet von [PIO]"
 
 
-class NahmTeilAn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+class NahmTeilAn(OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
     """automatically generated class from property with id 168435"""
 
     _legacy_property_id = 168435
@@ -1346,7 +1351,7 @@ class NahmTeilAn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDate
 
 
 class WarElternteilVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168488"""
 
@@ -1365,7 +1370,7 @@ class WarElternteilVon(
 
 
 class WarSchuelerinVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168489"""
 
@@ -1384,7 +1389,7 @@ class WarSchuelerinVon(
 
 
 class WarVerheiratetMit(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168490"""
 
@@ -1403,7 +1408,7 @@ class WarVerheiratetMit(
 
 
 class StandInKontaktMit(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     """automatically generated class from property with id 168491"""
 
@@ -1422,7 +1427,7 @@ class StandInKontaktMit(
 
 
 class ArbeiteteZusammenMit(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     subj_model = Person
     obj_model = Person
@@ -1437,7 +1442,7 @@ class ArbeiteteZusammenMit(
 
 
 class WurdeErhobenIn(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     subj_model = Person
     obj_model = Nobility
@@ -1452,7 +1457,7 @@ class WurdeErhobenIn(
 
 
 class WarGeburtstitelVon(
-    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
 ):
     subj_model = Person
     obj_model = Nobility
@@ -1466,7 +1471,7 @@ class WarGeburtstitelVon(
         return "war Geburtstitel von [PIO]"
 
 
-class FandStattIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+class FandStattIn(OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
     subj_model = Event
     obj_model = Place
 
@@ -1479,7 +1484,7 @@ class FandStattIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDat
         return "war Ort von [PIO]"
 
 
-class GelegenIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+class GelegenIn(OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
     subj_model = Institution
     obj_model = Place
 
