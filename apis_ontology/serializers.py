@@ -301,7 +301,7 @@ class InstitutionCidocSerializer(BaseRDFSerializer):
             (
                 appellation_uri,
                 RDFS.label,
-                Literal(f"{instance.name}"),
+                Literal(instance),
             )
         )
         return g
