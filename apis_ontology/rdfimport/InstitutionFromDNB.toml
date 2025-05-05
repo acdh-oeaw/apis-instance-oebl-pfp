@@ -4,9 +4,11 @@
 
 [[filters]]
 "rdf:type" = "gndo:CorporateBody"
+[[filters]]
+"rdf:type" = "gndo:OrganOfCorporateBody"
 
 [attributes]
-name = "gndo:preferredNameForTheCorporateBody"
+label = "gndo:preferredNameForTheCorporateBody"
 start = "gndo:dateOfEstablishment" 
 end = "gndo:dateOfTermination"
 same_as = "owl:sameAs"
