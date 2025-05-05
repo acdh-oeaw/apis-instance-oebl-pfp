@@ -51,16 +51,16 @@ def InstitutionAutocompleteQueryset(model, query):
         model.objects.annotate(
             icontains_rank=Case(
                 When(
-                    name__unaccent__icontains=query,
+                    label__unaccent__icontains=query,
                     then=Value(10.0)
                     / (
-                        Length("name", output_field=FloatField())
+                        Length("label", output_field=FloatField())
                         - Value(len(query))
                         + Value(1)
                     ),
                 )
             ),
-            similarity=TrigramSimilarity("name", query),
+            similarity=TrigramSimilarity("label", query),
         )
         .annotate(rank=Greatest("icontains_rank", "similarity"))
         .order_by("-rank")

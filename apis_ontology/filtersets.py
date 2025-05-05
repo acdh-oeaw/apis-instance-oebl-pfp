@@ -47,7 +47,7 @@ def trigram_search_filter_person(queryset, name, value):
 
 
 def trigram_search_filter_institution(queryset, name, value):
-    return trigram_search_filter(queryset, ["name"], value)
+    return trigram_search_filter(queryset, ["label"], value)
 
 
 def trigram_search_filter_place(queryset, name, value):
