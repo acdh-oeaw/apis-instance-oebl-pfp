@@ -1519,3 +1519,44 @@ class GelegenIn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateM
     @classmethod
     def reverse_name(self) -> str:
         return "ist/war Ort von [PIO]"
+
+
+class VerliehenAn(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+    subj_model = Prize
+    obj_model = Person
+
+    @classmethod
+    def name(self) -> str:
+        return "verliehen an [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "bekam verliehen [PIO]"
+
+
+class Stiftete(Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin):
+    subj_model = Person
+    obj_model = Prize
+
+    @classmethod
+    def name(self) -> str:
+        return "stiftete [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "wurde gestiftet von [PIO]"
+
+
+class StifteteInst(
+    Relation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+):
+    subj_model = Institution
+    obj_model = Prize
+
+    @classmethod
+    def name(self) -> str:
+        return "stiftete [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "wurde gestiftet von [PIO]"
