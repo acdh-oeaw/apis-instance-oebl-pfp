@@ -61,3 +61,7 @@ class InstitutionImporter(OEBLBaseEntityImporter):
 
 class EventImporter(OEBLBaseEntityImporter):
     pass
+
+
+class PrizeImporter(OEBLBaseEntityImporter):
+    pass
