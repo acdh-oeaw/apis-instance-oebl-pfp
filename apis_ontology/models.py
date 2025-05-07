@@ -484,10 +484,17 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
     )
     tender_text = models.TextField(verbose_name="Ausschreibung", blank=True, null=True)
 
+    @classmethod
+    def rdf_configs(cls):
+        return [
+            Path(__file__).parent / "rdfimport/PrizeFromDNB.toml",
+            Path(__file__).parent / "rdfimport/PrizeFromWikidata.toml",
+        ]
+
     def __str__(self):
         if self.start or self.end:
             return f"{self.name} ({self.start or 'na'} - {self.end or 'na'})"
-        return self.name
+        return str(self.name)
 
     class Meta(AbstractEntity.Meta, VersionMixin.Meta, LegacyDateMixin.Meta):
         verbose_name = _("Preis")

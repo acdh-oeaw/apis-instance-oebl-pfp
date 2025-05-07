@@ -1,0 +1,11 @@
+######################################################
+# Create a Prize from a d-nb.info RDF endpoint #
+######################################################
+[[filters]]
+"rdf:type" = "gndo:SubjectHeadingSensoStricto"
+
+[attributes]
+name = "gndo:preferredNameForTheSubjectHeading"
+same_as = "owl:sameAs"
+
+

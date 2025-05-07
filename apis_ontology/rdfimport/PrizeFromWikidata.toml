@@ -1,0 +1,26 @@
+######################################################
+# Create a Prize from a d-nb.info RDF endpoint #
+######################################################
+[[filters]]
+"wdt:P31" = "wd:Q618779"
+
+[[filters]]
+"wdt:P31" = "wd:Q11448906"
+
+[attributes]
+name = '''
+SELECT (COALESCE(?label_de, ?label_en, ?label) as ?name) 
+	WHERE {
+		?subject rdfs:label ?label 
+		OPTIONAL{
+			?subject rdfs:label ?label_de
+			FILTER(LANG(?label_de) = "de")
+			}
+		OPTIONAL{
+			?subject rdfs:label ?label_en
+			FILTER(LANG(?label_en) = "en")
+}
+}
+'''
+start = ["wdt:P571", "wdt:P580"]
+same_as = ["wdtn:P227", "wdtn:P1566", "wdtn:P214", "wdtn:P244"]
