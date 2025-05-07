@@ -223,45 +223,6 @@ class BaseRDFSerializer(serializers.BaseSerializer):
         return g
 
 
-class PlaceCidocSerializer(BaseRDFSerializer):
-    def to_representation(self, instance):
-        instance = normalize_empty_attributes(instance)
-        g, ns = super().to_representation(instance)
-
-        place_uri = URIRef(ns.place[str(instance.id)])
-        g.add((place_uri, RDF.type, ns.crm.E53_Place))
-        g.add((place_uri, RDFS.label, Literal(str(instance))))
-
-        g = self.create_sameas(g, ns, instance, place_uri)
-        # Add sameAs links
-
-        # Add properties
-        appellation_uri = URIRef(ns.appellation[str(instance.id)])
-        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
-        g.add((place_uri, ns.crm.P1_is_identified_by, appellation_uri))
-        g.add(
-            (
-                appellation_uri,
-                RDFS.label,
-                Literal(f"{instance.label}"),
-            )
-        )
-        if instance.latitude is not None and instance.longitude is not None:
-            g.add(
-                (
-                    place_uri,
-                    ns.crm.P168_place_is_defined_by,
-                    Literal(
-                        (
-                            f"Point ( {'+' if instance.longitude > 0 else ''}{instance.longitude} {'+' if instance.latitude > 0 else ''}{instance.latitude} )"
-                        ),
-                        datatype=GEO.wktLiteral,
-                    ),
-                )
-            )
-        return g
-
-
 class InstitutionCidocSerializer(BaseRDFSerializer):
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
