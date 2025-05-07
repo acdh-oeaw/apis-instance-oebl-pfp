@@ -473,6 +473,27 @@ class Nobility(AbstractEntity, OEBLBaseEntity):
         verbose_name_plural = _("Adelstitel")
 
 
+class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
+    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
+    part_of = models.ForeignKey(
+        "self",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Teil von",
+    )
+    tender_text = models.TextField(verbose_name="Ausschreibung", blank=True, null=True)
+
+    def __str__(self):
+        if self.start or self.end:
+            return f"{self.name} ({self.start or 'na'} - {self.end or 'na'})"
+        return self.name
+
+    class Meta(AbstractEntity.Meta, VersionMixin.Meta, LegacyDateMixin.Meta):
+        verbose_name = _("Preis")
+        verbose_name_plural = _("Preise")
+
+
 auditlog.register(Source, serialize_data=True)
 auditlog.register(Title, serialize_data=True)
 auditlog.register(ProfessionCategory, serialize_data=True)
@@ -488,6 +509,7 @@ auditlog.register(
 auditlog.register(Place, serialize_data=True)
 auditlog.register(Work, serialize_data=True)
 auditlog.register(Denomination, serialize_data=True)
+auditlog.register(Prize, serialize_data=True)
 
 
 class TempTripleGenericAttributes(models.Model):
