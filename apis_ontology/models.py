@@ -156,6 +156,7 @@ class Event(
         return self.name if self.name and self.name.strip() else "unbekannt"
 
     class Meta:
+        ordering = ["name"]
         verbose_name = _("Event")
         verbose_name_plural = _("Events")
 
@@ -182,7 +183,7 @@ class Institution(
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
 
-    class Meta:
+    class Meta(E74_Group.Meta):
         verbose_name = _("Institution")
         verbose_name_plural = _("Institutions")
 
@@ -401,10 +402,6 @@ class Person(
         ]
         return links
 
-    class Meta:
-        verbose_name = _("Person")
-        verbose_name_plural = _("Persons")
-
 
 class Place(
     E53_Place,
@@ -429,10 +426,6 @@ class Place(
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
 
-    class Meta:
-        verbose_name = _("Place")
-        verbose_name_plural = _("Places")
-
 
 class Work(
     LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity, OEBLBaseEntity
@@ -447,6 +440,7 @@ class Work(
         return self.name if self.name and self.name.strip() else "unbekannt"
 
     class Meta:
+        ordering = ["name"]
         verbose_name = _("Work")
         verbose_name_plural = _("Works")
 
@@ -458,6 +452,7 @@ class Denomination(AbstractEntity, OEBLBaseEntity):
         return self.name
 
     class Meta:
+        ordering = ["name"]
         verbose_name = _("Denomination")
         verbose_name_plural = _("Denominations")
 
@@ -469,6 +464,7 @@ class Nobility(AbstractEntity, OEBLBaseEntity):
         return self.name
 
     class Meta:
+        ordering = ["name"]
         verbose_name = _("Adelstitel")
         verbose_name_plural = _("Adelstitel")
 
@@ -497,6 +493,7 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
         return str(self.name)
 
     class Meta(AbstractEntity.Meta, VersionMixin.Meta, LegacyDateMixin.Meta):
+        ordering = ["name"]
         verbose_name = _("Preis")
         verbose_name_plural = _("Preise")
 
