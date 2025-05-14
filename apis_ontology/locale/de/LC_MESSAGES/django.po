@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-25 06:32+0000\n"
+"POT-Creation-Date: 2025-05-14 08:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,84 +18,102 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apis_ontology/models.py:61
+#: apis_ontology/models.py
+msgid "Start"
+msgstr "Start"
+
+#: apis_ontology/models.py
+msgid "End"
+msgstr "Ende"
+
+#: apis_ontology/models.py
 msgid "Title"
 msgstr "Titel"
 
-#: apis_ontology/models.py:62
+#: apis_ontology/models.py
 msgid "Titles"
 msgstr "Titel"
 
-#: apis_ontology/models.py:72
+#: apis_ontology/models.py
 msgid "Profession Category"
 msgstr "Berufsgruppe"
 
-#: apis_ontology/models.py:73
+#: apis_ontology/models.py
 msgid "Profession Categories"
 msgstr "Berufsgruppen"
 
-#: apis_ontology/models.py:79
+#: apis_ontology/models.py
 msgid "Profession"
 msgstr "Beruf"
 
-#: apis_ontology/models.py:80
+#: apis_ontology/models.py
 msgid "Professions"
 msgstr "Berufe"
 
-#: apis_ontology/models.py:97 apis_ontology/models.py:110
-#: apis_ontology/models.py:136 apis_ontology/models.py:201
-#: apis_ontology/models.py:214
+#: apis_ontology/models.py
+msgid "Parent Profession"
+msgstr "Eltern Beruf"
+
+#: apis_ontology/models.py
+msgid "Parent Professions"
+msgstr "Eltern Berufe"
+
+#: apis_ontology/models.py
 msgid "Notes"
 msgstr "Notizen"
 
-#: apis_ontology/models.py:103
+#: apis_ontology/models.py
 msgid "Event"
 msgstr "Ereignis"
 
-#: apis_ontology/models.py:104
+#: apis_ontology/models.py
 msgid "Events"
 msgstr "Ereignisse"
 
-#: apis_ontology/models.py:116
+#: apis_ontology/models.py
 msgid "Institution"
 msgstr "Institution"
 
-#: apis_ontology/models.py:117
+#: apis_ontology/models.py
 msgid "Institutions"
 msgstr "Institutionen"
 
-#: apis_ontology/models.py:137
-msgid "Alternative Names"
-msgstr "Alternative Namen"
-
-#: apis_ontology/models.py:195
-msgid "Person"
-msgstr "Person"
-
-#: apis_ontology/models.py:196
-msgid "Persons"
-msgstr "Personen"
-
-#: apis_ontology/models.py:207
-msgid "Place"
-msgstr "Ort"
-
-#: apis_ontology/models.py:208
-msgid "Places"
-msgstr "Orte"
-
-#: apis_ontology/models.py:220
+#: apis_ontology/models.py
 msgid "Work"
 msgstr "Werk"
 
-#: apis_ontology/models.py:221
+#: apis_ontology/models.py
 msgid "Works"
 msgstr "Werke"
 
-#: apis_ontology/models.py:231
+#: apis_ontology/models.py
 msgid "Denomination"
 msgstr "Konfession"
 
-#: apis_ontology/models.py:232
+#: apis_ontology/models.py
 msgid "Denominations"
 msgstr "Konfessionen"
+
+#: apis_ontology/models.py
+msgid "nobility"
+msgstr "Adelstitel"
+
+#: apis_ontology/models.py
+msgid "nobilities"
+msgstr "Adelstitel"
+
+#: apis_ontology/models.py
+msgid "part of"
+msgstr "Teil von"
+
+#: apis_ontology/models.py
+msgid "tender text"
+msgstr "Ausschreibung"
+
+#: apis_ontology/models.py
+msgid "prize"
+msgstr "Preis"
+
+#: apis_ontology/models.py
+msgid "prizes"
+msgstr "Preise"

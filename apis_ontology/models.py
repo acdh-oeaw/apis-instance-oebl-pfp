@@ -465,8 +465,8 @@ class Nobility(AbstractEntity, OEBLBaseEntity):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = _("Adelstitel")
-        verbose_name_plural = _("Adelstitel")
+        verbose_name = _("nobility")
+        verbose_name_plural = _("nobilities")
 
 
 class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
@@ -476,9 +476,9 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name="Teil von",
+        verbose_name=_("part of"),
     )
-    tender_text = models.TextField(verbose_name="Ausschreibung", blank=True, null=True)
+    tender_text = models.TextField(verbose_name=_("tender text"), blank=True, null=True)
 
     @classmethod
     def rdf_configs(cls):
@@ -494,8 +494,8 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
 
     class Meta(AbstractEntity.Meta, VersionMixin.Meta, LegacyDateMixin.Meta):
         ordering = ["name"]
-        verbose_name = _("Preis")
-        verbose_name_plural = _("Preise")
+        verbose_name = _("prize")
+        verbose_name_plural = _("prizes")
 
 
 auditlog.register(Source, serialize_data=True)
