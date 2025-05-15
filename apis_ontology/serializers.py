@@ -223,33 +223,6 @@ class BaseRDFSerializer(serializers.BaseSerializer):
         return g
 
 
-class InstitutionCidocSerializer(BaseRDFSerializer):
-    def to_representation(self, instance):
-        instance = normalize_empty_attributes(instance)
-        g, ns = super().to_representation(instance)
-
-        # Create the Person instance
-        inst_uri = URIRef(ns.inst[str(instance.id)])
-        g.add((inst_uri, RDF.type, ns.crm.E74_Group))
-        g.add((inst_uri, RDFS.label, Literal(str(instance))))
-
-        g = self.create_sameas(g, ns, instance, inst_uri)
-        # Add sameAs links
-
-        # Add properties
-        appellation_uri = URIRef(ns.appellation[str(instance.id)])
-        g.add((appellation_uri, RDF.type, ns.crm.E33_E41_Linguistic_Appellation))
-        g.add((inst_uri, ns.crm.P1_is_identified_by, appellation_uri))
-        g.add(
-            (
-                appellation_uri,
-                RDFS.label,
-                Literal(instance),
-            )
-        )
-        return g
-
-
 class PersonCidocSerializer(E21_PersonCidocSerializer):
     def add_life_event_place(self, g, instance, event_type, event_uri):
         if event_type not in ["birth", "death"]:
