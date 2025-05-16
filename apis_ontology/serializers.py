@@ -1,13 +1,9 @@
-import re
 from typing import Any
 
-from django.conf import settings
 from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import GEO, OWL, RDF, RDFS, XSD
-from rest_framework.renderers import serializers
+from rdflib.namespace import RDF, RDFS, XSD
 
 from apis_core.apis_entities.serializers import E21_PersonCidocSerializer
-from apis_core.apis_metainfo.models import Uri
 from apis_core.generic.serializers import GenericModelCidocSerializer
 from apis_core.generic.utils.rdf_namespace import ATTRIBUTES, CRM
 from apis_core.relations.utils import relation_content_types
@@ -98,130 +94,6 @@ def add_time_spans(g: Graph, ts_node: URIRef, instance: Any, field: str) -> Grap
         g.add((ts_node, RDF.type, crm_namespace["E52_Time-Span"]))
 
     return g
-
-
-class Namespaces:
-    """Container class for RDF namespaces"""
-
-    def __init__(self, base_uri):
-        self.crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-        self.place = Namespace(f"{base_uri}apis_ontology.place/")
-        self.appellation = Namespace(f"{base_uri}appellation/")
-        self.inst = Namespace(f"{base_uri}apis_ontology.institution/")
-        self.attr = Namespace(f"{base_uri}attributes/")
-        self.person = Namespace(f"{base_uri}apis_ontology.person/")
-
-    def bind_to_graph(self, g):
-        """Bind all namespaces to the given graph"""
-        g.namespace_manager.bind("crm", self.crm, replace=True)
-        g.namespace_manager.bind("oebl-place", self.place, replace=True)
-        g.namespace_manager.bind("oebl-appellation", self.appellation, replace=True)
-        g.namespace_manager.bind("oebl-attr", self.attr, replace=True)
-        g.namespace_manager.bind("oebl-person", self.person, replace=True)
-        g.namespace_manager.bind("oebl-inst", self.inst, replace=True)
-        g.namespace_manager.bind("owl", OWL, replace=True)
-        g.namespace_manager.bind("geo", GEO, replace=True)
-
-
-class BaseRDFSerializer(serializers.BaseSerializer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.g = None
-        self.ns = None
-
-    def to_representation(self, instance):
-        g = Graph()
-        base_uri = getattr(
-            settings, "APIS_BASE_URI", self.context["request"].build_absolute_uri("/")
-        )
-        if not base_uri.endswith("/"):
-            base_uri += "/"
-
-        # Create namespaces instance
-        ns = Namespaces(base_uri)
-        ns.bind_to_graph(g)
-
-        return g, ns
-
-    def create_sameas(self, g, ns, instance, instance_uri):
-        # add the ID as APIS Identifier
-        apis_id = URIRef(ns.attr[f"apis-identifier/{instance.pk}"])
-        g.add((apis_id, RDF.type, ns.crm["E42_Identifier"]))
-        g.add((apis_id, RDFS.label, Literal(instance.pk)))
-        # APIS internal identifier type
-        apis_id_type = URIRef(ns.attr["apis-identifier/type"])
-        g.add((apis_id, ns.crm["P2_has_type"], apis_id_type))
-        triple = (apis_id_type, RDF.type, ns.crm["E55_Type"])
-        if triple not in g:
-            g.add(triple)
-            g.add((apis_id_type, RDFS.label, Literal("APIS internal identifier")))
-        g.add((instance_uri, ns.crm.P1_is_identified_by, apis_id))
-
-        for uri in Uri.objects.filter(object_id=instance.pk):
-            uri_ref = URIRef(uri.uri)
-            g.add((instance_uri, OWL.sameAs, uri_ref))
-
-            # Extract and store identifiers for specific authority sources
-
-            # GND: matches patterns like 118540238 or 4074195-3
-            if "d-nb.info" in uri.uri:
-                gnd_match = re.search(r"(?:\/gnd\/)(\d+(?:-\d+)?X?)", uri.uri)
-                # GND identifier type
-                gnd_id_type = URIRef(ns.attr["gnd-identifier/type"])
-                triple = (gnd_id_type, RDF.type, ns.crm["E55_Type"])
-                if triple not in g:
-                    g.add(triple)
-                    g.add((gnd_id_type, RDFS.label, Literal("GND ID")))
-                if gnd_match:
-                    gnd_id = gnd_match.group(1)
-                    gnd_id_uri = URIRef(ns.attr[f"gnd-identifier/{instance.pk}"])
-                    g.add((gnd_id_uri, RDF.type, ns.crm["E42_Identifier"]))
-                    g.add((gnd_id_uri, RDFS.label, Literal(gnd_id)))
-                    g.add((gnd_id_uri, ns.crm["P2_has_type"], gnd_id_type))
-                    g.add((instance_uri, ns.crm["P1_is_identified_by"], gnd_id_uri))
-
-            # Wikidata: matches Q followed by numbers
-            elif "wikidata.org" in uri.uri:
-                wikidata_match = re.search(r"[/:]Q(\d+)", uri.uri)
-                # Wikidata identifier type
-                wikidata_id_type = URIRef(ns.attr["wikidata-identifier/type"])
-                triple = (wikidata_id_type, RDF.type, ns.crm["E55_Type"])
-                if triple not in g:
-                    g.add(triple)
-                    g.add((wikidata_id_type, RDFS.label, Literal("Wikidata ID")))
-                if wikidata_match:
-                    wikidata_id = f"Q{wikidata_match.group(1)}"
-                    wikidata_id_uri = URIRef(
-                        ns.attr[f"wikidata-identifier/{instance.pk}"]
-                    )
-                    g.add((wikidata_id_uri, RDF.type, ns.crm["E42_Identifier"]))
-                    g.add((wikidata_id_uri, RDFS.label, Literal(wikidata_id)))
-                    g.add((wikidata_id_uri, ns.crm["P2_has_type"], wikidata_id_type))
-                    g.add(
-                        (instance_uri, ns.crm["P1_is_identified_by"], wikidata_id_uri)
-                    )
-
-            # GeoNames: matches numeric IDs
-            elif "geonames.org" in uri.uri:
-                geonames_match = re.search(r"\/(\d+)(?:\/|$)", uri.uri)
-                # GeoNames identifier type
-                geonames_id_type = URIRef(ns.attr["geonames-identifier/type"])
-                triple = (geonames_id_type, RDF.type, ns.crm["E55_Type"])
-                if triple not in g:
-                    g.add(triple)
-                    g.add((geonames_id_type, RDFS.label, Literal("GeoNames ID")))
-                if geonames_match:
-                    geonames_id = geonames_match.group(1)
-                    geonames_id_uri = URIRef(
-                        ns.attr[f"geonames-identifier/{instance.pk}"]
-                    )
-                    g.add((geonames_id_uri, RDF.type, ns.crm["E42_Identifier"]))
-                    g.add((geonames_id_uri, RDFS.label, Literal(geonames_id)))
-                    g.add((geonames_id_uri, ns.crm["P2_has_type"], geonames_id_type))
-                    g.add(
-                        (instance_uri, ns.crm["P1_is_identified_by"], geonames_id_uri)
-                    )
-        return g
 
 
 class PersonCidocSerializer(E21_PersonCidocSerializer):
