@@ -8,6 +8,7 @@ from rest_framework.renderers import serializers
 
 from apis_core.apis_entities.serializers import E21_PersonCidocSerializer
 from apis_core.apis_metainfo.models import Uri
+from apis_core.generic.serializers import GenericModelCidocSerializer
 from apis_core.generic.utils.rdf_namespace import ATTRIBUTES, CRM
 from apis_core.relations.utils import relation_content_types
 from apis_ontology.models import (
@@ -302,57 +303,60 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
         return g
 
 
-class PersonInstitutionCidocBaseSerializer(BaseRDFSerializer):
+class PersonInstitutionCidocBaseSerializer(GenericModelCidocSerializer):
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
-        g, ns = super().to_representation(instance)
+        g = super().to_representation(instance)
 
-        person_id = (
-            instance.obj_oject_id
+        person = (
+            instance.obj
             if instance.obj_content_type.model == "person"
-            else instance.subj_object_id
+            else instance.subj
         )
         # Create the Person instance
-        person_uri = URIRef(ns.person[str(person_id)])
+        person_ns = Namespace(person.get_namespace_uri())
+        g.namespace_manager.bind(person.get_namespace_prefix(), person_ns)
+        person_uri = URIRef(person_ns[str(person.id)])
         g.add(
-            (person_uri, RDF.type, ns.crm.E21_Person)
+            (person_uri, RDF.type, CRM.E21_Person)
         )  # maybe remove that as also in detail view of person
-        inst_id = (
-            instance.subj_object_id
-            if instance.subj_object_id != person_id
-            else instance.obj_object_id
+        institution = (
+            instance.subj if instance.subj_object_id != person.id else instance.obj
         )
-        inst_uri = URIRef(ns.inst[str(inst_id)])
-        g.add((inst_uri, RDF.type, ns.crm.E74_Group))
-        joining_uri = URIRef(ns.attr[f"joining_ev_{instance.id}"])
-        g.add((joining_uri, RDF.type, ns.crm.E85_Joining))
+        institution_ns = Namespace(institution.get_namespace_uri())
+        g.namespace_manager.bind(institution.get_namespace_prefix(), institution_ns)
+        inst_uri = URIRef(institution_ns[str(institution.id)])
+        g.add((inst_uri, RDF.type, CRM.E74_Group))
+
+        joining_uri = URIRef(ATTRIBUTES[f"joining_ev_{instance.id}"])
+        g.add((joining_uri, RDF.type, CRM.E85_Joining))
         g.add((joining_uri, RDFS.label, Literal(f"{str(instance)} gestartet")))
-        pc_joining_uri = URIRef(ns.attr[f"pc_joining_ev_{instance.id}"])
-        memb_type_uri = URIRef(ns.attr[f"kind_member_{instance.id}"])
-        g.add((person_uri, ns.crm.P143i_was_joined_by, joining_uri))
-        g.add((joining_uri, ns.crm.P01i_is_domain_of, pc_joining_uri))
-        g.add((pc_joining_uri, ns.crm.P02_has_range, inst_uri))
-        g.add((pc_joining_uri, RDF.type, ns.crm["PC144_joined_with"]))
-        g.add((pc_joining_uri, ns.crm.P144_1_kind_of_member, memb_type_uri))
+        pc_joining_uri = URIRef(ATTRIBUTES[f"pc_joining_ev_{instance.id}"])
+        memb_type_uri = URIRef(ATTRIBUTES[f"kind_member_{instance.id}"])
+        g.add((person_uri, CRM.P143i_was_joined_by, joining_uri))
+        g.add((joining_uri, CRM.P01i_is_domain_of, pc_joining_uri))
+        g.add((pc_joining_uri, CRM.P02_has_range, inst_uri))
+        g.add((pc_joining_uri, RDF.type, CRM["PC144_joined_with"]))
+        g.add((pc_joining_uri, CRM.P144_1_kind_of_member, memb_type_uri))
         g.add((memb_type_uri, RDFS.label, Literal(instance.name())))
-        g.add((memb_type_uri, RDF.type, ns.crm.E55_Type))
-        leaving_uri = URIRef(ns.attr[f"leaving_ev_{instance.id}"])
-        g.add((leaving_uri, RDF.type, ns.crm.E86_Leaving))
-        g.add((person_uri, ns.crm["P145i_left_by"], leaving_uri))
-        g.add((leaving_uri, ns.crm["P146_separated_from"], inst_uri))
+        g.add((memb_type_uri, RDF.type, CRM.E55_Type))
+        leaving_uri = URIRef(ATTRIBUTES[f"leaving_ev_{instance.id}"])
+        g.add((leaving_uri, RDF.type, CRM.E86_Leaving))
+        g.add((person_uri, CRM["P145i_left_by"], leaving_uri))
+        g.add((leaving_uri, CRM["P146_separated_from"], inst_uri))
         g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
         if instance.start is not None:
             joining_time_span_uri = URIRef(
-                ns.attr[f"joining_ev_time_span_{instance.id}"]
+                ATTRIBUTES[f"joining_ev_time_span_{instance.id}"]
             )
 
-            g.add((joining_uri, ns.crm["P4_has_time-span"], joining_time_span_uri))
+            g.add((joining_uri, CRM["P4_has_time-span"], joining_time_span_uri))
             g = add_time_spans(g, joining_time_span_uri, instance, "start")
         if instance.end is not None:
             leaving_time_span_uri = URIRef(
-                ns.attr[f"leaving_ev_time_span_{instance.id}"]
+                ATTRIBUTES[f"leaving_ev_time_span_{instance.id}"]
             )
-            g.add((leaving_uri, ns.crm["P4_has_time-span"], leaving_time_span_uri))
+            g.add((leaving_uri, CRM["P4_has_time-span"], leaving_time_span_uri))
             g = add_time_spans(g, leaving_time_span_uri, instance, "end")
         return g
 
