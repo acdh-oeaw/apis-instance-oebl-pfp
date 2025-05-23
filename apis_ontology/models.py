@@ -1573,3 +1573,18 @@ class StifteteInst(
     @classmethod
     def reverse_name(self) -> str:
         return "wurde gestiftet von [PIO]"
+
+
+class HatNominiert(
+    OeblRelation, VersionMixin, TempTripleGenericAttributes, LegacyDateMixin
+):
+    subj_model = Person
+    obj_model = Person
+
+    @classmethod
+    def name(self) -> str:
+        return "hat nominiert [PIO]"
+
+    @classmethod
+    def reverse_name(self) -> str:
+        return "wurde nominiert von [PIO]"
