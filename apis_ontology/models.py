@@ -16,6 +16,8 @@ from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
 
+RDFIMPORT = Path(__file__).parent / "rdfimport"
+
 
 class LegacyDateMixin(models.Model):
     start = FuzzyDateParserField(
@@ -120,10 +122,10 @@ class Profession(GenericModel, models.Model):
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/ProfessionFromDNB.toml",
-            Path(__file__).parent / "rdfimport/ProfessionFromWikidata.toml",
-        ]
+        return {
+            "https://d-nb.info/*": RDFIMPORT / "ProfessionFromDNB.toml",
+            "http://www.wikidata.org/*": RDFIMPORT / "ProfessionFromWikidata.toml",
+        }
 
 
 class Parentprofession(GenericModel, models.Model):
@@ -148,9 +150,9 @@ class Event(
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/EventFromDNB.toml",
-        ]
+        return {
+            "https://d-nb.info/*": RDFIMPORT / "EventFromDNB.toml",
+        }
 
     def __str__(self):
         return self.name if self.name and self.name.strip() else "unbekannt"
@@ -175,10 +177,10 @@ class Institution(
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/InstitutionFromDNB.toml",
-            Path(__file__).parent / "rdfimport/InstitutionFromWikidata.toml",
-        ]
+        return {
+            "https://d-nb.info/*": RDFIMPORT / "InstitutionFromDNB.toml",
+            "http://www.wikidata.org/*": RDFIMPORT / "InstitutionFromWikidata.toml",
+        }
 
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
@@ -364,10 +366,10 @@ class Person(
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/PersonFromDNB.toml",
-            Path(__file__).parent / "rdfimport/PersonFromWikidata.toml",
-        ]
+        return {
+            "https://d-nb.info/*": RDFIMPORT / "PersonFromDNB.toml",
+            "http://www.wikidata.org/*": RDFIMPORT / "PersonFromWikidata.toml",
+        }
 
     def __str__(self):
         # Check if both proper names exist
@@ -417,11 +419,11 @@ class Place(
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/PlaceFromGeoNames.toml",
-            Path(__file__).parent / "rdfimport/PlaceFromDNB.toml",
-            Path(__file__).parent / "rdfimport/PlaceFromWikidata.toml",
-        ]
+        return {
+            "https://sws.geonames.org/*": RDFIMPORT / "PlaceFromGeoNames.toml",
+            "https://d-nb.info/*": RDFIMPORT / "PlaceFromDNB.toml",
+            "http://www.wikidata.org/*": RDFIMPORT / "PlaceFromWikidata.toml",
+        }
 
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
@@ -482,10 +484,10 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
 
     @classmethod
     def rdf_configs(cls):
-        return [
-            Path(__file__).parent / "rdfimport/PrizeFromDNB.toml",
-            Path(__file__).parent / "rdfimport/PrizeFromWikidata.toml",
-        ]
+        return {
+            "https://d-nb.info/*": RDFIMPORT / "PrizeFromDNB.toml",
+            "http://www.wikidata.org/*": RDFIMPORT / "PrizeFromWikidata.toml",
+        }
 
     def __str__(self):
         if self.start or self.end:
