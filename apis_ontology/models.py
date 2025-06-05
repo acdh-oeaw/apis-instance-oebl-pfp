@@ -10,7 +10,12 @@ from django.utils.translation import gettext_lazy as _
 from django_interval.fields import FuzzyDateParserField
 from django_json_editor_field.fields import JSONEditorField
 
-from apis_core.apis_entities.abc import E21_Person, E53_Place, E74_Group
+from apis_core.apis_entities.abc import (
+    E21_Person,
+    E53_Place,
+    E74_Group,
+    SimpleLabelModel,
+)
 from apis_core.apis_entities.models import AbstractEntity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
@@ -447,26 +452,14 @@ class Work(
         verbose_name_plural = _("Works")
 
 
-class Denomination(AbstractEntity, OEBLBaseEntity):
-    name = models.CharField()
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ["name"]
+class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelModel):
+    class Meta(SimpleLabelModel.Meta):
         verbose_name = _("Denomination")
         verbose_name_plural = _("Denominations")
 
 
-class Nobility(AbstractEntity, OEBLBaseEntity):
-    name = models.CharField(max_length=255, verbose_name="Name", blank=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ["name"]
+class Nobility(AbstractEntity, OEBLBaseEntity, SimpleLabelModel):
+    class Meta(SimpleLabelModel.Meta):
         verbose_name = _("nobility")
         verbose_name_plural = _("nobilities")
 
