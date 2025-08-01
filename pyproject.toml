@@ -15,7 +15,7 @@ dependencies = [
     "apis-acdhch-django-auditlog==0.2.1",
     "django-json-editor-field==0.4.2",
     "django-interval==0.5.1",
-    "apis-bibsonomy==0.13.1",
+    "apis-bibsonomy==0.13.2",
 ]
 
 [dependency-groups]
