@@ -10,7 +10,6 @@ INSTALLED_APPS += [  # noqa: F405
 ]
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
-INSTALLED_APPS += ["auditlog", "apis_acdhch_django_auditlog"]
 INSTALLED_APPS += ["django_json_editor_field"]
 INSTALLED_APPS += ["apis_bibsonomy"]
 INSTALLED_APPS += ["django_interval"]
