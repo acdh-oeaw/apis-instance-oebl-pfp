@@ -6,8 +6,6 @@ import simple_history.models
 from django.conf import settings
 from django.db import migrations, models
 
-import apis_core.generic.abc
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -242,7 +240,6 @@ class Migration(migrations.Migration):
             bases=(
                 simple_history.models.HistoricalChanges,
                 models.Model,
-                apis_core.generic.abc.GenericModel,
             ),
         ),
     ]
