@@ -2,8 +2,6 @@
 
 from django.db import migrations, models
 
-import apis_core.generic.abc
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -25,6 +23,5 @@ class Migration(migrations.Migration):
                 ),
                 ("label", models.CharField()),
             ],
-            bases=(apis_core.generic.abc.GenericModel, models.Model),
         ),
     ]
