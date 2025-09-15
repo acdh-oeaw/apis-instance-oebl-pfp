@@ -25,6 +25,7 @@ LANGUAGE_CODE = "de"
 MIDDLEWARE += [  # noqa: F405
     "auditlog.middleware.AuditlogMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
+    "apis_core.generic.middleware.HtmxMessageMiddleware",
 ]
 
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [  # noqa: F405
