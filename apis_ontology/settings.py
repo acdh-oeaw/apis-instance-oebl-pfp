@@ -13,7 +13,6 @@ INSTALLED_APPS.insert(0, "apis_ontology")
 INSTALLED_APPS += ["django_json_editor_field"]
 INSTALLED_APPS += ["apis_bibsonomy"]
 INSTALLED_APPS += ["django_interval"]
-INSTALLED_APPS += ["apis_core.uris"]
 
 ROOT_URLCONF = "apis_ontology.urls"
 
