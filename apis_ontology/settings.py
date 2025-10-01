@@ -21,11 +21,6 @@ CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 
 LANGUAGE_CODE = "de"
 
-MIDDLEWARE += [  # noqa: F405
-    "auditlog.middleware.AuditlogMiddleware",
-    "simple_history.middleware.HistoryRequestMiddleware",
-    "apis_core.generic.middleware.HtmxMessageMiddleware",
-]
 
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [  # noqa: F405
     "rest_framework.renderers.JSONRenderer",
