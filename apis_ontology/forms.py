@@ -18,7 +18,6 @@ class PersonForm(GenericModelForm):
         # the form clean
         more_details = Layout(
             HTML("<details><summary>More details</summary>"),
-            "oebl_kurzinfo",
             "online_edition_haupttext",
             "nachrecherche",
             "soziale_herkunft",
