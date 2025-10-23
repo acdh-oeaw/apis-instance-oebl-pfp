@@ -20,6 +20,7 @@ from apis_core.apis_entities.models import AbstractEntity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
+from apis_core.utils.rdf import load_uri_using_path
 
 RDFIMPORT = Path(__file__).parent / "rdfimport"
 
@@ -34,6 +35,16 @@ class LegacyDateMixin(models.Model):
 
     class Meta:
         abstract = True
+
+    def import_data(self, data):
+        errors = super().import_data(data)
+        if start := data.get("start", [False])[0]:
+            if "T" in start:
+                self.start, _ = start.split("T")
+        if end := data.get("end", [False])[0]:
+            if "T" in end:
+                self.end, _ = end.split("T")
+        return errors
 
 
 class OEBLBaseEntity:
@@ -125,12 +136,14 @@ class Profession(GenericModel, models.Model):
     def create_from_string(cls, string: str) -> Self:
         return cls.objects.get_or_create(name=string)[0]
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://d-nb.info/*": RDFIMPORT / "ProfessionFromDNB.toml",
-            "http://www.wikidata.org/*": RDFIMPORT / "ProfessionFromWikidata.toml",
-        }
+    import_definitions = {
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "ProfessionFromDNB.toml"
+        ),
+        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "ProfessionFromWikidata.toml"
+        ),
+    }
 
 
 class Parentprofession(GenericModel, models.Model):
@@ -153,11 +166,11 @@ class Event(
 
     _default_search_fields = ["name", "notes", "kind"]
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://d-nb.info/*": RDFIMPORT / "EventFromDNB.toml",
-        }
+    import_definitions = {
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "EventFromDNB.toml"
+        ),
+    }
 
     def __str__(self):
         return self.name if self.name and self.name.strip() else "unbekannt"
@@ -180,12 +193,14 @@ class Institution(
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://d-nb.info/*": RDFIMPORT / "InstitutionFromDNB.toml",
-            "http://www.wikidata.org/*": RDFIMPORT / "InstitutionFromWikidata.toml",
-        }
+    import_definitions = {
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "InstitutionFromDNB.toml"
+        ),
+        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "InstitutionFromWikidata.toml"
+        ),
+    }
 
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
@@ -369,12 +384,14 @@ class Person(
         blank=True, verbose_name="ÖBL Werkverzeichnis"
     )
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://d-nb.info/*": RDFIMPORT / "PersonFromDNB.toml",
-            "http://www.wikidata.org/*": RDFIMPORT / "PersonFromWikidata.toml",
-        }
+    import_definitions = {
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PersonFromDNB.toml"
+        ),
+        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PersonFromWikidata.toml"
+        ),
+    }
 
     def __str__(self):
         # Check if both proper names exist
@@ -409,6 +426,18 @@ class Person(
         ]
         return links
 
+    def import_data(self, data):
+        errors = super().import_data(data)
+        for profession_uri in data.get("profession_profession_m2m", []):
+            self.profession.add(Profession.import_from(profession_uri))
+        altnames = data.get("alternative_names", [])
+        if altnames:
+            self.alternative_names = [
+                {"name": name, "art": "alternativer Name"} for name in altnames
+            ]
+            self.save()
+        return errors
+
 
 class Place(
     E53_Place,
@@ -422,16 +451,28 @@ class Place(
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://sws.geonames.org/*": RDFIMPORT / "PlaceFromGeoNames.toml",
-            "https://d-nb.info/*": RDFIMPORT / "PlaceFromDNB.toml",
-            "http://www.wikidata.org/*": RDFIMPORT / "PlaceFromWikidata.toml",
-        }
+    import_definitions = {
+        "https://sws.geonames.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PlaceFromGeoNames.toml"
+        ),
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PlaceFromDNB.toml"
+        ),
+        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PlaceFromWikidata.toml"
+        ),
+    }
 
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
+
+    def import_data(self, data):
+        errors = super().import_data(data)
+        if latitude := data.get("latitude", [False])[0]:
+            self.latitude = float(latitude.replace("+", "").strip())
+        if longitude := data.get("longitude", [False])[0]:
+            self.longitude = float(longitude.replace("+", "").strip())
+        return errors
 
 
 class Work(
@@ -475,12 +516,14 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
     )
     tender_text = models.TextField(verbose_name=_("tender text"), blank=True, null=True)
 
-    @classmethod
-    def rdf_configs(cls):
-        return {
-            "https://d-nb.info/*": RDFIMPORT / "PrizeFromDNB.toml",
-            "http://www.wikidata.org/*": RDFIMPORT / "PrizeFromWikidata.toml",
-        }
+    import_definitions = {
+        "https://d-nb.info/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PrizeFromDNB.toml"
+        ),
+        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
+            x, RDFIMPORT / "PrizeFromWikidata.toml"
+        ),
+    }
 
     def __str__(self):
         if self.start or self.end:
