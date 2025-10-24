@@ -1,6 +1,9 @@
 ##############################################
 # Create an entity `apis_ontology.Person`
 # from a wikidata RDF endpoint
+# Test with https://www.wikidata.org/wiki/Q42 (Douglas Adams)
+# has start, end, forename, surname, professions, sameAs
+# and the relations
 ##############################################
 [[filters]]
 "wdt:P31" = "wd:Q5"
