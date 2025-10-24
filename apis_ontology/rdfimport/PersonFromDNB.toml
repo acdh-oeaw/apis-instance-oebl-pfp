@@ -1,5 +1,8 @@
 ######################################################
 # Create an E21_Person from a d-nb.info RDF endpoint #
+# Test with https://d-nb.info/gnd/119252880 (Terry Pratchett)
+# Has forename, surname, start, end, sameas, professions, alternative_names
+# and the relation
 ######################################################
 [[filters]]
 "rdf:type" = "gndo:DifferentiatedPerson"
