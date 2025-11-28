@@ -15,7 +15,7 @@ from apis_core.apis_entities.filtersets import (
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
 
 PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
-HELP_TEXT = "Search for similar words in <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
+HELP_TEXT = "Search for similar words in <em>label</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 
 
 PATTERN = re.compile(r"""((?:[^ "']|"[^"]*"|'[^']*')+)""")
