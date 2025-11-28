@@ -136,7 +136,6 @@ class PersonFilterSet(LegacyStuffMixinFilterSet):
 class InstitutionFilterSet(LegacyStuffMixinFilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filters.move_to_end("search", False)
         self.filters["search"] = django_filters.CharFilter(
             method=trigram_search_filter_institution,
             label="Search",
@@ -147,7 +146,6 @@ class InstitutionFilterSet(LegacyStuffMixinFilterSet):
 class PlaceFilterSet(LegacyStuffMixinFilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filters.move_to_end("search", False)
         self.filters["search"] = django_filters.CharFilter(
             method=trigram_search_filter_place, label="Search", help_text=HELP_TEXT
         )
