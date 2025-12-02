@@ -38,10 +38,12 @@ class LegacyDateMixin(models.Model):
 
     def import_data(self, data):
         errors = super().import_data(data)
-        if start := data.get("start", [False])[0]:
+        if start := data.get("start", []):
+            start = start[0]
             if "T" in start:
                 self.start, _ = start.split("T")
-        if end := data.get("end", [False])[0]:
+        if end := data.get("end", []):
+            end = end[0]
             if "T" in end:
                 self.end, _ = end.split("T")
         return errors
