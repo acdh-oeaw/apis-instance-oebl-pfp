@@ -1,7 +1,6 @@
 import django_tables2 as tables
 
-from apis_core.apis_entities.tables import AbstractEntityTable
-from apis_core.generic.tables import CustomTemplateColumn
+from apis_core.generic.tables import CustomTemplateColumn, GenericTable
 from apis_core.relations.tables import RelationsListTable
 
 from .models import Person
@@ -25,7 +24,7 @@ class BibsonomyColumn(CustomTemplateColumn):
     template_name = "columns/bibsonomy.html"
 
 
-class PersonTable(AbstractEntityTable):
+class PersonTable(GenericTable):
     class Meta:
         model = Person
         fields = ["surname", "forename", "start", "end"]
@@ -57,9 +56,9 @@ class OEBLBaseEntityRelationsTable(RelationsListTable):
     class Meta(RelationsListTable.Meta):
         sequence = (
             ["start", "end"]
-            + list(RelationsListTable.Meta.sequence)[:-3]
+            + list(RelationsListTable.Meta.sequence)[:-4]
             + ["notes"]
-            + list(RelationsListTable.Meta.sequence)[-3:]
+            + list(RelationsListTable.Meta.sequence)[-4:]
         )
 
     def __init__(self, *args, **kwargs):
