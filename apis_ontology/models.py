@@ -470,9 +470,11 @@ class Place(
 
     def import_data(self, data):
         errors = super().import_data(data)
-        if latitude := data.get("latitude", [False])[0]:
+        if latitude := data.get("latitude", []):
+            latitude = latitude[0]
             self.latitude = float(latitude.replace("+", "").strip())
-        if longitude := data.get("longitude", [False])[0]:
+        if longitude := data.get("longitude", []):
+            longitude = longitude[0]
             self.longitude = float(longitude.replace("+", "").strip())
         return errors
 
