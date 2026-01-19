@@ -1505,11 +1505,11 @@ class ArbeiteteZusammenMit(
 
     @classmethod
     def name(self) -> str:
-        return "arbeitete zusammmen mit [PIO]"
+        return "arbeitete zusammen mit [PIO]"
 
     @classmethod
     def reverse_name(self) -> str:
-        return "arbeitete zusammmen mit [PIO]"
+        return "arbeitete zusammen mit [PIO]"
 
 
 class WurdeErhobenIn(
