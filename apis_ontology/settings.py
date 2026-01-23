@@ -21,6 +21,8 @@ CSRF_TRUSTED_ORIGINS = ["https://oebl-pnp.acdh-dev.oeaw.ac.at"]
 
 LANGUAGE_CODE = "de"
 
+ALLOWED_HOSTS.append("oebl-pnp-auto-deploy.apis-oebl-pnp.svc.cluster.local")  # noqa: F405
+
 
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [  # noqa: F405
     "rest_framework.renderers.JSONRenderer",
