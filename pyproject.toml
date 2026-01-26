@@ -16,7 +16,6 @@ dependencies = [
     "django-json-editor-field==0.4.2",
     "django-interval==0.5.2",
     "apis-bibsonomy==0.13.2",
-    "gunicorn>=23.0.0,<24.0.0"
 ]
 
 [dependency-groups]
