@@ -11,6 +11,7 @@ from apis_ontology.models import (
     Institution,
     Person,
     PersonPlaceLegacyRelation,
+    PersonWorkLegacyRelation,
     StarbIn,
     WurdeGeborenIn,
 )
@@ -249,3 +250,22 @@ for ct in relation_content_types(combination=(Person, Institution)):
     )
     # Add the new serializer class to the module globals
     globals()[f"{cls.__name__}CidocSerializer"] = serializer_class
+
+
+class WorkCidocSerializer(GenericModelCidocSerializer):
+    """
+    Extend the existing serializer to add the `P67_refers_to` relation to the work cidoc export
+    """
+
+    def to_representation(self, instance):
+        g = super().to_representation(instance)
+
+        for relation in PersonWorkLegacyRelation.objects.filter(
+            obj_content_type=instance.content_type, obj_object_id=instance.id
+        ):
+            person = relation.subj
+            person_ns = Namespace(person.get_namespace_uri())
+            g.namespace_manager.bind(person.get_namespace_prefix(), person_ns)
+            person_uri = URIRef(person_ns[str(person.id)])
+            g.add((self.appellation_uri, CRM["P67_refers_to"], person_uri))
+        return g
