@@ -91,7 +91,8 @@ def add_time_spans(g: Graph, ts_node: URIRef, instance: Any, field: str) -> Grap
             g.add((ts_node, RDFS.label, Literal(f"{field} time span")))
 
         # Add the time span type
-        g.add((ts_node, RDF.type, crm_namespace["E52_Time-Span"]))
+
+    g.add((ts_node, RDF.type, crm_namespace["E52_Time-Span"]))
 
     return g
 
@@ -154,10 +155,12 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
             g.add((birth_event, RDF.type, CRM.E67_Birth))
             g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
             g.add((birth_event, CRM.P98_brought_into_life, self.instance_uri))
-            g.add((birth_event, CRM["P4_has_time-span"], birth_time_span))
-
-            birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
-            g = add_time_spans(g, birth_time_span, instance, "start")
+            if instance.start_date_sort or (
+                instance.start_date_from and instance.start_date_to
+            ):
+                g.add((birth_event, CRM["P4_has_time-span"], birth_time_span))
+                birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
+                g = add_time_spans(g, birth_time_span, instance, "start")
         g = self.add_life_event_place(g, instance, "birth", birth_event)
 
         death_event = None
@@ -167,10 +170,12 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
             death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
             g.add((death_event, RDF.type, CRM.E69_Death))
             g.add((death_event, CRM.P100_was_death_of, self.instance_uri))
-            g.add((death_event, CRM["P4_has_time-span"], death_time_span))
-
-            death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
-            g = add_time_spans(g, death_time_span, instance, "end")
+            if instance.end_date_sort or (
+                instance.end_date_from and instance.end_date_to
+            ):
+                g.add((death_event, CRM["P4_has_time-span"], death_time_span))
+                death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
+                g = add_time_spans(g, death_time_span, instance, "end")
         g = self.add_life_event_place(g, instance, "death", death_event)
         return g
 
