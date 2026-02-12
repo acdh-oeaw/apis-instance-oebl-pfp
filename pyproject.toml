@@ -14,7 +14,7 @@ dependencies = [
     "django-auditlog>=3.0.0,<4.0",
     "apis-acdhch-django-auditlog==0.3.0",
     "django-json-editor-field==0.4.2",
-    "django-interval==0.5.2",
+    "django-interval==0.5.4",
     "apis-bibsonomy==0.13.2",
 ]
 
