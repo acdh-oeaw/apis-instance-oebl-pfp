@@ -24,17 +24,6 @@ LANGUAGE_CODE = "de"
 ALLOWED_HOSTS.append("oebl-pnp-auto-deploy.apis-oebl-pnp.svc.cluster.local")  # noqa: F405
 
 
-# this is a workaround to disable pagintation in the relations
-# listing on the entities pages
-APIS_ENTITIES = {
-    "Event": {"relations_per_page": 1000},
-    "Institution": {"relations_per_page": 1000},
-    "Person": {"relations_per_page": 1000},
-    "Place": {"relations_per_page": 1000},
-    "Work": {"relations_per_page": 1000},
-    "Denomination": {"relations_per_page": 1000},
-}
-
 DEFAULT_HIGHLIGTHER_PROJECT = 28
 
 APIS_BIBSONOMY = [
