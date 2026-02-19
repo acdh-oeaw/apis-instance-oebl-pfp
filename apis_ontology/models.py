@@ -21,6 +21,7 @@ from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
 from apis_core.utils.rdf import load_uri_using_path
+from apis_ontology.rdfconfigs import person, event, institution, prize, profession
 
 RDFIMPORT = Path(__file__).parent / "rdfimport"
 
@@ -140,10 +141,10 @@ class Profession(GenericModel, models.Model):
 
     import_definitions = {
         "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "ProfessionFromDNB.toml"
+            x, profession.ProfessionFromDNB
         ),
         "http://www.wikidata.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "ProfessionFromWikidata.toml"
+            x, profession.ProfessionFromWikidata
         ),
     }
 
@@ -169,9 +170,7 @@ class Event(
     _default_search_fields = ["name", "notes", "kind"]
 
     import_definitions = {
-        "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "EventFromDNB.toml"
-        ),
+        "https://d-nb.info/*": lambda x: load_uri_using_path(x, event.EventFromDNB),
     }
 
     def __str__(self):
@@ -197,10 +196,10 @@ class Institution(
 
     import_definitions = {
         "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "InstitutionFromDNB.toml"
+            x, institution.InstitutionFromDNBCustom
         ),
         "http://www.wikidata.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "InstitutionFromWikidata.toml"
+            x, institution.InstitutionFromWikidataCustom
         ),
     }
 
@@ -388,10 +387,10 @@ class Person(
 
     import_definitions = {
         "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PersonFromDNB.toml"
+            x, person.E21_PersonFromDNBCustom
         ),
         "http://www.wikidata.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PersonFromWikidata.toml"
+            x, person.E21_PersonFromWikidataCustom
         ),
     }
 
@@ -453,18 +452,6 @@ class Place(
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
-    import_definitions = {
-        "https://sws.geonames.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PlaceFromGeoNames.toml"
-        ),
-        "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PlaceFromDNB.toml"
-        ),
-        "http://www.wikidata.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PlaceFromWikidata.toml"
-        ),
-    }
-
     def __str__(self):
         return self.label if self.label and self.label.strip() else "unbekannt"
 
@@ -521,11 +508,9 @@ class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
     tender_text = models.TextField(verbose_name=_("tender text"), blank=True, null=True)
 
     import_definitions = {
-        "https://d-nb.info/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PrizeFromDNB.toml"
-        ),
+        "https://d-nb.info/*": lambda x: load_uri_using_path(x, prize.PrizeFromDNB),
         "http://www.wikidata.org/*": lambda x: load_uri_using_path(
-            x, RDFIMPORT / "PrizeFromWikidata.toml"
+            x, prize.PrizeFromWikidata
         ),
     }
 
