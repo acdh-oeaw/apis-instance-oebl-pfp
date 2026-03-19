@@ -105,7 +105,7 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
         rel = None
         if event_type == "birth":
             crm_type = "E67_Birth"
-            label_template = "Tod von {}"
+            label_template = "Geburt von {}"
             crm_relation = "P98_brought_into_life"
             leg_rel = PersonPlaceLegacyRelation.objects.filter(
                 subj_object_id=instance.pk, legacy_relation_vocab_label="geboren in"
@@ -114,7 +114,7 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
             rel = leg_rel or new_rel
         if event_type == "death":
             crm_type = "E69_Death"
-            label_template = "Geburt von {}"
+            label_template = "Tod von {}"
             crm_relation = "P100_was_death_of"
             leg_rel = PersonPlaceLegacyRelation.objects.filter(
                 subj_object_id=instance.pk, legacy_relation_vocab_label="gestorben in"
@@ -147,35 +147,30 @@ class PersonCidocSerializer(E21_PersonCidocSerializer):
     def to_representation(self, instance):
         instance = normalize_empty_attributes(instance)
         g = super().to_representation(instance)
-
         birth_event = None
-        if instance.start is not None:
+        if instance.start_date_sort or (
+            instance.start_date_from and instance.start_date_to
+        ):
             birth_event = URIRef(ATTRIBUTES[f"birth_{instance.id}"])
             birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
             g.add((birth_event, RDF.type, CRM.E67_Birth))
             g.add((birth_event, RDFS.label, Literal(f"Geburt von {str(instance)}")))
             g.add((birth_event, CRM.P98_brought_into_life, self.instance_uri))
-            if instance.start_date_sort or (
-                instance.start_date_from and instance.start_date_to
-            ):
-                g.add((birth_event, CRM["P4_has_time-span"], birth_time_span))
-                birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
-                g = add_time_spans(g, birth_time_span, instance, "start")
+            g.add((birth_event, CRM["P4_has_time-span"], birth_time_span))
+            birth_time_span = URIRef(ATTRIBUTES[f"birth_time-span_{instance.id}"])
+            g = add_time_spans(g, birth_time_span, instance, "start")
         g = self.add_life_event_place(g, instance, "birth", birth_event)
 
         death_event = None
-        if instance.end is not None:
+        if instance.end_date_sort or (instance.end_date_from and instance.end_date_to):
             death_event = URIRef(ATTRIBUTES[f"death_{instance.id}"])
             g.add((death_event, RDFS.label, Literal(f"Tod von {str(instance)}")))
             death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
             g.add((death_event, RDF.type, CRM.E69_Death))
             g.add((death_event, CRM.P100_was_death_of, self.instance_uri))
-            if instance.end_date_sort or (
-                instance.end_date_from and instance.end_date_to
-            ):
-                g.add((death_event, CRM["P4_has_time-span"], death_time_span))
-                death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
-                g = add_time_spans(g, death_time_span, instance, "end")
+            g.add((death_event, CRM["P4_has_time-span"], death_time_span))
+            death_time_span = URIRef(ATTRIBUTES[f"death_time-span_{instance.id}"])
+            g = add_time_spans(g, death_time_span, instance, "end")
         g = self.add_life_event_place(g, instance, "death", death_event)
         return g
 
@@ -207,7 +202,15 @@ class PersonInstitutionCidocBaseSerializer(GenericModelCidocSerializer):
 
         joining_uri = URIRef(ATTRIBUTES[f"joining_ev_{instance.id}"])
         g.add((joining_uri, RDF.type, CRM.E85_Joining))
-        g.add((joining_uri, RDFS.label, Literal(f"{str(instance)} gestartet")))
+        g.add(
+            (
+                joining_uri,
+                RDFS.label,
+                Literal(
+                    f"{str(instance)} gestartet{' (' + instance.start + ')' if instance.start else ''}"
+                ),
+            )
+        )
         pc_joining_uri = URIRef(ATTRIBUTES[f"pc_joining_ev_{instance.id}"])
         memb_type_uri = URIRef(ATTRIBUTES[f"kind_member_{instance.id}"])
         g.add((person_uri, CRM.P143i_was_joined_by, joining_uri))
@@ -221,15 +224,25 @@ class PersonInstitutionCidocBaseSerializer(GenericModelCidocSerializer):
         g.add((leaving_uri, RDF.type, CRM.E86_Leaving))
         g.add((person_uri, CRM["P145i_left_by"], leaving_uri))
         g.add((leaving_uri, CRM["P146_separated_from"], inst_uri))
-        g.add((leaving_uri, RDFS.label, Literal(f"{str(instance)} beendet")))
-        if instance.start is not None:
+        g.add(
+            (
+                leaving_uri,
+                RDFS.label,
+                Literal(
+                    f"{str(instance)} beendet{' (' + instance.end + ')' if instance.end else ''}"
+                ),
+            )
+        )
+        if instance.start_date_sort or (
+            instance.start_date_from and instance.start_date_to
+        ):
             joining_time_span_uri = URIRef(
                 ATTRIBUTES[f"joining_ev_time_span_{instance.id}"]
             )
 
             g.add((joining_uri, CRM["P4_has_time-span"], joining_time_span_uri))
             g = add_time_spans(g, joining_time_span_uri, instance, "start")
-        if instance.end is not None:
+        if instance.end_date_sort or (instance.end_date_from and instance.end_date_to):
             leaving_time_span_uri = URIRef(
                 ATTRIBUTES[f"leaving_ev_time_span_{instance.id}"]
             )
