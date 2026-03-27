@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_interval.fields import FuzzyDateParserField
 from django_json_editor_field.fields import JSONEditorField
+from rdflib import Namespace
 
 from apis_core.apis_entities.abc import (
     E21_Person,
@@ -495,6 +496,11 @@ class Work(
         ordering = ["name"]
         verbose_name = _("Work")
         verbose_name_plural = _("Works")
+
+    @classmethod
+    def get_rdf_types(csl):
+        LRMOO = Namespace("http://iflastandards.info/ns/lrm/lrmoo/")
+        return [LRMOO.F3_Manifestation]
 
 
 class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelModel):
