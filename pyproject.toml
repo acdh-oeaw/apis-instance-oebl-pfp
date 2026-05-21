@@ -11,7 +11,6 @@ dependencies = [
     "apis-core-rdf==0.62.1",
     "apis-highlighter-ng==0.6.4",
     "apis-acdhch-default-settings==2.18.0",
-    "django-auditlog>=3.0.0,<4.0",
     "apis-acdhch-django-auditlog==0.3.0",
     "django-json-editor-field==0.4.2",
     "django-interval==0.5.4",
