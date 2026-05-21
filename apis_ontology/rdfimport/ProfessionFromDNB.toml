@@ -1,6 +1,0 @@
-[[filters]]
-"gndo:gndSubjectCategory" = "<https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4ab>"
-
-[attributes]
-name = "gndo:preferredNameForTheSubjectHeading"
-	
