@@ -17,6 +17,7 @@ from apis_core.apis_entities.abc import (
     SimpleLabelModel,
 )
 from apis_core.apis_entities.models import AbstractEntity
+from apis_core.entities.abc import Entity
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
 from apis_core.relations.models import Relation
@@ -161,7 +162,12 @@ class Parentprofession(GenericModel, models.Model):
 
 
 class Event(
-    LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity, OEBLBaseEntity
+    LegacyStuffMixin,
+    VersionMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    OEBLBaseEntity,
+    Entity,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -190,6 +196,7 @@ class Institution(
     AbstractEntity,
     OEBLBaseEntity,
     RDFExport,
+    Entity,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
@@ -219,6 +226,7 @@ class Person(
     AbstractEntity,
     OEBLBaseEntity,
     RDFExport,
+    Entity,
 ):
     date_of_birth = None
     date_of_death = None
@@ -448,6 +456,7 @@ class Place(
     AbstractEntity,
     OEBLBaseEntity,
     RDFExport,
+    Entity,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
@@ -467,7 +476,12 @@ class Place(
 
 
 class Work(
-    LegacyStuffMixin, VersionMixin, LegacyDateMixin, AbstractEntity, OEBLBaseEntity
+    LegacyStuffMixin,
+    VersionMixin,
+    LegacyDateMixin,
+    AbstractEntity,
+    OEBLBaseEntity,
+    Entity,
 ):
     kind = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
@@ -484,19 +498,19 @@ class Work(
         verbose_name_plural = _("Works")
 
 
-class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelModel):
+class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelModel, Entity):
     class Meta(SimpleLabelModel.Meta):
         verbose_name = _("Denomination")
         verbose_name_plural = _("Denominations")
 
 
-class Nobility(AbstractEntity, OEBLBaseEntity, SimpleLabelModel):
+class Nobility(AbstractEntity, OEBLBaseEntity, SimpleLabelModel, Entity):
     class Meta(SimpleLabelModel.Meta):
         verbose_name = _("nobility")
         verbose_name_plural = _("nobilities")
 
 
-class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity):
+class Prize(AbstractEntity, VersionMixin, LegacyDateMixin, OEBLBaseEntity, Entity):
     name = models.CharField(max_length=255, verbose_name="Name", blank=True)
     part_of = models.ForeignKey(
         "self",
