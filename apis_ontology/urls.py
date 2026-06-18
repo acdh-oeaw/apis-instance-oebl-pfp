@@ -7,7 +7,4 @@ urlpatterns += [
 ]
 
 urlpatterns += staticfiles_urlpatterns()
-urlpatterns += [
-    path("", include("apis_acdhch_django_auditlog.urls")),
-]
 urlpatterns += [path("", include("django_interval.urls"))]
