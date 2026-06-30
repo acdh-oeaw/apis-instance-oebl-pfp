@@ -3,7 +3,7 @@ from typing import Any
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
 
-from apis_core.apis_entities.serializers import E21_PersonCidocSerializer
+from apis_core.entities.serializers import E21_PersonCidocSerializer
 from apis_core.generic.serializers import GenericModelCidocSerializer
 from apis_core.generic.utils.rdf_namespace import ATTRIBUTES, CRM
 from apis_core.relations.utils import relation_content_types
