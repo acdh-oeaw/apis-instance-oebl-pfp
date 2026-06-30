@@ -1,4 +1,4 @@
-from apis_core.apis_entities.rdfconfigs.group import (
+from apis_core.entities.rdfconfigs.group import (
     E74_GroupFromDNB,
     E74_GroupFromWikidata,
 )

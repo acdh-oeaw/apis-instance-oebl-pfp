@@ -9,10 +9,8 @@ from django.db.models.functions import Greatest
 from django_interval.fields import FuzzyDateParserField
 from django_interval.filters import DateIntervalRangeFilter
 
-from apis_core.apis_entities.filtersets import (
-    AbstractEntityFilterSet,
-)
 from apis_core.collections.models import SkosCollection, SkosCollectionContentObject
+from apis_core.entities.filtersets import EntityFilterSet
 
 PERSON_HELP_TEXT = "Search for similar words in <em>forename</em> & <em>name</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
 HELP_TEXT = "Search for similar words in <em>label</em> based on <a href='https://www.postgresql.org/docs/current/pgtrgm.html#PGTRGM-CONCEPTS'>trigram matching</a>."
@@ -83,8 +81,8 @@ def collection_method(queryset, name, value):
 ###################
 # custom filtersets
 ###################
-class LegacyStuffMixinFilterSet(AbstractEntityFilterSet):
-    class Meta(AbstractEntityFilterSet.Meta):
+class LegacyStuffMixinFilterSet(EntityFilterSet):
+    class Meta(EntityFilterSet.Meta):
         exclude = [
             "end_date_to",
             "end_date_from",

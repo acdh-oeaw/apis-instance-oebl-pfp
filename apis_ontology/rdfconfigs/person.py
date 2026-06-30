@@ -1,4 +1,4 @@
-from apis_core.apis_entities.rdfconfigs.person import (
+from apis_core.entities.rdfconfigs.person import (
     E21_PersonFromDNB,
     E21_PersonFromWikidata,
 )
