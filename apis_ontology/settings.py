@@ -37,3 +37,5 @@ APIS_BIBSONOMY = [
 ]
 
 APIS_RDF_NAMESPACE_PREFIX = "oebl"
+
+MIDDLEWARE += ["apis_ontology.middleware.TokenAuthMiddleware"]  # noqa: F405
