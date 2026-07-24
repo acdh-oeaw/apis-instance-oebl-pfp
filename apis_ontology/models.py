@@ -16,7 +16,7 @@ from apis_core.entities.abc import (
     E53_Place,
     E74_Group,
     Entity,
-    SimpleLabelModel,
+    SimpleLabelEntity,
 )
 from apis_core.generic.abc import GenericModel
 from apis_core.history.models import VersionMixin
@@ -498,14 +498,14 @@ class Work(
         verbose_name_plural = _("Works")
 
 
-class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelModel, Entity):
-    class Meta(SimpleLabelModel.Meta):
+class Denomination(AbstractEntity, OEBLBaseEntity, SimpleLabelEntity):
+    class Meta(SimpleLabelEntity.Meta):
         verbose_name = _("Denomination")
         verbose_name_plural = _("Denominations")
 
 
-class Nobility(AbstractEntity, OEBLBaseEntity, SimpleLabelModel, Entity):
-    class Meta(SimpleLabelModel.Meta):
+class Nobility(AbstractEntity, OEBLBaseEntity, SimpleLabelEntity):
+    class Meta(SimpleLabelEntity.Meta):
         verbose_name = _("nobility")
         verbose_name_plural = _("nobilities")
 
