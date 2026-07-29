@@ -41,6 +41,9 @@ from apis_core.relations.models import Relation
 # The `subj_model` and `obj_model` where changed to be single values,
 # because apis-core-rdf does not allow lists, so it does not make
 # sense to serialize those values as lists.
+#
+# 20260729: added the `possible_types` attribute for relation types
+# that have a `legacy_relation_vocab_label` attribute
 
 
 class ListRelationTypesAPIView(APIView):
@@ -67,5 +70,14 @@ class ListRelationTypesAPIView(APIView):
                 "obj_model": cls.obj_model.__name__,
                 "legacy_property_id": getattr(cls, "_legacy_property_id", None),
             }
+            if hasattr(cls, "legacy_relation_vocab_label"):
+                labels = cls.objects.values_list(
+                    "legacy_relation_vocab_label", "legacy_relation_vocab_label_reverse"
+                )
+                labels = [
+                    {"forward": forward, "reverse": reverse}
+                    for (forward, reverse) in (set(labels))
+                ]
+                relations[content_type.model]["possible_types"] = labels
 
         return Response({"relations": relations})
