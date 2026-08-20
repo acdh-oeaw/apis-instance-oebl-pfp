@@ -2,6 +2,9 @@ from apis_core.utils.rdf import Attribute, Filter
 
 
 class ProfessionFromDNB:
+    # https://d-nb.info/standards/vocab/gnd/gnd-sc#9.4ab is: "Specific
+    # professions, specific occupational activities, roles; Religious
+    # affiliation, worldview"
     gndsubjectcategory = Filter(
         [
             (
