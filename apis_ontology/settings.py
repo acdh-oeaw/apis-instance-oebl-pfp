@@ -37,3 +37,10 @@ APIS_BIBSONOMY = [
 ]
 
 APIS_RDF_NAMESPACE_PREFIX = "oebl"
+
+if os.environ.get("DJANGO_EMAIL_HOST"):
+    EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST")
+
+if os.environ.get("DJANGO_ADMINS"):
+    admins = os.environ.get("DJANGO_ADMINS").split(",")
+    ADMINS = [(admin, admin) for admin in admins]
