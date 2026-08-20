@@ -34,4 +34,3 @@ class ProfessionFromWikidata:
     q28640 = Filter([("wdt:P31", "wd:Q28640")])
 
     name = Attribute([namequery])
-    same_as = Attribute(["wdt:P227"])
