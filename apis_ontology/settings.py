@@ -2,8 +2,6 @@ import os
 
 from apis_acdhch_default_settings.settings import *  # noqa: F403
 
-DEBUG = True
-
 INSTALLED_APPS += [  # noqa: F405
     "apis_highlighter",
     "django.contrib.postgres",
