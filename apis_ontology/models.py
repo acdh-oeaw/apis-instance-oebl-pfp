@@ -438,7 +438,15 @@ class Person(
     def import_data(self, data):
         errors = super().import_data(data)
         for profession_uri in data.get("profession_profession_m2m", []):
-            self.profession.add(Profession.import_from(profession_uri))
+            profession_data = Profession.fetch_from(profession_uri)
+            for profession_name in profession_data.get("name", []):
+                if Profession.objects.filter(name=profession_name).exists():
+                    profession = Profession.objects.filter(name=profession_name).first()
+                else:
+                    profession, _ = Profession.objects.get_or_create(
+                        name=profession_name
+                    )
+                self.profession.add(profession)
         altnames = data.get("alternative_names", [])
         if altnames:
             self.alternative_names = [
