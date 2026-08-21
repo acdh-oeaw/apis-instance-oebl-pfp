@@ -42,10 +42,3 @@ if os.environ.get("DJANGO_EMAIL_HOST"):
 if os.environ.get("DJANGO_ADMINS"):
     admins = os.environ.get("DJANGO_ADMINS").split(",")
     ADMINS = [(admin, admin) for admin in admins]
-
-
-LOGGING["handlers"]["mail_admins"] = {  # noqa: F405
-    "level": "ERROR",
-    "class": "django.utils.log.AdminEmailHandler",
-    "include_html": True,
-}
