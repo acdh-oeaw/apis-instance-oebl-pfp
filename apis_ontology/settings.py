@@ -4,7 +4,6 @@ from apis_acdhch_default_settings.settings import *  # noqa: F403
 
 INSTALLED_APPS += [  # noqa: F405
     "apis_highlighter",
-    "django.contrib.postgres",
 ]
 INSTALLED_APPS.remove("apis_ontology")
 INSTALLED_APPS.insert(0, "apis_ontology")
