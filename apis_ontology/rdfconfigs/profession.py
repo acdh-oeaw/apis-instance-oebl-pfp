@@ -20,6 +20,7 @@ class ProfessionFromDNB:
 namequery = """
 SELECT (COALESCE(?label_de, ?label_en, ?label) as ?label)
 	WHERE {
+        ?subject wdt:P31 wd:Q28640 .
 		?subject rdfs:label ?label
 		OPTIONAL{
 			?subject rdfs:label ?label_de
